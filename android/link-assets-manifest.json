@@ -2,12 +2,12 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "src/assets/fonts/KonkhmerSleokchher-Regular.ttf",
-      "sha1": "94417847620598abd3154b15d598bbd51ac488ab"
+      "path": "src/assets/fonts/Acme-Regular.ttf",
+      "sha1": "8697187664d6dd8d3d058a590da32c7e19158413"
     },
     {
-      "path": "src/assets/fonts/Monomakh-Regular.ttf",
-      "sha1": "a8e99f3d89c539be61b1e172ddb541d2456edfdb"
+      "path": "src/assets/fonts/KonkhmerSleokchher-Regular.ttf",
+      "sha1": "94417847620598abd3154b15d598bbd51ac488ab"
     }
   ]
 }
