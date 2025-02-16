@@ -5,7 +5,7 @@ import { styles } from "./LogoStyles";
 import MoneyTrackIcon from "../../assets/images/icon-money-track.svg";
 import MoneyTrackLogo from "../../assets/images/logo-money-track.svg";
 
-const Logo: React.FC = () => {
+export const Logo: React.FC = () => {
   return (
     <View style={styles.container}>
       <MoneyTrackIcon width={30} height={30} style={styles.icon} />
@@ -13,5 +13,3 @@ const Logo: React.FC = () => {
     </View>
   );
 };
-
-export default Logo;
