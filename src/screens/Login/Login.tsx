@@ -9,13 +9,12 @@ import LoginImage from "../../assets/images/login-image.svg";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type RootStackParamList = {
+type StackNavigation = {
   SignUp: undefined;
 };
 
 export const Login: React.FC = () => {
-  const navigation =
-    useNavigation<StackNavigationProp<RootStackParamList, "SignUp">>();
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
   const handleSignUpBtn = () => {
     navigation.navigate("SignUp");
   };
@@ -24,7 +23,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <View style={styles.topContent}>
         <Logo />
         <CustomText style={styles.loginMsg}>Acesse sua conta</CustomText>

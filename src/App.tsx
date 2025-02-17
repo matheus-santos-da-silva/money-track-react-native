@@ -1,13 +1,8 @@
 import React from "react";
-import { SafeAreaView } from "react-native";
-import { Login } from "./screens/Login/Login";
+import { Stack } from "./routes/Stack";
 
 function App(): React.JSX.Element {
-  return (
-    <SafeAreaView style={{ padding: 16 }}>
-      <Login />
-    </SafeAreaView>
-  );
+  return <Stack />;
 }
 
 export default App;
