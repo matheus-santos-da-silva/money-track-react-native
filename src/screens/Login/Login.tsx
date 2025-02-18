@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import { styles } from "./LoginStyles";
+import { homeScreensStyle } from "../../styles/home-screens.style";
 import { Input } from "../../components/Input/Input";
 import { Logo } from "../../components/Logo/Logo";
 import { CustomText } from "../../components/CustomText/CustomText";
@@ -23,14 +24,14 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topContent}>
+    <SafeAreaView style={homeScreensStyle.container}>
+      <View style={homeScreensStyle.topContent}>
         <Logo />
         <CustomText style={styles.loginMsg}>Acesse sua conta</CustomText>
       </View>
-      <View style={styles.middleContent}>
+      <View style={homeScreensStyle.middleContent}>
         <LoginImage width={220} height={220} />
-        <View style={styles.form}>
+        <View style={homeScreensStyle.form}>
           <Input
             label="Email"
             value={email}
@@ -42,18 +43,24 @@ export const Login: React.FC = () => {
             label="Senha"
             value={password}
             onChangeText={setPassword}
-            placeholder="Digite seu email"
+            placeholder="Digite sua senha"
             isPassword={true}
           />
         </View>
       </View>
       <View>
         <Button value="Continuar"></Button>
-        <View style={styles.containerSignUp}>
-          <CustomText style={styles.text}>Ainda não tem uma conta</CustomText>
-          <Text style={[styles.text, styles.questionMark]}>?</Text>
+        <View style={homeScreensStyle.footer}>
+          <CustomText style={homeScreensStyle.text}>
+            Ainda não tem uma conta
+          </CustomText>
+          <Text style={[homeScreensStyle.text, homeScreensStyle.questionMark]}>
+            ?
+          </Text>
           <Pressable onPress={handleSignUpBtn}>
-            <CustomText style={styles.signUp}>Cadastre-se</CustomText>
+            <CustomText style={homeScreensStyle.bottomLink}>
+              Cadastre-se
+            </CustomText>
           </Pressable>
         </View>
       </View>

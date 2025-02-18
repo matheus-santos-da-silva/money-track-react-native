@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Login } from "../screens/Login/Login";
 import { SignUp } from "../screens/SignUp/SignUp";
-import { SafeAreaView } from "react-native";
 
 const StackNavigator = createNativeStackNavigator();
 
