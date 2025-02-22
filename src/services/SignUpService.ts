@@ -1,0 +1,46 @@
+import axios from "axios";
+import { UserToken } from "../contexts/AuthContext";
+import { validateEmail, validatePassword } from "../utils/validate-signUp";
+import { USERS_SERVICE_URL } from "@env";
+
+export interface SignUpUserResponse {
+  success: boolean;
+  message?: string;
+  userToken?: UserToken;
+}
+
+export const SignUpUser = async (
+  email: string,
+  password: string
+): Promise<SignUpUserResponse> => {
+  const validEmail = validateEmail(email);
+  if (validEmail.message) {
+    return { success: false, message: validEmail.message };
+  }
+
+  const validPassword = validatePassword(password);
+  if (validPassword.message) {
+    return { success: false, message: validPassword.message };
+  }
+
+  try {
+    const response = await axios.post(`${USERS_SERVICE_URL}/users`, {
+      email,
+      password,
+    });
+
+    return {
+      success: true,
+      userToken: response.data,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage =
+        error.response?.data?.message ||
+        `Erro ao criar usuário. Status: ${error.response?.status}`;
+      return { success: false, message: errorMessage };
+    }
+
+    return { success: false, message: "Erro de rede ou desconhecido" };
+  }
+};
