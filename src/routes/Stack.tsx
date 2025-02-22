@@ -1,18 +1,15 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { Login } from "../screens/Login/Login";
-import { SignUp } from "../screens/SignUp/SignUp";
-
-const StackNavigator = createNativeStackNavigator();
+import { NavigationContainer } from "@react-navigation/native";
+import { useAuth } from "../hooks/useAuth";
+import { ProtectedRoutes } from "./ProtectedRoutes";
+import { PublicRoutes } from "./PublicRoutes";
 
 export const Stack: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <NavigationContainer>
-      <StackNavigator.Navigator screenOptions={{ headerShown: false }}>
-        <StackNavigator.Screen name="Login" component={Login} />
-        <StackNavigator.Screen name="SignUp" component={SignUp} />
-      </StackNavigator.Navigator>
+      {user?.token ? <ProtectedRoutes /> : <PublicRoutes />}
     </NavigationContainer>
   );
 };
