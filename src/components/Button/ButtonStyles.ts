@@ -9,9 +9,11 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignSelf: "center",
+    alignItems: "center",
     marginLeft: 20,
     marginTop: 30,
     elevation: 7,
+    flexDirection: "row",
   },
   buttonText: {
     color: "#FFFFFF",
@@ -20,5 +22,9 @@ export const styles = StyleSheet.create({
   },
   buttonPressed: {
     backgroundColor: "#3769DA",
+  },
+  loading: {
+    width: 40,
+    height: 40,
   },
 });
