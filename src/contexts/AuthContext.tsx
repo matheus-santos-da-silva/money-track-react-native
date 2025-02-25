@@ -5,6 +5,7 @@ import React, {
   useState,
 } from "react";
 import { SignUpUser } from "../services/SignUpService";
+import { LoginUser } from "../services/LoginService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type UserToken = {
@@ -13,7 +14,7 @@ export type UserToken = {
 
 type AuthContextProps = {
   user: UserToken | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -28,7 +29,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<UserToken | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const login = async () => {};
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -46,6 +46,24 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     checkAuthStatus();
   }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setError(null);
+    setIsLoading(true);
+    const { success, message, userToken } = await LoginUser(email, password);
+    setIsLoading(false);
+    if (success && userToken) {
+      await AsyncStorage.setItem(
+        "@money-track-token!",
+        JSON.stringify(userToken)
+      );
+      setUser(userToken);
+      return success;
+    } else {
+      setError(message || "Erro de rede ou desconhecido");
+      return success;
+    }
+  };
 
   const signUp = async (email: string, password: string): Promise<boolean> => {
     setError(null);

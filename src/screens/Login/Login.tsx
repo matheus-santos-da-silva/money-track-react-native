@@ -9,19 +9,36 @@ import { Button } from "../../components/Button/Button";
 import LoginImage from "../../assets/images/login-image.svg";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useAuth } from "../../hooks/useAuth";
+import Snackbar from "react-native-snackbar";
 
 type StackNavigation = {
   SignUp: undefined;
+  Home: undefined;
 };
 
 export const Login: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+
+  const { login, error, isLoading } = useAuth();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
   const handleSignUpBtn = () => {
     navigation.navigate("SignUp");
   };
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const handleLogin = async () => {
+    const result = await login(email, password);
+    if (!result) {
+      Snackbar.show({
+        text: error || "Erro desconhecido!",
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "#de525a",
+        fontFamily: "Poppins-Regular",
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={homeScreensStyle.container}>
@@ -49,7 +66,11 @@ export const Login: React.FC = () => {
         </View>
       </View>
       <View>
-        <Button value="Continuar"></Button>
+        <Button
+          isLoading={isLoading}
+          onPress={handleLogin}
+          value="Continuar"
+        ></Button>
         <View style={homeScreensStyle.footer}>
           <CustomText style={homeScreensStyle.text}>
             Ainda não tem uma conta

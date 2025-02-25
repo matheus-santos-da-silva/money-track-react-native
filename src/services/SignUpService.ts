@@ -1,18 +1,12 @@
 import axios from "axios";
-import { UserToken } from "../contexts/AuthContext";
 import { validateEmail, validatePassword } from "../utils/validate-signUp";
 import { USERS_SERVICE_URL } from "@env";
-
-export interface SignUpUserResponse {
-  success: boolean;
-  message?: string;
-  userToken?: UserToken;
-}
+import { AuthResponseDTO } from "./AuthServicesResponsesDTO";
 
 export const SignUpUser = async (
   email: string,
   password: string
-): Promise<SignUpUserResponse> => {
+): Promise<AuthResponseDTO> => {
   const validEmail = validateEmail(email);
   if (validEmail.message) {
     return { success: false, message: validEmail.message };
