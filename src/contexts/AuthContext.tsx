@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { SignUpUser } from "../services/SignUpService";
+import { SignUpProps, SignUpUser } from "../services/SignUpService";
 import { LoginUser } from "../services/LoginService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -15,7 +15,7 @@ export type UserToken = {
 type AuthContextProps = {
   user: UserToken | null;
   login: (email: string, password: string) => Promise<boolean>;
-  signUp: (email: string, password: string) => Promise<boolean>;
+  signUp: (data: SignUpProps) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
   error: string | null;
@@ -65,10 +65,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<boolean> => {
+  const signUp = async ({
+    email,
+    name,
+    password,
+  }: SignUpProps): Promise<boolean> => {
     setError(null);
     setIsLoading(true);
-    const { success, message, userToken } = await SignUpUser(email, password);
+    const { success, message, userToken } = await SignUpUser({
+      email,
+      name,
+      password,
+    });
     setIsLoading(false);
     if (success && userToken) {
       await AsyncStorage.setItem(

@@ -1,25 +1,22 @@
 import axios from "axios";
-import { validateEmail, validatePassword } from "../utils/validate-signUp";
 import { USERS_SERVICE_URL } from "@env";
 import { AuthResponseDTO } from "./AuthServicesResponsesDTO";
 
-export const SignUpUser = async (
-  email: string,
-  password: string
-): Promise<AuthResponseDTO> => {
-  const validEmail = validateEmail(email);
-  if (validEmail.message) {
-    return { success: false, message: validEmail.message };
-  }
+export interface SignUpProps {
+  email: string;
+  name: string;
+  password: string;
+}
 
-  const validPassword = validatePassword(password);
-  if (validPassword.message) {
-    return { success: false, message: validPassword.message };
-  }
-
+export const SignUpUser = async ({
+  email,
+  name,
+  password,
+}: SignUpProps): Promise<AuthResponseDTO> => {
   try {
     const response = await axios.post(`${USERS_SERVICE_URL}/users`, {
       email,
+      name,
       password,
     });
 
