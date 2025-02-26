@@ -69,7 +69,7 @@ export const Login: React.FC = () => {
         <Button
           isLoading={isLoading}
           onPress={handleLogin}
-          value="Continuar"
+          value="Entrar"
         ></Button>
         <View style={homeScreensStyle.footer}>
           <CustomText style={homeScreensStyle.text}>
