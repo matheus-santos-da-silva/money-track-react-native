@@ -1,5 +1,6 @@
-export const validateEmail = (
-  email: string
+export const validateData = (
+  email: string,
+  password: string
 ): { success: boolean; message?: string } => {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   const validEmail = emailRegex.test(email);
@@ -10,12 +11,6 @@ export const validateEmail = (
     };
   }
 
-  return { success: true };
-};
-
-export const validatePassword = (
-  password: string
-): { success: boolean; message?: string } => {
   if (password.length < 7) {
     return {
       success: false,

@@ -11,16 +11,18 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "../../hooks/useAuth";
 import Snackbar from "react-native-snackbar";
+import { validateData } from "../../utils/validate-signUp";
 
-type StackNavigation = {
+export type StackNavigation = {
   Login: undefined;
   Home: undefined;
+  ProfileCompletion: { email: string; password: string };
 };
 
 export const SignUp: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
-  const { signUp, error, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -29,14 +31,17 @@ export const SignUp: React.FC = () => {
   };
 
   const handleSignUp = async () => {
-    const result = await signUp(email, password);
-    if (!result) {
+    const { message } = validateData(email, password);
+
+    if (message) {
       Snackbar.show({
-        text: error || "Erro desconhecido!",
+        text: message || "Erro desconhecido!",
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: "#de525a",
         fontFamily: "Poppins-Regular",
       });
+    } else {
+      navigation.navigate("ProfileCompletion", { email, password });
     }
   };
 
@@ -66,17 +71,11 @@ export const SignUp: React.FC = () => {
         </View>
       </View>
       <View>
-        <Pressable
-          onPress={() => {
-            console.log("Clicou no botão de cadastro!");
-          }}
-        >
-          <Button
-            isLoading={isLoading}
-            onPress={handleSignUp}
-            value="Cadastrar"
-          ></Button>
-        </Pressable>
+        <Button
+          isLoading={isLoading}
+          onPress={handleSignUp}
+          value="Cadastrar"
+        />
         <View style={homeScreensStyle.footer}>
           <CustomText style={homeScreensStyle.text}>
             Já tem uma conta
