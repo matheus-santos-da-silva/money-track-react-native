@@ -9,7 +9,7 @@ export const Logo: React.FC = () => {
   return (
     <View style={styles.container}>
       <MoneyTrackIcon width={30} height={30} style={styles.icon} />
-      <MoneyTrackLogo width={104} height={24} />
+      <MoneyTrackLogo width={114} height={24} />
     </View>
   );
 };

@@ -19,6 +19,7 @@ export const styles = StyleSheet.create({
     borderColor: Colors.primaryGray,
     paddingLeft: 16,
     position: "relative",
+    color: Colors.primaryGray,
   },
   icon: {
     position: "absolute",
