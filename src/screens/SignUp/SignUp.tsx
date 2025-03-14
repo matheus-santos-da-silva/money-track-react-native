@@ -46,48 +46,57 @@ export const SignUp: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={homeScreensStyle.container}>
+    <SafeAreaView style={styles.signUpContainer}>
       <View style={homeScreensStyle.topContent}>
         <Logo />
         <CustomText style={styles.signUpMsg}>Crie sua conta</CustomText>
       </View>
-      <View style={homeScreensStyle.middleContent}>
-        <SignUpImage style={styles.signUpImage} width={220} height={220} />
-        <View style={homeScreensStyle.form}>
-          <Input
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Digite seu email"
-            isPassword={false}
-          />
-          <Input
-            label="Senha"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Digite sua senha"
-            isPassword={true}
-          />
-        </View>
-      </View>
       <View>
-        <Button
-          isLoading={isLoading}
-          onPress={handleSignUp}
-          value="Cadastrar"
-        />
-        <View style={homeScreensStyle.footer}>
-          <CustomText style={homeScreensStyle.text}>
-            Já tem uma conta
-          </CustomText>
-          <Text style={[homeScreensStyle.text, homeScreensStyle.questionMark]}>
-            ?
-          </Text>
-          <Pressable onPress={handleSignUpBtn}>
-            <CustomText style={homeScreensStyle.bottomLink}>
-              Acesse a conta
+        <View style={homeScreensStyle.middleContent}>
+          <SignUpImage style={styles.signUpImage} width={260} height={260} />
+          <View style={homeScreensStyle.form}>
+            <Input
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Digite seu email"
+              isPassword={false}
+            />
+            <Input
+              label="Senha"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Digite sua senha"
+              isPassword={true}
+            />
+          </View>
+        </View>
+        <View style={styles.bottomContent}>
+          <Button
+            isLoading={isLoading}
+            onPress={handleSignUp}
+            value="Cadastrar"
+          />
+          <View style={homeScreensStyle.divisionContainer}>
+            <View style={homeScreensStyle.orLine} />
+            <Text style={homeScreensStyle.orText}>OU</Text>
+            <View style={homeScreensStyle.orLine} />
+          </View>
+          <View style={homeScreensStyle.footer}>
+            <CustomText style={homeScreensStyle.text}>
+              Já tem uma conta
             </CustomText>
-          </Pressable>
+            <Text
+              style={[homeScreensStyle.text, homeScreensStyle.questionMark]}
+            >
+              ?
+            </Text>
+            <Pressable onPress={handleSignUpBtn}>
+              <CustomText style={homeScreensStyle.bottomLink}>
+                Acesse a conta
+              </CustomText>
+            </Pressable>
+          </View>
         </View>
       </View>
     </SafeAreaView>

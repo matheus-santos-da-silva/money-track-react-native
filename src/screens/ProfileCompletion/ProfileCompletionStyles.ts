@@ -2,6 +2,10 @@ import { StyleSheet } from "react-native";
 import { Colors } from "../../styles/colors";
 
 export const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+  },
   topContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -13,11 +17,11 @@ export const styles = StyleSheet.create({
     position: "absolute",
   },
   logo: {
-    flex: 1, 
+    flex: 1,
     alignItems: "center",
-    justifyContent: "center", 
-    marginLeft: "auto", 
-    marginRight: "auto", 
+    justifyContent: "center",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   profileCompletionMsg: {
     fontSize: 28,
@@ -41,9 +45,10 @@ export const styles = StyleSheet.create({
     marginLeft: 50,
   },
   btn: {
-    marginRight: 16,
+    marginRight: 22,
   },
   bottomContent: {
     gap: 6,
   },
+  mainContent: {},
 });

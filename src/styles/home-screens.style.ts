@@ -2,29 +2,49 @@ import { StyleSheet } from "react-native";
 import { Colors } from "./colors";
 
 export const homeScreensStyle = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
   topContent: {
     justifyContent: "center",
     alignItems: "center",
     gap: 18,
   },
+  mainContent: {
+    flex: 1,
+    alignItems: "center",
+    maxHeight: "84%",
+    width: "100%",
+  },
   middleContent: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 12,
+    gap: 12,
   },
   form: {
     gap: 12,
   },
-  footer: {
-    width: 280,
-    marginTop: 20,
+  divisionContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 56,
+    marginLeft: 24,
+    width: "68%",
+  },
+  orLine: {
+    flex: 0.5,
+    height: 1,
+    backgroundColor: Colors.primaryGray,
+  },
+  orText: {
+    marginHorizontal: 10,
+    fontFamily: "KonkhmerSleokchher-Regular",
+    color: Colors.primaryGray,
+  },
+  footer: {
+    width: 280,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 20,
     gap: 2,
   },
   text: {

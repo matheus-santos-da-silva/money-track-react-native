@@ -8,6 +8,7 @@ import {
 import { styles } from "./InputStyles";
 import { CustomText } from "../CustomText/CustomText";
 import IconEye from "../../assets/images/icon-eye-password.svg";
+import { Colors } from "../../styles/colors";
 
 interface InputFieldProps extends TextInputProps {
   label: string;
@@ -22,6 +23,7 @@ export const Input: React.FC<InputFieldProps> = ({
   value,
   onChangeText,
   placeholder,
+  placeholderTextColor = Colors.primaryGray,
   isPassword = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +42,7 @@ export const Input: React.FC<InputFieldProps> = ({
         onChangeText={onChangeText}
         placeholder={placeholder}
         secureTextEntry={isPassword && !showPassword}
+        placeholderTextColor={placeholderTextColor}
         keyboardType={label === "Email" ? "email-address" : "default"}
       />
 

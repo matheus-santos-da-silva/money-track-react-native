@@ -48,7 +48,7 @@ export const ProfileCompletion: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={homeScreensStyle.container}>
+    <SafeAreaView style={styles.container}>
       <View style={[styles.topContent]}>
         <BackBtn onPress={handleBackBtn} style={styles.backBtn} />
         <View style={styles.logo}>
