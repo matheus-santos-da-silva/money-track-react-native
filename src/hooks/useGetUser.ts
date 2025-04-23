@@ -8,7 +8,6 @@ export const useGetUser = (token: string) => {
 
   useEffect(() => {
     if (!token) return;
-
     getUser(token)
       .then((res) => {
         if (res.success && res.user) {
