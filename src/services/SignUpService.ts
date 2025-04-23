@@ -1,6 +1,6 @@
 import axios from "axios";
 import { USERS_SERVICE_URL } from "@env";
-import { AuthResponseDTO } from "./AuthServicesResponsesDTO";
+import { AuthResponseDTO } from "./DTOS/AuthServicesResponsesDTO";
 
 export interface SignUpProps {
   email: string;
