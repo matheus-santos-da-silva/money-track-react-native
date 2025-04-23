@@ -1,4 +1,4 @@
-import { UserToken } from "../contexts/AuthContext";
+import { UserToken } from "../../contexts/AuthContext";
 
 export interface AuthResponseDTO {
   success: boolean;

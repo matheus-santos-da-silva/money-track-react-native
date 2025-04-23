@@ -1,7 +1,7 @@
 import axios from "axios";
 import { validateData } from "../utils/validate-signUp";
 import { USERS_SERVICE_URL } from "@env";
-import { AuthResponseDTO } from "./AuthServicesResponsesDTO";
+import { AuthResponseDTO } from "./DTOS/AuthServicesResponsesDTO";
 
 export const LoginUser = async (
   email: string,

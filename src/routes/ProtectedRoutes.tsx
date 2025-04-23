@@ -6,7 +6,7 @@ const { Screen, Navigator } = createNativeStackNavigator();
 
 export const ProtectedRoutes: React.FC = () => {
   return (
-    <Navigator>
+    <Navigator screenOptions={{ headerShown: false }}>
       <Screen name="Home" component={Home} />
     </Navigator>
   );

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { getUser } from "../services/UserService";
+import { getUser } from "../services/GetUserService";
 import { UserDTO } from "../services/DTOS/UserDTO";
 
 export const useGetUser = (token: string) => {
   const [user, setUser] = useState<UserDTO | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  console.log("Chamei o useGetUser", token);
-
   useEffect(() => {
+    if (!token) return;
+
     getUser(token)
       .then((res) => {
         if (res.success && res.user) {
@@ -19,9 +19,8 @@ export const useGetUser = (token: string) => {
       })
       .catch((error) => {
         setError(error);
-        console.log(error);
       });
-  }, []);
+  }, [token]);
 
   return { user, error };
 };
