@@ -10,6 +10,8 @@ import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
 import { clearOldCache } from "../../utils/cache-helpers";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import HomeIcon from "../../assets/images/home-svg.svg";
@@ -22,6 +24,10 @@ import DownArrowIcon from "../../assets/images/arrow-down-svg.svg";
 import BluePlusBTN from "../../assets/images/blue-plus-button-svg.svg";
 import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
+
+type StackNavigation = {
+  Menu: { id: string; name: string };
+};
 
 export const Home: React.FC = () => {
   const currentDate = new Date();
@@ -46,6 +52,12 @@ export const Home: React.FC = () => {
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+  };
+
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+
+  const navigateToMenu = () => {
+    navigation.navigate("Menu", { id: user!.id, name: user!.name });
   };
 
   const { logout } = useAuth();
@@ -191,7 +203,9 @@ export const Home: React.FC = () => {
 
         <View style={styles.iconGroup}>
           <ChartsIcon height="24" width="24" />
-          <UserIcon height="24" width="24" />
+          <TouchableOpacity onPress={navigateToMenu}>
+            <UserIcon height="24" width="24" />
+          </TouchableOpacity>
         </View>
       </View>
     </View>

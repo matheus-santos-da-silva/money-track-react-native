@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { SafeAreaView, Text, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
-import { Logo } from "../../components/Logo/Logo";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { Input } from "../../components/Input/Input";
-import { homeScreensStyle } from "../../styles/home-screens.style";
 import { styles } from "./ProfileCompletionStyles";
 import { Button } from "../../components/Button/Button";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import BackBtn from "../../assets/images/back-btn.svg";
+import { TopBar } from "../../components/TopBar/TopBar";
 import Snackbar from "react-native-snackbar";
 
 type StackNavigation = {
@@ -49,12 +47,7 @@ export const ProfileCompletion: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.topContent]}>
-        <BackBtn onPress={handleBackBtn} style={styles.backBtn} />
-        <View style={styles.logo}>
-          <Logo />
-        </View>
-      </View>
+      <TopBar handleBackBtn={handleBackBtn} />
       <View style={styles.middleContent}>
         <CustomText style={styles.profileCompletionMsg}>
           Estamos quase lá!
