@@ -6,23 +6,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 14,
   },
-  topContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingHorizontal: 10,
-  },
-  backBtn: {
-    position: "absolute",
-  },
-  logo: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
   profileCompletionMsg: {
     fontSize: 28,
     padding: 0,
@@ -50,5 +33,4 @@ export const styles = StyleSheet.create({
   bottomContent: {
     gap: 6,
   },
-  mainContent: {},
 });
