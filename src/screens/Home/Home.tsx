@@ -1,33 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
 import { styles } from "./HomeStyles";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
-import { TransactionCard } from "../../components/TransactionCard/TransactionCard";
-import { useGetUser } from "../../hooks/useGetUser";
 import { useAuth } from "../../hooks/useAuth";
-import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { BottomBar } from "../../components/BottomBar/BottomBar";
+import { CustomText } from "../../components/CustomText/CustomText";
+import { useGetUser } from "../../hooks/useGetUser";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
 import { clearOldCache } from "../../utils/cache-helpers";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { useTransactions } from "../../contexts/TransactionsContext";
+import { TransactionCard } from "../../components/TransactionCard/TransactionCard";
+import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
+import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { Text, TouchableOpacity, View } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import HomeIcon from "../../assets/images/home-svg.svg";
-import AlignLeftIcon from "../../assets/images/align-left-svg.svg";
-import ChartsIcon from "../../assets/images/bar-chart-svg.svg";
-import UserIcon from "../../assets/images/user-svg.svg";
 import NotificationIcon from "../../assets/images/bell-svg.svg";
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
 import DownArrowIcon from "../../assets/images/arrow-down-svg.svg";
-import BluePlusBTN from "../../assets/images/blue-plus-button-svg.svg";
 import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
-
-type StackNavigation = {
-  Menu: { id: string; name: string };
-};
 
 export const Home: React.FC = () => {
   const currentDate = new Date();
@@ -42,6 +33,8 @@ export const Home: React.FC = () => {
   const [isHidden, setIsHidden] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const { setTransactions } = useTransactions();
+
   const handleMonthChange = (newMonth: number) => {
     setCurrentMonth(newMonth);
   };
@@ -52,12 +45,6 @@ export const Home: React.FC = () => {
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
-  };
-
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
-
-  const navigateToMenu = () => {
-    navigation.navigate("Menu", { id: user!.id, name: user!.name });
   };
 
   const { logout } = useAuth();
@@ -87,7 +74,12 @@ export const Home: React.FC = () => {
       token: token ?? "",
       month: currentMonth,
       year: currentYear,
+      allMonths: false,
     });
+
+  useEffect(() => {
+    if (transactions) setTransactions(transactions);
+  }, [transactions]);
 
   const { total, expenses, incomes } = useBalance(transactions);
 
@@ -188,26 +180,17 @@ export const Home: React.FC = () => {
           )}
         </View>
       </View>
-
-      <View style={styles.bottomMenu}>
-        <View style={styles.iconGroup}>
-          <HomeIcon height="24" width="24" />
-          <AlignLeftIcon height="24" width="24" />
-        </View>
-
-        <View style={styles.svgContainer}>
-          <TouchableOpacity activeOpacity={0.9}>
-            <BluePlusBTN height="60" width="60" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.iconGroup}>
-          <ChartsIcon height="24" width="24" />
-          <TouchableOpacity onPress={navigateToMenu}>
-            <UserIcon height="24" width="24" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {user && (
+        <BottomBar
+          userProps={{
+            id: user.id,
+            name: user.name,
+            token,
+            month: currentMonth,
+            year: currentYear,
+          }}
+        />
+      )}
     </View>
   );
 };
