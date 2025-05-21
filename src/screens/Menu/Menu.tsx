@@ -1,16 +1,17 @@
 import { SafeAreaView, TouchableOpacity, View } from "react-native";
-import { TopBar } from "../../components/TopBar/TopBar";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { CustomText } from "../../components/CustomText/CustomText";
+import { useAuth } from "../../hooks/useAuth";
 import { styles } from "./MenuStyles";
+import { TopBar } from "../../components/TopBar/TopBar";
+import { CustomText } from "../../components/CustomText/CustomText";
+import { clearOldCache } from "../../utils/cache-helpers";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 
 import UserCircle from "../../assets/images/menu-user-circle.svg";
 import UserIcon from "../../assets/images/user-svg.svg";
 import CategoriesIcon from "../../assets/images/categories-menu-icon.svg";
 import MyPlanIcon from "../../assets/images/plan-menu-icon.svg";
 import LogoutIcon from "../../assets/images/logout-menu-icon.svg";
-import { useAuth } from "../../hooks/useAuth";
 
 type StackNavigation = {
   Home: undefined;
@@ -69,7 +70,12 @@ export const Menu: React.FC = () => {
             </View>
           </TouchableOpacity>
           <View style={styles.divisionLine}></View>
-          <TouchableOpacity onPress={logout}>
+          <TouchableOpacity
+            onPress={() => {
+              clearOldCache(id);
+              logout;
+            }}
+          >
             <View style={styles.menuOption}>
               <LogoutIcon height="26" width="26" />
               <CustomText style={styles.menuText}>Sair</CustomText>
