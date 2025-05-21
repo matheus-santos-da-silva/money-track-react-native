@@ -1,12 +1,14 @@
 import React from "react";
 import { styles } from "./TransactionCardStyles";
-import { TouchableOpacity, View } from "react-native";
+import { Colors } from "../../styles/colors";
 import { CustomText } from "../CustomText/CustomText";
+import { formatAmount } from "../../utils/format-amount";
 import { ActivityIndicator } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+
 import IncomeIcon from "../../assets/images/icon-receita-svg.svg";
 import ExpenseIcon from "../../assets/images/icon-despesa-svg.svg";
 import BluePlusBTN from "../../assets/images/blue-plus-button-svg.svg";
-import { Colors } from "../../styles/colors";
 
 interface TransactionCardProps {
   type: "income" | "expense";
@@ -38,12 +40,7 @@ export const TransactionCard = React.memo<TransactionCardProps>(
             <ActivityIndicator size="large" color={Colors.primaryGray} />
           ) : (
             <CustomText style={styles.cardMainContentText}>
-              {isHidden
-                ? "R$ -----"
-                : `R$ ${amount.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
+              {isHidden ? "R$ -----" : `R$ ${formatAmount(amount)}`}
             </CustomText>
           )}
         </View>
