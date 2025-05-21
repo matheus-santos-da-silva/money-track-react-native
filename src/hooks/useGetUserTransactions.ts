@@ -12,6 +12,7 @@ interface useGetUserTransactionsDTO {
   token: string;
   month: number;
   year: number;
+  allMonths: boolean;
 }
 
 export const useGetUserTransactions = ({
@@ -19,12 +20,16 @@ export const useGetUserTransactions = ({
   token,
   month,
   year,
+  allMonths = false,
 }: useGetUserTransactionsDTO) => {
   const [transactions, setTransactions] = useState<UserTransactionsDTO | null>(
     null
   );
   const [transactionsError, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  let startDate: string = "";
+  let endDate: string = "";
 
   const fetchData = useCallback(
     async (forceRefresh = false) => {
@@ -34,7 +39,16 @@ export const useGetUserTransactions = ({
       setError(null);
 
       try {
-        if (!forceRefresh) {
+        if (allMonths) {
+          startDate = `${year}-01-01`;
+          endDate = `${year}-12-31`;
+        } else {
+          const range = getDateRange(year, month);
+          startDate = range.startDate;
+          endDate = range.endDate;
+        }
+
+        if (!forceRefresh && !allMonths) {
           const cachedData = await getTransactionsCache(user_id, month, year);
           if (cachedData) {
             setTransactions(cachedData);
@@ -43,7 +57,6 @@ export const useGetUserTransactions = ({
           }
         }
 
-        const { startDate, endDate } = getDateRange(year, month);
         const res = await getUserTransactions(
           user_id,
           token,
@@ -53,7 +66,9 @@ export const useGetUserTransactions = ({
 
         if (res.success && res.transactions) {
           setTransactions(res.transactions);
-          setTransactionsCache(user_id, month, year, res.transactions);
+          if (!allMonths) {
+            setTransactionsCache(user_id, month, year, res.transactions);
+          }
         } else {
           setError(res.message || "Erro ao buscar transações");
           if (forceRefresh) {
@@ -66,7 +81,7 @@ export const useGetUserTransactions = ({
         setLoading(false);
       }
     },
-    [user_id, token, month, year]
+    [user_id, token, month, year, allMonths]
   );
 
   useEffect(() => {
