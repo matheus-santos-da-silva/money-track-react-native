@@ -5,18 +5,11 @@ import { UserServiceResponseDTO } from "./DTOS/UserServiceResponseDTO";
 export const getUser = async (
   token: string
 ): Promise<UserServiceResponseDTO> => {
-  console.log("Token do service:", token);
-
   try {
     const response = await axios.get(`${USERS_SERVICE_URL}/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    });
-
-    console.log({
-      success: true,
-      user: response.data,
     });
 
     return {
