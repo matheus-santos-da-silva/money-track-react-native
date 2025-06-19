@@ -198,7 +198,8 @@ export const Transactions: React.FC = () => {
                     title={tx.category.name}
                     type={tx.type}
                     value={tx.amount}
-                    icon={"shop-icon"}
+                    icon={tx.category.icon.split("-")[1]}
+                    circleColor={tx.category.icon.split("-")[0]}
                   />
                 ))}
               </View>
