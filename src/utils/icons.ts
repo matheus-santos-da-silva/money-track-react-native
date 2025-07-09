@@ -1,4 +1,4 @@
-import React from "react";
+import { FC } from "react";
 import { SvgProps } from "react-native-svg";
 
 import ShopIcon from "../assets/images/category-icons/shop-category-icon.svg";
@@ -11,12 +11,13 @@ import SubscriptionsIcon from "../assets/images/category-icons/subscriptions-cat
 import TransportIcon from "../assets/images/category-icons/transport-category-icon.svg";
 import TravelIcon from "../assets/images/category-icons/travel-category-icon.svg";
 import WageIcon from "../assets/images/category-icons/wage-category-icon.svg";
+import LeisureIcon from "../assets/images/category-icons/leisure-category-icon.svg";
 
-export const iconMap: Record<string, React.FC<SvgProps>> = {
+export const iconMap: Record<string, FC<SvgProps>> = {
   food: ShopIcon,
   transport: TransportIcon,
   home: HomeIcon,
-  leisure: ShopIcon,
+  leisure: LeisureIcon,
   wage: WageIcon,
   extraincome: ExtraIncomeIcon,
   travel: TravelIcon,
