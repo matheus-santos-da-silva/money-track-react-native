@@ -1,6 +1,6 @@
 import { CategoryDTO } from "./CategoryDTO";
 
-export interface IncomeDTO {
+export interface TransactionDTO {
   amount: number;
   category_id: string;
   description?: string;

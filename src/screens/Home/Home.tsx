@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { styles } from "./HomeStyles";
 import { useAuth } from "../../hooks/useAuth";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
@@ -7,10 +6,13 @@ import { useGetUser } from "../../hooks/useGetUser";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
 import { clearOldCache } from "../../utils/cache-helpers";
+import { useNavigation } from "@react-navigation/native";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { TransactionCard } from "../../components/TransactionCard/TransactionCard";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
+import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { FC, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,7 +22,20 @@ import DownArrowIcon from "../../assets/images/arrow-down-svg.svg";
 import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
 
-export const Home: React.FC = () => {
+type StackNavigation = {
+  CreateExpense: {
+    token: string;
+    user_id: string;
+  };
+  CreateIncome: {
+    token: string;
+    user_id: string;
+  };
+};
+
+export const Home: FC = () => {
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+
   const currentDate = new Date();
   const [currentYear] = useState<number>(currentDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(
@@ -82,6 +97,14 @@ export const Home: React.FC = () => {
   }, [transactions]);
 
   const { total, expenses, incomes } = useBalance(transactions);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      refetch();
+    });
+
+    return unsubscribe;
+  }, [navigation, refetch]);
 
   const handleRetry = () => {
     refetch();
@@ -164,7 +187,12 @@ export const Home: React.FC = () => {
               <TransactionCard
                 type="expense"
                 isHidden={isHidden}
-                onPress={logout}
+                onPress={() =>
+                  navigation.navigate("CreateExpense", {
+                    token,
+                    user_id: user!.id,
+                  })
+                }
                 amount={expenses}
                 isLoading={loading}
               />
@@ -172,7 +200,12 @@ export const Home: React.FC = () => {
               <TransactionCard
                 type="income"
                 isHidden={isHidden}
-                onPress={logout}
+                onPress={() =>
+                  navigation.navigate("CreateIncome", {
+                    token,
+                    user_id: user!.id,
+                  })
+                }
                 amount={incomes}
                 isLoading={loading}
               />

@@ -1,7 +1,6 @@
-import { ExpenseDTO } from "./finance/ExpenseDTO";
-import { IncomeDTO } from "./finance/IncomeDTO";
+import { TransactionDTO } from "./finance/TransactionDTO";
 
 export interface UserTransactionsDTO {
-  expenses: ExpenseDTO[];
-  incomes: IncomeDTO[];
+  expenses: TransactionDTO[];
+  incomes: TransactionDTO[];
 }
