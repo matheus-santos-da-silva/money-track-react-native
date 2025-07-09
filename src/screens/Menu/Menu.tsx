@@ -1,11 +1,11 @@
-import { SafeAreaView, TouchableOpacity, View } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
 import { styles } from "./MenuStyles";
 import { TopBar } from "../../components/TopBar/TopBar";
+import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { SafeAreaView, TouchableOpacity, View } from "react-native";
 
 import UserCircle from "../../assets/images/menu-user-circle.svg";
 import UserIcon from "../../assets/images/user-svg.svg";
@@ -73,7 +73,7 @@ export const Menu: React.FC = () => {
           <TouchableOpacity
             onPress={() => {
               clearOldCache(id);
-              logout;
+              logout();
             }}
           >
             <View style={styles.menuOption}>
