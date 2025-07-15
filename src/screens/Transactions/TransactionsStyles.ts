@@ -5,14 +5,16 @@ export const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.backgroundGray,
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
 
   /* Top Content */
   blueTopContainer: {
-    height: 180,
+    height: "24%",
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
     backgroundColor: Colors.primaryBlue,
-    paddingTop: 16,
+    paddingVertical: 16,
     gap: 35,
   },
 
@@ -35,7 +37,9 @@ export const styles = StyleSheet.create({
   },
 
   mainContainer: {
-    height: 540,
+    flex: 1,
+    width: "100%",
+    marginTop: 10,
   },
 
   transactionsContent: {

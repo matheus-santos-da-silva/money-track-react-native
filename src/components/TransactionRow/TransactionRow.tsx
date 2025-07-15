@@ -1,10 +1,10 @@
-import React from "react";
+import { FC } from "react";
 import { styles } from "./TransactionRowStyles";
 import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
 import { View, Text } from "react-native";
-import { formatAmount } from "../../utils/format-amount";
 import { selectColor } from "../../utils/colors";
+import { formatAmount } from "../../utils/format-amount";
 
 interface TransactionRowProps {
   title: string;
@@ -14,7 +14,7 @@ interface TransactionRowProps {
   circleColor: string;
 }
 
-export const TransactionRow: React.FC<TransactionRowProps> = ({
+export const TransactionRow: FC<TransactionRowProps> = ({
   title,
   type,
   value,

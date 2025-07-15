@@ -1,8 +1,8 @@
-import React, { useState } from "react";
 import { styles } from "./TransactionsStyles";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
+import { FC, useState } from "react";
 import { filterOptions } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionRow } from "../../components/TransactionRow/TransactionRow";
 import { useTransactions } from "../../contexts/TransactionsContext";
@@ -40,7 +40,7 @@ const formatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
 });
 
-export const Transactions: React.FC = () => {
+export const Transactions: FC = () => {
   const { name, id, token, month, year } =
     useRoute<RouteProp<ParamList, "Params">>().params;
 

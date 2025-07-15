@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { styles } from "./ButtonStyles";
+import { CustomText } from "../CustomText/CustomText";
+import { FC, useState } from "react";
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -6,8 +8,6 @@ import {
   TouchableOpacityProps,
   View,
 } from "react-native";
-import { CustomText } from "../CustomText/CustomText";
-import { styles } from "./ButtonStyles";
 
 interface ButtonFieldProps extends TouchableOpacityProps {
   value: string;
@@ -15,7 +15,7 @@ interface ButtonFieldProps extends TouchableOpacityProps {
   isLoading: boolean;
 }
 
-export const Button: React.FC<ButtonFieldProps> = ({
+export const Button: FC<ButtonFieldProps> = ({
   value,
   style,
   onPress,
@@ -35,7 +35,7 @@ export const Button: React.FC<ButtonFieldProps> = ({
         {isLoading ? (
           <ActivityIndicator
             size="large"
-            color="#646464"
+            color="#ffffffff"
             style={styles.loading}
           />
         ) : (

@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import { styles } from "./InputStyles";
+import { Colors } from "../../styles/colors";
+import { CustomText } from "../CustomText/CustomText";
+import { FC, useState } from "react";
 import {
   TextInput,
   TextInputProps,
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "./InputStyles";
-import { CustomText } from "../CustomText/CustomText";
+
 import IconEye from "../../assets/images/icon-eye-password.svg";
-import { Colors } from "../../styles/colors";
 
 interface InputFieldProps extends TextInputProps {
   label: string;
@@ -18,7 +19,7 @@ interface InputFieldProps extends TextInputProps {
   isPassword: boolean;
 }
 
-export const Input: React.FC<InputFieldProps> = ({
+export const Input: FC<InputFieldProps> = ({
   label,
   value,
   onChangeText,
@@ -36,21 +37,23 @@ export const Input: React.FC<InputFieldProps> = ({
     <View style={styles.container}>
       <CustomText style={styles.label}>{label}</CustomText>
 
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={isPassword && !showPassword}
-        placeholderTextColor={placeholderTextColor}
-        keyboardType={label === "Email" ? "email-address" : "default"}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          secureTextEntry={isPassword && !showPassword}
+          placeholderTextColor={placeholderTextColor}
+          keyboardType={label === "Email" ? "email-address" : "default"}
+        />
 
-      {isPassword && (
-        <TouchableOpacity onPress={togglePasswordVisibility}>
-          <IconEye style={styles.icon} />
-        </TouchableOpacity>
-      )}
+        {isPassword && (
+          <TouchableOpacity onPress={togglePasswordVisibility}>
+            <IconEye style={styles.icon} height={20} width={20} />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };

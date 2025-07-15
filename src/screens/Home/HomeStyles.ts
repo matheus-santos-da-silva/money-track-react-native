@@ -5,28 +5,31 @@ export const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.backgroundGray,
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
 
   /* Top Blue Menu */
   topMenu: {
-    width: 412,
-    height: 240,
+    width: "100%",
+    height: "32%",
+    minHeight: 220,
+    maxHeight: 280,
     backgroundColor: "#407BFF",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: 32,
-    paddingHorizontal: 20,
+    padding: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
+
   topMenuContent: {
-    marginTop: 24,
-    width: 350,
+    width: "100%",
     height: 50,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
+
   profileCircle: {
     width: 50,
     height: 50,
@@ -35,36 +38,51 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
   profileLetter: {
     fontSize: 26,
     color: "#B1B1B1",
     fontFamily: "KonkhmerSleokchher-Regular",
   },
+
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
+
+  lastMenuContent: {
+    width: "100%",
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+
   middleMenuContent: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
+
   amountTotalText: {
     color: "white",
     fontFamily: "Poppins-Regular",
     fontSize: 18,
     lineHeight: 18,
   },
+
   amount: {
     color: "white",
     fontSize: 30,
     lineHeight: 40,
   },
+
   EyeIconView: {
-    width: 24,
-    height: 24,
-    marginLeft: 330,
+    position: "absolute",
+    right: 4,
+    zIndex: 2,
   },
+
   greetingText: {
     fontSize: 16,
     color: "white",
@@ -74,23 +92,27 @@ export const styles = StyleSheet.create({
 
   /* Main Content */
   mainContainer: {
+    flex: 1,
     flexDirection: "column",
     alignItems: "center",
-    height: 500,
   },
+
   monthContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingBottom: 20,
+    paddingVertical: 8,
   },
+
   monthText: {
-    fontSize: 20,
-    color: Colors.primaryGray,
+    fontSize: 18,
+    color: "white",
   },
+
   mainContent: {
     flexDirection: "column",
     alignItems: "center",
+    paddingTop: 24,
     gap: 32,
   },
 
@@ -102,6 +124,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     borderColor: "#FFEBEE",
   },
+
   errorIconContainer: {
     backgroundColor: "#FFEBEE",
     width: 52,
@@ -111,18 +134,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: -200,
   },
+
   errorTitle: {
     color: "#FF6B6B",
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
   },
+
   errorMessage: {
     color: "#999",
     fontSize: 16,
     textAlign: "center",
     marginBottom: 16,
   },
+
   retryButton: {
     flexDirection: "row",
     backgroundColor: "#FF6B6B",
@@ -132,6 +158,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
+
   retryButtonText: {
     color: "#FFF",
     fontWeight: "500",

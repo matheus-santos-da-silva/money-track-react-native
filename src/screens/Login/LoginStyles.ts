@@ -1,17 +1,23 @@
-import { StyleSheet } from "react-native";
 import { Colors } from "../../styles/colors";
+import { StyleSheet } from "react-native";
+import { Dimensions } from "react-native";
+
+const { height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
-    justifyContent: "center",
-    marginRight: 14,
+    width: "100%",
+    paddingVertical: 20,
   },
+
   loginMsg: {
-    fontSize: 24,
+    fontSize: 20,
     color: Colors.primaryGray,
   },
+
   bottomContent: {
-    gap: 30,
+    width: "100%",
+    gap: height * 0.03,
   },
 });

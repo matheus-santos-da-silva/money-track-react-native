@@ -13,14 +13,14 @@ import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSel
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { FC, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import NotificationIcon from "../../assets/images/bell-svg.svg";
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
-import DownArrowIcon from "../../assets/images/arrow-down-svg.svg";
-import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import DownArrowIcon from "../../assets/images/white-arrow-down.svg";
+import NotificationIcon from "../../assets/images/bell-svg.svg";
+import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 
 type StackNavigation = {
   CreateExpense: {
@@ -142,77 +142,89 @@ export const Home: FC = () => {
           </CustomText>
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={toggleVisibility}
-          style={styles.EyeIconView}
-        >
-          <EyeIcon height="24" width="24" />
-        </TouchableOpacity>
-      </View>
+        <View style={styles.lastMenuContent}>
+          <View
+            style={{
+              position: "absolute",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity onPress={toggleModal} style={styles.monthContent}>
+              <CustomText style={styles.monthText}>{monthName}</CustomText>
+              <DownArrowIcon height="20" width="20" />
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.mainContainer}>
-        <TouchableOpacity onPress={toggleModal} style={styles.monthContent}>
-          <CustomText style={styles.monthText}>{monthName}</CustomText>
-          <DownArrowIcon height="20" width="20" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={toggleVisibility}
+            style={styles.EyeIconView}
+          >
+            <EyeIcon height="20" width="20" />
+          </TouchableOpacity>
 
-        <MonthSelectorModal
-          visible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          onSelectMonth={handleMonthChange}
-        />
-
-        <View style={styles.mainContent}>
-          {transactionsError ? (
-            <View style={styles.errorCard}>
-              <View style={styles.errorIconContainer}>
-                <AlertTriangleIcon width={30} height={30} />
-              </View>
-              <Text style={styles.errorTitle}>Ops, algo deu errado!</Text>
-              <Text style={styles.errorMessage}>
-                Não foi possível carregar suas transações
-              </Text>
-
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={handleRetry}
-              >
-                <RefreshIcon width={16} height={16} />
-                <Text style={styles.retryButtonText}>Tentar novamente</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              <TransactionCard
-                type="expense"
-                isHidden={isHidden}
-                onPress={() =>
-                  navigation.navigate("CreateExpense", {
-                    token,
-                    user_id: user!.id,
-                  })
-                }
-                amount={expenses}
-                isLoading={loading}
-              />
-
-              <TransactionCard
-                type="income"
-                isHidden={isHidden}
-                onPress={() =>
-                  navigation.navigate("CreateIncome", {
-                    token,
-                    user_id: user!.id,
-                  })
-                }
-                amount={incomes}
-                isLoading={loading}
-              />
-            </>
-          )}
+          <MonthSelectorModal
+            visible={isModalVisible}
+            onClose={() => setIsModalVisible(false)}
+            onSelectMonth={handleMonthChange}
+          />
         </View>
       </View>
+
+      <ScrollView>
+        <View style={styles.mainContainer}>
+          <View style={styles.mainContent}>
+            {transactionsError ? (
+              <View style={styles.errorCard}>
+                <View style={styles.errorIconContainer}>
+                  <AlertTriangleIcon width={30} height={30} />
+                </View>
+                <Text style={styles.errorTitle}>Ops, algo deu errado!</Text>
+                <Text style={styles.errorMessage}>
+                  Não foi possível carregar suas transações
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={handleRetry}
+                >
+                  <RefreshIcon width={16} height={16} />
+                  <Text style={styles.retryButtonText}>Tentar novamente</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <TransactionCard
+                  type="expense"
+                  isHidden={isHidden}
+                  onPress={() =>
+                    navigation.navigate("CreateExpense", {
+                      token,
+                      user_id: user!.id,
+                    })
+                  }
+                  amount={expenses}
+                  isLoading={loading}
+                />
+
+                <TransactionCard
+                  type="income"
+                  isHidden={isHidden}
+                  onPress={() =>
+                    navigation.navigate("CreateIncome", {
+                      token,
+                      user_id: user!.id,
+                    })
+                  }
+                  amount={incomes}
+                  isLoading={loading}
+                />
+              </>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+
       {user && (
         <BottomBar
           userProps={{
