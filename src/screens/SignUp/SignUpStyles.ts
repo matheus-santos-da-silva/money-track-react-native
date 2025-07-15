@@ -1,21 +1,24 @@
-import { StyleSheet } from "react-native";
 import { Colors } from "../../styles/colors";
+import { StyleSheet } from "react-native";
+import { Dimensions } from "react-native";
+
+const { height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   signUpContainer: {
-    justifyContent: "center",
-    marginVertical: 18,
-    marginRight: 10,
+    flex: 1,
+    width: "100%",
+    paddingVertical: 16,
   },
+
   signUpMsg: {
-    fontSize: 26,
+    fontSize: 22,
     color: Colors.primaryGray,
   },
-  signUpImage: {
-    marginLeft: 14,
-  },
+
   bottomContent: {
+    width: "100%",
     alignItems: "center",
-    gap: 28,
+    gap: height * 0.03,
   },
 });

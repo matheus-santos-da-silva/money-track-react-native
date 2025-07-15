@@ -1,6 +1,6 @@
-import React from "react";
-import { Modal, Text, TouchableOpacity, Pressable } from "react-native";
+import { FC } from "react";
 import { styles } from "./MonthSelectorModalStyles";
+import { Modal, Text, TouchableOpacity, Pressable } from "react-native";
 
 interface MonthSelectorModalProps {
   visible: boolean;
@@ -23,7 +23,7 @@ export const months = [
   "Dezembro",
 ];
 
-export const MonthSelectorModal: React.FC<MonthSelectorModalProps> = ({
+export const MonthSelectorModal: FC<MonthSelectorModalProps> = ({
   visible,
   onClose,
   onSelectMonth,

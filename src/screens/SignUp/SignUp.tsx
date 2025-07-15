@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
 import { Logo } from "../../components/Logo/Logo";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { styles } from "./SignUpStyles";
-import { homeScreensStyle } from "../../styles/home-screens.style";
-import SignUpImage from "../../assets/images/signup-image.svg";
 import { Input } from "../../components/Input/Input";
+import { styles } from "./SignUpStyles";
 import { Button } from "../../components/Button/Button";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "../../hooks/useAuth";
-import Snackbar from "react-native-snackbar";
+import { CustomText } from "../../components/CustomText/CustomText";
+import { FC, useState } from "react";
 import { validateData } from "../../utils/validate-signUp";
+import { showSnackBar } from "../../utils/show-snack-bar";
+import { useNavigation } from "@react-navigation/native";
+import { homeScreensStyle } from "../../styles/home-screens.style";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
+
+import SignUpImage from "../../assets/images/signup-image.svg";
 
 export type StackNavigation = {
   Login: undefined;
@@ -19,7 +20,7 @@ export type StackNavigation = {
   ProfileCompletion: { email: string; password: string };
 };
 
-export const SignUp: React.FC = () => {
+export const SignUp: FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const { isLoading } = useAuth();
@@ -34,12 +35,7 @@ export const SignUp: React.FC = () => {
     const { message } = validateData(email, password);
 
     if (message) {
-      Snackbar.show({
-        text: message || "Erro desconhecido!",
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: "#de525a",
-        fontFamily: "Poppins-Regular",
-      });
+      showSnackBar(message || "Erro desconhecido!", "#de525a");
     } else {
       navigation.navigate("ProfileCompletion", { email, password });
     }
@@ -51,9 +47,9 @@ export const SignUp: React.FC = () => {
         <Logo />
         <CustomText style={styles.signUpMsg}>Crie sua conta</CustomText>
       </View>
-      <View>
+      <View style={homeScreensStyle.mainContent}>
         <View style={homeScreensStyle.middleContent}>
-          <SignUpImage style={styles.signUpImage} width={260} height={260} />
+          <SignUpImage width={250} height={250} />
           <View style={homeScreensStyle.form}>
             <Input
               label="Email"

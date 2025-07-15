@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { Colors } from "../../styles/colors";
 
 export const styles = StyleSheet.create({
   modalContainer: {
@@ -18,13 +19,17 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    color: Colors.primaryBlue,
   },
+
   monthItem: {
     paddingVertical: 10,
     width: "100%",
     alignItems: "center",
   },
+
   monthText: {
     fontSize: 16,
+    fontFamily: "Poppins-Regular",
   },
 });

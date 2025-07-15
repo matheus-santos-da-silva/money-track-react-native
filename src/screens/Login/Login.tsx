@@ -1,23 +1,24 @@
-import React, { useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
-import { styles } from "./LoginStyles";
-import { homeScreensStyle } from "../../styles/home-screens.style";
-import { Input } from "../../components/Input/Input";
 import { Logo } from "../../components/Logo/Logo";
-import { CustomText } from "../../components/CustomText/CustomText";
+import { Input } from "../../components/Input/Input";
+import { styles } from "./LoginStyles";
 import { Button } from "../../components/Button/Button";
-import LoginImage from "../../assets/images/login-image.svg";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "../../hooks/useAuth";
-import Snackbar from "react-native-snackbar";
+import { CustomText } from "../../components/CustomText/CustomText";
+import { FC, useState } from "react";
+import { showSnackBar } from "../../utils/show-snack-bar";
+import { useNavigation } from "@react-navigation/native";
+import { homeScreensStyle } from "../../styles/home-screens.style";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
+
+import LoginImage from "../../assets/images/login-image.svg";
 
 type StackNavigation = {
   SignUp: undefined;
   Home: undefined;
 };
 
-export const Login: React.FC = () => {
+export const Login: FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const { login, error, isLoading } = useAuth();
@@ -30,14 +31,7 @@ export const Login: React.FC = () => {
 
   const handleLogin = async () => {
     const result = await login(email, password);
-    if (!result) {
-      Snackbar.show({
-        text: error || "Erro desconhecido!",
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: "#de525a",
-        fontFamily: "Poppins-Regular",
-      });
-    }
+    if (!result) showSnackBar(error || "Erro desconhecido!", "#de525a");
   };
 
   return (
@@ -47,8 +41,8 @@ export const Login: React.FC = () => {
         <CustomText style={styles.loginMsg}>Acesse sua conta</CustomText>
       </View>
       <View style={homeScreensStyle.mainContent}>
+        <LoginImage width={250} height={250} />
         <View style={homeScreensStyle.middleContent}>
-          <LoginImage width={260} height={260} />
           <View style={homeScreensStyle.form}>
             <Input
               label="Email"
