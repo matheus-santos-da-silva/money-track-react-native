@@ -6,7 +6,7 @@ import { FC, useState } from "react";
 import { filterOptions } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionRow } from "../../components/TransactionRow/TransactionRow";
 import { useTransactions } from "../../contexts/TransactionsContext";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { SearchTransactionsBar } from "../../components/SearchTransactionBar/SearchTransactionsBar";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { TransactionsFilterModal } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
@@ -16,6 +16,9 @@ import { SafeAreaView, TouchableOpacity, View } from "react-native";
 
 import SearchIcon from "../../assets/images/search-btn-svg.svg";
 import DateFilterIcon from "../../assets/images/date-filter-svg.svg";
+import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { StackNavigation } from "../Home/Home";
 
 type ParamList = {
   Params: {
@@ -41,6 +44,10 @@ const formatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 export const Transactions: FC = () => {
+  const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+
   const { name, id, token, month, year } =
     useRoute<RouteProp<ParamList, "Params">>().params;
 
@@ -89,6 +96,14 @@ export const Transactions: FC = () => {
     : fetchedTransactions;
 
   const groupedByDate: GroupedTransactions = {};
+
+  const handleSelectType = (type: "EXPENSE" | "INCOME") => {
+    setIsTypeSelectorVisible(false);
+    navigation.navigate(type === "EXPENSE" ? "CreateExpense" : "CreateIncome", {
+      user_id: id,
+      token,
+    });
+  };
 
   const filteredTransactions = searchQuery
     ? {
@@ -215,13 +230,25 @@ export const Transactions: FC = () => {
           </View>
         )}
       </View>
-      <BottomBar userProps={{ id, name, token, month, year }} />
+      <BottomBar
+        userProps={{ id, name, token, month, year }}
+        onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
+      />
       <TransactionsFilterModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
         onSelectFilter={handleSelectFilter}
         selectedFilter={filterSelected}
         onChangeSelected={handleSelectFilter}
+      />
+
+      <CreateTransactionTypeSelector
+        visible={isTypeSelectorVisible}
+        onClose={() => setIsTypeSelectorVisible(false)}
+        onSelect={(type) => {
+          setIsTypeSelectorVisible(false);
+          handleSelectType(type);
+        }}
       />
     </SafeAreaView>
   );

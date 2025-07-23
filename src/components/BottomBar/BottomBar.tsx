@@ -1,5 +1,5 @@
-import React from "react";
 import { styles } from "./BottomBarStyles";
+import { FC, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TouchableOpacity, View } from "react-native";
@@ -8,7 +8,8 @@ import HomeIcon from "../../assets/images/home-svg.svg";
 import AlignLeftIcon from "../../assets/images/align-left-svg.svg";
 import ChartsIcon from "../../assets/images/bar-chart-svg.svg";
 import UserIcon from "../../assets/images/user-svg.svg";
-import BluePlusBTN from "../../assets/images/blue-plus-button-svg.svg";
+import BluePlusBTN from "../../assets/images/add-transaction-button.svg";
+import { CreateTransactionTypeSelector } from "../CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 
 interface ButtonFieldProps {
   userProps: {
@@ -35,14 +36,28 @@ type StackNavigation = {
     month: number;
     year: number;
   };
+  CreateExpense: {
+    token: string;
+    user_id: string;
+  };
+  CreateIncome: {
+    token: string;
+    user_id: string;
+  };
   Home: undefined;
 };
 
-export const BottomBar: React.FC<ButtonFieldProps> = ({ userProps }) => {
+export const BottomBar: FC<
+  ButtonFieldProps & { onShowTypeSelector: () => void }
+> = ({ userProps, onShowTypeSelector }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const navigateTo = <type extends keyof StackNavigation>(screen: type) => {
-    if (screen !== "Home") {
+    if (
+      screen !== "Home" &&
+      screen !== "CreateExpense" &&
+      screen !== "CreateIncome"
+    ) {
       navigation.navigate(screen, {
         id: userProps.id,
         name: userProps.name,
@@ -67,8 +82,8 @@ export const BottomBar: React.FC<ButtonFieldProps> = ({ userProps }) => {
       </View>
 
       <View style={styles.svgContainer}>
-        <TouchableOpacity activeOpacity={0.9}>
-          <BluePlusBTN height="60" width="60" />
+        <TouchableOpacity activeOpacity={0.9} onPress={onShowTypeSelector}>
+          <BluePlusBTN height="70" width="70" />
         </TouchableOpacity>
       </View>
 

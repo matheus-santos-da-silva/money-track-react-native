@@ -13,6 +13,7 @@ import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSel
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { FC, useEffect, useState } from "react";
+import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
@@ -22,7 +23,7 @@ import DownArrowIcon from "../../assets/images/white-arrow-down.svg";
 import NotificationIcon from "../../assets/images/bell-svg.svg";
 import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 
-type StackNavigation = {
+export type StackNavigation = {
   CreateExpense: {
     token: string;
     user_id: string;
@@ -34,6 +35,8 @@ type StackNavigation = {
 };
 
 export const Home: FC = () => {
+  const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const currentDate = new Date();
@@ -108,6 +111,14 @@ export const Home: FC = () => {
 
   const handleRetry = () => {
     refetch();
+  };
+
+  const handleSelectType = (type: "EXPENSE" | "INCOME") => {
+    setIsTypeSelectorVisible(false);
+    navigation.navigate(type === "EXPENSE" ? "CreateExpense" : "CreateIncome", {
+      user_id: user!.id,
+      token,
+    });
   };
 
   return (
@@ -234,8 +245,18 @@ export const Home: FC = () => {
             month: currentMonth,
             year: currentYear,
           }}
+          onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
         />
       )}
+
+      <CreateTransactionTypeSelector
+        visible={isTypeSelectorVisible}
+        onClose={() => setIsTypeSelectorVisible(false)}
+        onSelect={(type) => {
+          setIsTypeSelectorVisible(false);
+          handleSelectType(type);
+        }}
+      />
     </View>
   );
 };
