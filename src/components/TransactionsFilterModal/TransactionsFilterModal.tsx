@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { FC } from "react";
 import { styles } from "./TransactionsFilterModalStyles";
 import { Colors } from "../../styles/colors";
 import { CustomText } from "../CustomText/CustomText";
@@ -7,7 +7,7 @@ import { View, TouchableOpacity } from "react-native";
 import MaterialIcons from "@react-native-vector-icons/material-icons";
 import Modal from "react-native-modal";
 
-export type filterOptions = "today" | "thisMonth" | "thisYear";
+export type filterOptions = "today" | "thisMonth";
 
 interface FilterModalProps {
   isVisible: boolean;
@@ -17,7 +17,7 @@ interface FilterModalProps {
   onChangeSelected: (filter: filterOptions) => void;
 }
 
-export const TransactionsFilterModal: React.FC<FilterModalProps> = ({
+export const TransactionsFilterModal: FC<FilterModalProps> = ({
   isVisible,
   onClose,
   onSelectFilter,
@@ -57,7 +57,6 @@ export const TransactionsFilterModal: React.FC<FilterModalProps> = ({
         <View style={styles.option}>
           {renderOption("Hoje", "today")}
           {renderOption("Este mês", "thisMonth")}
-          {renderOption("Este ano", "thisYear")}
         </View>
 
         <TouchableOpacity
