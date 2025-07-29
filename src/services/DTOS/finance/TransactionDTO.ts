@@ -7,5 +7,6 @@ export interface TransactionDTO {
   id: string;
   total_installments: number;
   transaction_date: Date;
+  recurrence: string;
   category: CategoryDTO;
 }

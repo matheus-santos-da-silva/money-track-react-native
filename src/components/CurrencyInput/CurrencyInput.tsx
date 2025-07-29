@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Colors } from "../../styles/colors";
 import { styles } from "./CurrencyInputStyles";
 import {
@@ -24,6 +24,13 @@ export const CurrencyInputWithKeypad: FC<CurrencyInputWithKeypadProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
 
   const MAX_DIGITS = 9;
+
+  useEffect(() => {
+    if (value && value > 0) {
+      const cents = Math.round(value * 100).toString();
+      setRawValue(cents);
+    }
+  }, [value]);
 
   const formatCurrency = (value: string) => {
     const cents = value.padStart(3, "0");

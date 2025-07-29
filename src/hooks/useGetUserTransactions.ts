@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { getDateRange } from "../utils/get-date-range";
 import { UserTransactionsDTO } from "../services/DTOS/UserTransactionsDTO";
 import { getUserTransactions } from "../services/GetUserTransactionsService";
-import { getDateRange } from "../utils/get-date-range";
+import { useEffect, useState, useCallback } from "react";
 import {
   getTransactionsCache,
   setTransactionsCache,
@@ -12,7 +12,6 @@ interface useGetUserTransactionsDTO {
   token: string;
   month: number;
   year: number;
-  allMonths: boolean;
 }
 
 export const useGetUserTransactions = ({
@@ -20,7 +19,6 @@ export const useGetUserTransactions = ({
   token,
   month,
   year,
-  allMonths = false,
 }: useGetUserTransactionsDTO) => {
   const [transactions, setTransactions] = useState<UserTransactionsDTO | null>(
     null
@@ -32,28 +30,24 @@ export const useGetUserTransactions = ({
   let endDate: string = "";
 
   const fetchData = useCallback(
-    async (forceRefresh = false) => {
-      if (!user_id || !token) return;
+    async (forceRefresh = false): Promise<UserTransactionsDTO | null> => {
+      if (!user_id || !token) return null;
 
       setLoading(true);
       setError(null);
 
       try {
-        if (allMonths) {
-          startDate = `${year}-01-01`;
-          endDate = `${year}-12-31`;
-        } else {
-          const range = getDateRange(year, month);
-          startDate = range.startDate;
-          endDate = range.endDate;
-        }
+        const range = getDateRange(year, month);
+        startDate = range.startDate;
+        endDate = range.endDate;
 
-        if (!forceRefresh && !allMonths) {
+        if (!forceRefresh) {
           const cachedData = await getTransactionsCache(user_id, month, year);
           if (cachedData) {
             setTransactions(cachedData);
             setLoading(false);
-            return;
+
+            return cachedData;
           }
         }
 
@@ -66,22 +60,23 @@ export const useGetUserTransactions = ({
 
         if (res.success && res.transactions) {
           setTransactions(res.transactions);
-          if (!allMonths) {
-            setTransactionsCache(user_id, month, year, res.transactions);
-          }
+          setTransactionsCache(user_id, month, year, res.transactions);
+
+          return res.transactions;
         } else {
           setError(res.message || "Erro ao buscar transações");
-          if (forceRefresh) {
-            setTransactions(null);
-          }
+          if (forceRefresh) setTransactions(null);
+
+          return null;
         }
       } catch (error) {
         setError(String(error));
+        return null;
       } finally {
         setLoading(false);
       }
     },
-    [user_id, token, month, year, allMonths]
+    [user_id, token, month, year]
   );
 
   useEffect(() => {
@@ -92,6 +87,6 @@ export const useGetUserTransactions = ({
     transactions,
     transactionsError,
     loading,
-    refetch: () => fetchData(true),
+    refetch: (forceRefresh = false) => fetchData(forceRefresh),
   };
 };
