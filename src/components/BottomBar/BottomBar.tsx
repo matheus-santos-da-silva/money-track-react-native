@@ -1,5 +1,5 @@
+import { FC } from "react";
 import { styles } from "./BottomBarStyles";
-import { FC, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TouchableOpacity, View } from "react-native";
@@ -9,7 +9,6 @@ import AlignLeftIcon from "../../assets/images/align-left-svg.svg";
 import ChartsIcon from "../../assets/images/bar-chart-svg.svg";
 import UserIcon from "../../assets/images/user-svg.svg";
 import BluePlusBTN from "../../assets/images/add-transaction-button.svg";
-import { CreateTransactionTypeSelector } from "../CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 
 interface ButtonFieldProps {
   userProps: {

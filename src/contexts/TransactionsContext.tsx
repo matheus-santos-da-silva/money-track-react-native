@@ -4,6 +4,9 @@ import { UserTransactionsDTO } from "../services/DTOS/UserTransactionsDTO";
 export interface TransactionsContextType {
   transactions: UserTransactionsDTO;
   setTransactions: (transactions: UserTransactionsDTO) => void;
+  shouldRefetch: boolean;
+  triggerRefetch: () => void;
+  clearRefetch: () => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(
@@ -30,8 +33,21 @@ export const TransactionsProvider: React.FC<{ children: ReactNode }> = ({
     incomes: [],
   });
 
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+
+  const triggerRefetch = () => setShouldRefetch(true);
+  const clearRefetch = () => setShouldRefetch(false);
+
   return (
-    <TransactionsContext.Provider value={{ transactions, setTransactions }}>
+    <TransactionsContext.Provider
+      value={{
+        transactions,
+        setTransactions,
+        shouldRefetch,
+        triggerRefetch,
+        clearRefetch,
+      }}
+    >
       {children}
     </TransactionsContext.Provider>
   );

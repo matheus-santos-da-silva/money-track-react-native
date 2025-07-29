@@ -12,6 +12,7 @@ import { TransactionCard } from "../../components/TransactionCard/TransactionCar
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
 import { FC, useEffect, useState } from "react";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -27,10 +28,12 @@ export type StackNavigation = {
   CreateExpense: {
     token: string;
     user_id: string;
+    initialData?: InitialTransactionData;
   };
   CreateIncome: {
     token: string;
     user_id: string;
+    initialData?: InitialTransactionData;
   };
 };
 
@@ -92,7 +95,6 @@ export const Home: FC = () => {
       token: token ?? "",
       month: currentMonth,
       year: currentYear,
-      allMonths: false,
     });
 
   useEffect(() => {

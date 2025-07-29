@@ -1,18 +1,20 @@
-import { styles } from "./CreateTransactionStyles";
+import { styles } from "./HandleTransactionStyles";
 import { Colors } from "../../styles/colors";
 import { iconMap } from "../../utils/icons";
-import { CustomText } from "../../components/CustomText/CustomText";
+import { CustomText } from "../CustomText/CustomText";
 import { selectColor } from "../../utils/colors";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCreateTransaction } from "../../hooks/useCreateTransaction";
-import { TransactionTypeModal } from "../../components/TransactionTypeModal/TransactionTypeModal";
-import { CurrencyInputWithKeypad } from "../../components/CurrencyInput/CurrencyInput";
-import { TransactionRecurrenceSelector } from "../../components/TransactionRecurrenceSelector/TransactionRecurrenceSelector";
-import { TransactionInstallmentsSelector } from "../../components/TransactionInstallmentsSelector/TransactionInstallmentsSelector";
+import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
+import { TransactionTypeModal } from "../TransactionTypeModal/TransactionTypeModal";
+import { CurrencyInputWithKeypad } from "../CurrencyInput/CurrencyInput";
+import { TransactionRecurrenceSelector } from "../TransactionRecurrenceSelector/TransactionRecurrenceSelector";
+import { TransactionInstallmentsSelector } from "../TransactionInstallmentsSelector/TransactionInstallmentsSelector";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import {
   SafeAreaView,
@@ -31,9 +33,29 @@ import TransactionIcon from "../../assets/images/transaction-icon.svg";
 import GrayDownArrowIcon from "../../assets/images/arrow-down-svg.svg";
 import WhiteDownArrowIcon from "../../assets/images/white-arrow-down.svg";
 
+export interface InitialTransactionData {
+  id?: string;
+  amount?: number;
+  category?: {
+    id: string;
+    icon: string;
+    name: string;
+  };
+  recurrence?: "MONTHLY" | "YEARLY" | "NONE";
+  installments?: number;
+  description?: string;
+  date?: Date;
+  transactionType?: "fixa" | "parcelada" | "recorrente";
+  type?: "EXPENSE" | "INCOME";
+}
+
 type StackNavigation = {
   Home: undefined;
-  CreateTransaction: { token: string; user_id: string };
+  CreateTransaction: {
+    token: string;
+    user_id: string;
+    initialData?: InitialTransactionData;
+  };
 };
 
 type ParamList = {
@@ -45,43 +67,52 @@ type ParamList = {
 
 type TransactionType = "INCOME" | "EXPENSE";
 
-interface CreateTransactionProps {
+interface HandleTransactionProps {
   transactionType: TransactionType;
   color: string;
+  initialData?: InitialTransactionData;
+  isEditing?: boolean;
   typeText: string;
 }
 
-export const CreateTransaction: FC<CreateTransactionProps> = ({
+export const HandleTransaction: FC<HandleTransactionProps> = ({
   transactionType,
   color,
   typeText,
+  initialData,
+  isEditing,
 }) => {
   const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { triggerRefetch } = useTransactions();
 
   const { execute, transactionLoading } = useCreateTransaction();
-
-  const [amount, setAmount] = useState(0);
+  const { update, updateTransactionLoading } = useUpdateTransaction();
 
   const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
-  const [category, setCategory] = useState<{
-    id: string;
-    icon: string;
-    name: string;
-  } | null>(null);
+
+  const [amount, setAmount] = useState(
+    initialData?.amount ? initialData.amount : 0
+  );
+
+  const [category, setCategory] = useState(initialData?.category || null);
 
   const [showRecurrenceMenu, setShowRecurrenceMenu] = useState(false);
   const [recurrence, setRecurrence] = useState<"MONTHLY" | "YEARLY" | "NONE">(
-    "NONE"
+    initialData?.recurrence || "NONE"
   );
 
   const [showInstallmentsMenu, setShowInstallmentsMenu] = useState(false);
-  const [installments, setInstallments] = useState<number>(1);
+  const [installments, setInstallments] = useState(
+    initialData?.installments || 1
+  );
 
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState(
+    initialData?.description || ""
+  );
 
   const [selectedTransactionType, setSelectedTransactionType] = useState<
     "fixa" | "parcelada" | "recorrente" | null
-  >(null);
+  >(initialData?.transactionType || null);
 
   const handleSelectTransaction = (
     type: "fixa" | "parcelada" | "recorrente"
@@ -89,10 +120,17 @@ export const CreateTransaction: FC<CreateTransactionProps> = ({
     setSelectedTransactionType(type);
   };
 
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date>(
+    initialData?.date
+      ? typeof initialData.date === "string"
+        ? new Date(initialData.date)
+        : initialData.date
+      : new Date()
+  );
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
   const formatDate = (date: Date) => {
+    if (!date) return "Selecione uma data";
     return date.toLocaleDateString("pt-BR");
   };
 
@@ -107,6 +145,76 @@ export const CreateTransaction: FC<CreateTransactionProps> = ({
     token,
     type: transactionType,
   });
+
+  const handleSubmit = async () => {
+    if (!category) {
+      showSnackBar("Você precisa escolhar uma categoria!", "#de525a");
+      return;
+    }
+
+    if (amount === 0) {
+      showSnackBar("Valor da Transação não pode ser R$ 0,00!", "#de525a");
+      return;
+    }
+
+    if (!selectedTransactionType) {
+      showSnackBar(
+        "Escolha um tipo para a sua Transação! Fixa, Parcelada ou Recorrente.",
+        "#de525a"
+      );
+      return;
+    }
+
+    const transactionData = {
+      id: initialData?.id,
+      type: (transactionType === "INCOME" ? "incomes" : "expenses") as
+        | "incomes"
+        | "expenses",
+      token,
+      user_id,
+      amount,
+      category_id: category.id,
+      recurrence,
+      total_installments: installments,
+      transaction_date: date.toISOString(),
+      description,
+      ...(isEditing && { id: initialData?.id }),
+    };
+
+    try {
+      let success;
+      if (isEditing) {
+        if (!initialData?.id) {
+          showSnackBar("ID da transação não encontrado", "#de525a");
+          return;
+        }
+
+        success = await update({
+          ...transactionData,
+          id: initialData.id,
+        });
+      } else {
+        success = await execute(transactionData);
+      }
+
+      if (success) {
+        showSnackBar(
+          `Transação ${isEditing ? "atualizada" : "criada"} com sucesso!`,
+          "#4BB543"
+        );
+
+        triggerRefetch();
+        navigation.goBack();
+      } else {
+        showSnackBar(
+          `Erro ao ${isEditing ? "atualizar" : "criar"} transação`,
+          "#de525a"
+        );
+      }
+    } catch (error) {
+      showSnackBar("Ocorreu um erro inesperado", "#de525a");
+    }
+  };
 
   return (
     <SafeAreaView style={styles(color).container}>
@@ -306,48 +414,7 @@ export const CreateTransaction: FC<CreateTransactionProps> = ({
 
         <TouchableOpacity
           disabled={transactionLoading}
-          onPress={async () => {
-            if (!category) {
-              showSnackBar("Você precisa escolhar uma categoria!", "#de525a");
-              return;
-            }
-
-            if (amount === 0) {
-              showSnackBar(
-                "Valor da Transação não pode ser R$ 0,00!",
-                "#de525a"
-              );
-              return;
-            }
-
-            if (!selectedTransactionType) {
-              showSnackBar(
-                "Escolha um tipo para a sua Transação! Fixa, Parcelada ou Recorrente.",
-                "#de525a"
-              );
-              return;
-            }
-
-            const created = await execute({
-              type: transactionType === "INCOME" ? "incomes" : "expenses",
-              token,
-              user_id,
-              amount,
-              category_id: category.id,
-              recurrence,
-              total_installments: installments,
-              transaction_date: date.toISOString(),
-              description,
-            });
-
-            if (created) {
-              showSnackBar("Transação criada com sucesso!", "#4BB543");
-              navigation.goBack();
-            } else {
-              showSnackBar("Erro ao criar transação", "#de525a");
-              return;
-            }
-          }}
+          onPress={handleSubmit}
           style={[
             styles(color).confirmButtonContainer,
             transactionLoading && { opacity: 0.6 },
@@ -360,7 +427,11 @@ export const CreateTransaction: FC<CreateTransactionProps> = ({
             ]}
           >
             <CustomText style={styles(color).confirmButtonText}>
-              {transactionLoading ? "Salvando..." : "Adicionar"}
+              {transactionLoading || updateTransactionLoading
+                ? "Salvando..."
+                : isEditing
+                ? "Atualizar"
+                : "Adicionar"}
             </CustomText>
           </View>
         </TouchableOpacity>

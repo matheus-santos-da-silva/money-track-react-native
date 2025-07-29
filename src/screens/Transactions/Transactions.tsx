@@ -2,23 +2,24 @@ import { styles } from "./TransactionsStyles";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
-import { FC, useState } from "react";
 import { filterOptions } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionRow } from "../../components/TransactionRow/TransactionRow";
+import { StackNavigation } from "../Home/Home";
 import { useTransactions } from "../../contexts/TransactionsContext";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import { SearchTransactionsBar } from "../../components/SearchTransactionBar/SearchTransactionsBar";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
+import { FC, useEffect, useState } from "react";
 import { TransactionsFilterModal } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionsMonthSelector } from "../../components/TransactionsMonthSelector/TransactionsMonthSelector";
+import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { ActivityIndicator, ScrollView } from "react-native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView, TouchableOpacity, View } from "react-native";
 
 import SearchIcon from "../../assets/images/search-btn-svg.svg";
 import DateFilterIcon from "../../assets/images/date-filter-svg.svg";
-import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { StackNavigation } from "../Home/Home";
 
 type ParamList = {
   Params: {
@@ -32,6 +33,11 @@ type ParamList = {
 
 type GroupedTransactions = {
   [date: string]: {
+    id: string;
+    description?: string;
+    total_installments: number;
+    transaction_date: Date;
+    recurrence: string;
     type: "Receita" | "Despesa";
     amount: number;
     category: CategoryDTO;
@@ -45,6 +51,7 @@ const formatter = new Intl.DateTimeFormat("pt-BR", {
 
 export const Transactions: FC = () => {
   const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(false);
 
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
@@ -60,7 +67,12 @@ export const Transactions: FC = () => {
   };
   const isViewingCurrentMonth = currentMonthIndex === month;
 
-  const { transactions: contextTransactions } = useTransactions();
+  const {
+    transactions: contextTransactions,
+    setTransactions,
+    shouldRefetch,
+    clearRefetch,
+  } = useTransactions();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -77,23 +89,25 @@ export const Transactions: FC = () => {
   );
 
   const handleSelectFilter = (filter: filterOptions) => {
-    if (filter !== "thisYear") handleMonthChange(new Date().getMonth());
+    handleMonthChange(new Date().getMonth());
     setFilterSelected(filter);
   };
 
-  const { transactions: fetchedTransactions, loading } = useGetUserTransactions(
-    {
-      user_id: id,
-      token: token,
-      month: currentMonthIndex,
-      year: currentYear,
-      allMonths: filterSelected === "thisYear",
-    }
-  );
+  const {
+    transactions: fetchedTransactions,
+    loading,
+    refetch,
+  } = useGetUserTransactions({
+    user_id: id,
+    token: token,
+    month: currentMonthIndex,
+    year: currentYear,
+  });
 
-  const transactions = isViewingCurrentMonth
-    ? contextTransactions
-    : fetchedTransactions;
+  const transactions =
+    isViewingCurrentMonth && !forceUpdate
+      ? contextTransactions
+      : fetchedTransactions;
 
   const groupedByDate: GroupedTransactions = {};
 
@@ -104,6 +118,25 @@ export const Transactions: FC = () => {
       token,
     });
   };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      if (shouldRefetch) {
+        setForceUpdate(true);
+
+        refetch(true).then((updated) => {
+          if (isViewingCurrentMonth && updated) {
+            setTransactions(updated);
+          }
+
+          setForceUpdate(false);
+          clearRefetch();
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, shouldRefetch]);
 
   const filteredTransactions = searchQuery
     ? {
@@ -132,6 +165,11 @@ export const Transactions: FC = () => {
             if (!groupedByDate[date]) groupedByDate[date] = [];
 
             groupedByDate[date].push({
+              id: transaction.id,
+              recurrence: transaction.recurrence,
+              total_installments: transaction.total_installments,
+              transaction_date: transaction.transaction_date,
+              description: transaction?.description,
               type: filteredTransactions.incomes.includes(transaction)
                 ? "Receita"
                 : "Despesa",
@@ -145,6 +183,11 @@ export const Transactions: FC = () => {
           if (!groupedByDate[date]) groupedByDate[date] = [];
 
           groupedByDate[date].push({
+            id: transaction.id,
+            recurrence: transaction.recurrence,
+            total_installments: transaction.total_installments,
+            transaction_date: transaction.transaction_date,
+            description: transaction?.description,
             type: filteredTransactions.incomes.includes(transaction)
               ? "Receita"
               : "Despesa",
@@ -192,7 +235,7 @@ export const Transactions: FC = () => {
         />
       </View>
       <View style={styles.mainContainer}>
-        {loading && !isViewingCurrentMonth ? (
+        {loading ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
@@ -207,16 +250,65 @@ export const Transactions: FC = () => {
                 <CustomText style={styles.transactionDateText}>
                   {date}
                 </CustomText>
-                {txList.map((tx, index) => (
-                  <TransactionRow
-                    key={index}
-                    title={tx.category.name}
-                    type={tx.type}
-                    value={tx.amount}
-                    icon={tx.category.icon.split("-")[1]}
-                    circleColor={tx.category.icon.split("-")[0]}
-                  />
-                ))}
+
+                {txList.map((tx, index) => {
+                  return (
+                    <TouchableOpacity
+                      key={`${tx.id}-${index}`}
+                      onPress={() => {
+                        const screen =
+                          tx.type === "Despesa"
+                            ? "CreateExpense"
+                            : "CreateIncome";
+
+                        const initialData: InitialTransactionData = {
+                          id: tx.id,
+                          amount: tx.amount,
+                          category: {
+                            id: tx.category.id,
+                            icon: tx.category.icon,
+                            name: tx.category.name,
+                          },
+                          description: tx.description,
+                          date: tx.transaction_date,
+                          transactionType:
+                            tx.recurrence !== "NONE"
+                              ? "recorrente"
+                              : tx.total_installments > 1
+                              ? "parcelada"
+                              : "fixa",
+                          recurrence: tx.recurrence as
+                            | "MONTHLY"
+                            | "YEARLY"
+                            | "NONE",
+                          installments: tx.total_installments,
+                        };
+
+                        if (screen === "CreateExpense") {
+                          navigation.navigate("CreateExpense", {
+                            user_id: id,
+                            token,
+                            initialData,
+                          });
+                        } else {
+                          navigation.navigate("CreateIncome", {
+                            user_id: id,
+                            token,
+                            initialData,
+                          });
+                        }
+                      }}
+                    >
+                      <TransactionRow
+                        title={tx.category.name}
+                        type={tx.type}
+                        value={tx.amount}
+                        icon={tx.category.icon.split("-")[1]}
+                        circleColor={tx.category.icon.split("-")[0]}
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             ))}
           </ScrollView>

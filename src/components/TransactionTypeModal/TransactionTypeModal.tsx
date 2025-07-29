@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { styles } from "../CreateTransaction/CreateTransactionStyles";
+import { styles } from "../HandleTransaction/HandleTransactionStyles";
 import { Colors } from "../../styles/colors";
 import { modalStyles } from "./TransactionTypeModalStyles";
 import { useNavigation } from "@react-navigation/native";
