@@ -1,6 +1,8 @@
-import React from "react";
+import { FC } from "react";
 import { Home } from "../screens/Home/Home";
 import { Menu } from "../screens/Menu/Menu";
+import { EditProfile } from "../screens/EditProfile/EditProfile";
+import { EditPassword } from "../screens/EditPassword/EditPassword";
 import { Transactions } from "../screens/Transactions/Transactions";
 import { CreateIncome } from "../screens/Create-Income/CreateIncome";
 import { CreateExpense } from "../screens/Create-Expense/CreateExpense";
@@ -8,7 +10,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const { Screen, Navigator } = createNativeStackNavigator();
 
-export const ProtectedRoutes: React.FC = () => {
+export const ProtectedRoutes: FC = () => {
   return (
     <Navigator screenOptions={{ headerShown: false }}>
       <Screen name="Home" component={Home} />
@@ -16,6 +18,8 @@ export const ProtectedRoutes: React.FC = () => {
       <Screen name="Transactions" component={Transactions} />
       <Screen name="CreateExpense" component={CreateExpense} />
       <Screen name="CreateIncome" component={CreateIncome} />
+      <Screen name="EditProfile" component={EditProfile} />
+      <Screen name="EditPassword" component={EditPassword} />
     </Navigator>
   );
 };
