@@ -15,17 +15,26 @@ import LogoutIcon from "../../assets/images/logout-menu-icon.svg";
 
 type StackNavigation = {
   Home: undefined;
+  EditProfile: {
+    token: string;
+    user_id: string;
+    name: string;
+    email: string;
+  };
 };
 
 type ParamList = {
   Params: {
     id: string;
+    token: string;
     name: string;
+    email: string;
   };
 };
 
 export const Menu: React.FC = () => {
-  const { name, id } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { name, id, token, email } =
+    useRoute<RouteProp<ParamList, "Params">>().params;
 
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
@@ -49,7 +58,16 @@ export const Menu: React.FC = () => {
         </View>
 
         <View style={styles.menuList}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("EditProfile", {
+                token,
+                user_id: id,
+                name,
+                email,
+              })
+            }
+          >
             <View style={styles.menuOption}>
               <UserIcon height="26" width="26" />
               <CustomText style={styles.menuText}>Editar Perfil</CustomText>

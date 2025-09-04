@@ -14,6 +14,7 @@ interface ButtonFieldProps {
   userProps: {
     id: string;
     name: string;
+    email: string;
     token: string;
     month: number;
     year: number;
@@ -24,12 +25,14 @@ type StackNavigation = {
   Menu: {
     id: string;
     name: string;
+    email: string;
     token: string;
     month: number;
     year: number;
   };
   Transactions: {
     id: string;
+    email: string;
     name: string;
     token: string;
     month: number;
@@ -60,6 +63,7 @@ export const BottomBar: FC<
       navigation.navigate(screen, {
         id: userProps.id,
         name: userProps.name,
+        email: userProps.email,
         token: userProps.token,
         month: userProps.month,
         year: userProps.year,

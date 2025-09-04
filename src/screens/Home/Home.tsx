@@ -5,6 +5,7 @@ import { CustomText } from "../../components/CustomText/CustomText";
 import { useGetUser } from "../../hooks/useGetUser";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
+import { showSnackBar } from "../../utils/show-snack-bar";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useNavigation } from "@react-navigation/native";
 import { useTransactions } from "../../contexts/TransactionsContext";
@@ -87,7 +88,17 @@ export const Home: FC = () => {
     if (user?.id) {
       clearOldCache(user.id);
     }
-  }, [user?.id]);
+
+    if (error) {
+      showSnackBar("Sua sessão expirou. Faça login novamente.", "#de525a");
+
+      const timer = setTimeout(() => {
+        logout();
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [user?.id, error, logout]);
 
   const { transactions, transactionsError, loading, refetch } =
     useGetUserTransactions({
@@ -135,7 +146,11 @@ export const Home: FC = () => {
             </View>
 
             <Text style={styles.greetingText}>
-              {error ? error : user ? `Olá, ${user.name}!` : "Carregando..."}
+              {error
+                ? "Sessão expirada..."
+                : user
+                ? `Olá, ${user.name}!`
+                : "Carregando..."}
             </Text>
           </View>
           <NotificationIcon fill="white" height="24" width="24" />
@@ -243,6 +258,7 @@ export const Home: FC = () => {
           userProps={{
             id: user.id,
             name: user.name,
+            email: user.email,
             token,
             month: currentMonth,
             year: currentYear,

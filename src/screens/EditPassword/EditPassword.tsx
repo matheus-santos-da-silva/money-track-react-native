@@ -1,0 +1,171 @@
+import { styles } from "./EditPasswordStyles";
+import { Button } from "../../components/Button/Button";
+import { CustomText } from "../../components/CustomText/CustomText";
+import { FC, useState } from "react";
+import { showSnackBar } from "../../utils/show-snack-bar";
+import { UpdatePassword } from "../../services/UpdatePasswordService";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
+
+import BackButton from "../../assets/images/arrow-left-svg.svg";
+import EyeIcon from "../../assets/images/icon-eye-password.svg";
+
+type StackNavigation = {
+  Home: undefined;
+};
+
+type ParamList = {
+  Params: {
+    token: string;
+    user_id: string;
+  };
+};
+
+export const EditPassword: FC = () => {
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+
+  const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+
+  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+
+  const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
+  const [showCurrentPassword, setShowCurrentPassword] =
+    useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+
+  const handleUpdatePassword = async () => {
+    if (
+      currentPassword.length < 7 ||
+      currentPassword.length > 30 ||
+      newPassword.length < 7 ||
+      newPassword.length > 30 ||
+      confirmPassword.length < 7 ||
+      confirmPassword.length > 30
+    ) {
+      showSnackBar("A senha deve ter entre 8 a 30 caracteres", "#de525a");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showSnackBar("As senhas não coincidem!", "#de525a");
+      return;
+    }
+
+    const { success, message } = await UpdatePassword(
+      user_id,
+      token,
+      currentPassword,
+      newPassword
+    );
+
+    if (!success) {
+      showSnackBar(message || "Erro desconhecido!", "#de525a");
+    } else {
+      showSnackBar("Senha editada com sucesso!!", "#407BFF");
+      navigation.navigate("Home");
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.topMenuContent}>
+        <View style={styles.topContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <BackButton width={18} height={18} />
+          </TouchableOpacity>
+          <View style={styles.logo}>
+            <CustomText style={{ color: "#FFFFFF" }}>Money Track</CustomText>
+          </View>
+        </View>
+
+        <CustomText style={styles.editProfileText}>Nova Senha</CustomText>
+      </View>
+
+      <View style={styles.mainContent}>
+        <View>
+          <View style={styles.label}>
+            <CustomText style={styles.labelText}>Senha Atual</CustomText>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder={"Digite sua senha atual"}
+              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              onChangeText={setCurrentPassword}
+              value={currentPassword}
+              secureTextEntry={!showCurrentPassword}
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              style={styles.eyeIcon}
+            >
+              <EyeIcon width={20} height={20} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View>
+          <View style={styles.label}>
+            <CustomText style={styles.labelText}>Nova Senha</CustomText>
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder={"Digite a nova senha"}
+              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              onChangeText={setNewPassword}
+              value={newPassword}
+              secureTextEntry={!showNewPassword}
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowNewPassword(!showNewPassword)}
+              style={styles.eyeIcon}
+            >
+              <EyeIcon width={20} height={20} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View>
+          <View style={styles.label}>
+            <CustomText style={styles.labelText}>
+              Confirmar Nova Senha
+            </CustomText>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder={"Confirme a nova senha"}
+              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              onChangeText={setConfirmPassword}
+              value={confirmPassword}
+              secureTextEntry={!showConfirmPassword}
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={styles.eyeIcon}
+            >
+              <EyeIcon width={20} height={20} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.buttonDiv}>
+          <Button
+            value="Confirmar"
+            onPress={handleUpdatePassword}
+            isLoading={false}
+          />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};

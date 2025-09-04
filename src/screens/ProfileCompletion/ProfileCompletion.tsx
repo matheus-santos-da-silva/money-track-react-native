@@ -57,7 +57,7 @@ export const ProfileCompletion: React.FC = () => {
         </Text>
       </View>
       <View style={styles.bottomContent}>
-        <View style={styles.label}>
+        <View style={styles.inputContainer}>
           <Input
             label="Nome"
             value={name}
@@ -66,7 +66,7 @@ export const ProfileCompletion: React.FC = () => {
             isPassword={false}
           />
         </View>
-        <View style={styles.btn}>
+        <View style={styles.buttonContainer}>
           <Button
             isLoading={isLoading}
             onPress={handleFinishSignUp}
