@@ -5,6 +5,7 @@ export const styles = StyleSheet.create({
   container: {
     paddingVertical: 16,
     paddingHorizontal: 14,
+    flex: 1,
   },
   profileCompletionMsg: {
     fontSize: 28,
@@ -13,7 +14,6 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
   },
   middleContent: {
-    justifyContent: "center",
     alignItems: "center",
     marginTop: 140,
     marginBottom: 20,
@@ -24,13 +24,15 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.primaryGray,
   },
-  label: {
-    marginLeft: 50,
+  inputContainer: {
+    marginBottom: 20,
   },
-  btn: {
-    marginRight: 22,
+  buttonContainer: {
+    alignItems: "center",
   },
   bottomContent: {
-    gap: 6,
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: "flex-start",
   },
 });
