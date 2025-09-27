@@ -116,7 +116,7 @@ export const Home: FC = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      refetch();
+      refetch(true);
     });
 
     return unsubscribe;
