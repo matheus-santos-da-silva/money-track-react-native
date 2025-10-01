@@ -15,6 +15,10 @@ import LogoutIcon from "../../assets/images/logout-menu-icon.svg";
 
 type StackNavigation = {
   Home: undefined;
+  CategoriesList: {
+    token: string;
+    user_id: string;
+  };
   EditProfile: {
     token: string;
     user_id: string;
@@ -74,7 +78,14 @@ export const Menu: React.FC = () => {
             </View>
           </TouchableOpacity>
           <View style={styles.divisionLine}></View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("CategoriesList", {
+                token,
+                user_id: id,
+              })
+            }
+          >
             <View style={styles.menuOption}>
               <CategoriesIcon height="26" width="26" />
               <CustomText style={styles.menuText}>Categorias</CustomText>

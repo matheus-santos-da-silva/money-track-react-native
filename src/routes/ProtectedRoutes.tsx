@@ -6,6 +6,7 @@ import { EditPassword } from "../screens/EditPassword/EditPassword";
 import { Transactions } from "../screens/Transactions/Transactions";
 import { CreateIncome } from "../screens/Create-Income/CreateIncome";
 import { CreateExpense } from "../screens/Create-Expense/CreateExpense";
+import { CategoriesList } from "../screens/CategoryList/CategoriesList";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const { Screen, Navigator } = createNativeStackNavigator();
@@ -20,6 +21,7 @@ export const ProtectedRoutes: FC = () => {
       <Screen name="CreateIncome" component={CreateIncome} />
       <Screen name="EditProfile" component={EditProfile} />
       <Screen name="EditPassword" component={EditPassword} />
+      <Screen name="CategoriesList" component={CategoriesList} />
     </Navigator>
   );
 };
