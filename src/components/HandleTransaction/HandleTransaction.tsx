@@ -464,7 +464,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
 
               return (
                 <TouchableOpacity
-                  key={category.icon}
+                  key={category.id}
                   style={{
                     width: "30%",
                     alignItems: "center",

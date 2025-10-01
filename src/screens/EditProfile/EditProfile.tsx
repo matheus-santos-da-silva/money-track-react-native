@@ -66,7 +66,7 @@ export const EditProfile: FC = () => {
     if (!success) {
       showSnackBar(message || "Erro desconhecido!", "#de525a");
     } else {
-      showSnackBar("Perfil editado com sucesso!!", "#407BFF");
+      showSnackBar("Perfil editado com sucesso!!", "#4BB543");
       navigation.navigate("Home");
     }
   };
