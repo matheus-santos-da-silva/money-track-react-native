@@ -14,7 +14,7 @@ interface ButtonFieldProps {
   userProps: {
     id: string;
     name: string;
-    email: string;
+    email?: string;
     token: string;
     month: number;
     year: number;
@@ -32,7 +32,6 @@ type StackNavigation = {
   };
   Transactions: {
     id: string;
-    email: string;
     name: string;
     token: string;
     month: number;
@@ -54,19 +53,29 @@ export const BottomBar: FC<
 > = ({ userProps, onShowTypeSelector }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
-  const navigateTo = <type extends keyof StackNavigation>(screen: type) => {
-    if (
-      screen !== "Home" &&
-      screen !== "CreateExpense" &&
-      screen !== "CreateIncome"
-    ) {
-      navigation.navigate(screen, {
+  const navigateTo = (screen: keyof StackNavigation) => {
+    if (screen === "Menu") {
+      if (!userProps.email) return;
+      navigation.navigate("Menu", {
         id: userProps.id,
         name: userProps.name,
         email: userProps.email,
         token: userProps.token,
         month: userProps.month,
         year: userProps.year,
+      });
+    } else if (screen === "Transactions") {
+      navigation.navigate("Transactions", {
+        id: userProps.id,
+        name: userProps.name,
+        token: userProps.token,
+        month: userProps.month,
+        year: userProps.year,
+      });
+    } else if (screen === "CreateExpense" || screen === "CreateIncome") {
+      navigation.navigate(screen, {
+        token: userProps.token,
+        user_id: userProps.id,
       });
     } else {
       navigation.navigate("Home");
