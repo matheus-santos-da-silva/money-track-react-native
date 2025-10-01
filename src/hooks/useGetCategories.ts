@@ -1,37 +1,59 @@
 import { CategoryDTO } from "../services/DTOS/finance/CategoryDTO";
 import { getCategories } from "../services/GetCategoriesService";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-interface useGetCategoriesDTO {
+type TransactionType = "EXPENSE" | "INCOME";
+
+const cache: Record<TransactionType, CategoryDTO[]> = {
+  INCOME: [],
+  EXPENSE: [],
+};
+
+interface UseGetCategoriesDTO {
   token: string;
-  type?: "EXPENSE" | "INCOME";
+  type: TransactionType;
 }
 
-export const useGetCategories = ({ token, type }: useGetCategoriesDTO) => {
-  const [categories, setCategories] = useState<CategoryDTO[]>([]);
+export const useGetCategories = ({ token, type }: UseGetCategoriesDTO) => {
+  const [categories, setCategories] = useState<CategoryDTO[]>(cache[type]);
+  const [loading, setLoading] = useState(!cache[type].length);
   const [categoriesError, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!token) return;
+  const fetchCategories = useCallback(
+    async ({
+      fetchType,
+      resetCache = false,
+    }: { fetchType?: TransactionType; resetCache?: boolean } = {}) => {
+      const currentType = fetchType || type;
+      if (!token || !currentType) return;
 
-    setLoading(true);
+      if (!resetCache && cache[currentType].length > 0) {
+        setCategories(cache[currentType]);
 
-    getCategories({ token, type })
-      .then((res) => {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await getCategories({ token, type });
         if (res.success && res.categories) {
-          setCategories(res.categories);
+          cache[type] = res.categories;
+          if (currentType === type) setCategories(res.categories);
         } else {
           setError(res.message || "Erro desconhecido ao buscar as categorias.");
         }
-      })
-      .catch((error) => {
+      } catch (error: any) {
         setError(error.message || "Erro desconhecido.");
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
-  }, [token, type]);
+      }
+    },
+    [token, type]
+  );
 
-  return { categories, loading, categoriesError };
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  return { categories, loading, categoriesError, refetch: fetchCategories };
 };
