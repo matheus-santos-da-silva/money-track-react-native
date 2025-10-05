@@ -59,7 +59,7 @@ export const styles = (color: string) =>
 
     /* Main Content */
     mainContent: {
-      gap: 20,
+      gap: 16,
     },
 
     categoriesTitle: {

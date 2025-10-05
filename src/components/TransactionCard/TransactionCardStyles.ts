@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
   },
+
   topCardContent: {
     width: 340,
     flexDirection: "row",
@@ -16,26 +17,31 @@ export const styles = StyleSheet.create({
     paddingTop: 12,
     paddingLeft: 12,
   },
+
   iconAndText: {
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
   },
+
   cardText: {
     color: Colors.primaryGray,
     fontSize: 20,
   },
+
   divisionLine: {
-    height: 1,
+    height: 0.7,
     width: 320,
     alignSelf: "center",
     marginTop: 7,
     backgroundColor: Colors.primaryGray,
   },
+
   cardMainContent: {
     marginTop: 20,
     marginLeft: 30,
   },
+
   cardMainContentText: {
     color: Colors.primaryGray,
     fontSize: 31,

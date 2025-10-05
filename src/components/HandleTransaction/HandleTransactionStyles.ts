@@ -44,7 +44,9 @@ export const styles = (color: string) =>
     },
 
     logo: {
-      flex: 1,
+      position: "absolute",
+      left: 0,
+      right: 0,
       alignItems: "center",
     },
 
@@ -101,6 +103,7 @@ export const styles = (color: string) =>
       borderColor: Colors.primaryGray,
       color: Colors.primaryGray,
       borderRadius: 16,
+      fontFamily: "Poppins-Regular",
     },
 
     halfDiv: {
@@ -131,6 +134,7 @@ export const styles = (color: string) =>
       lineHeight: 20,
       opacity: 0.7,
       color: Colors.primaryGray,
+      fontFamily: "Poppins-Regular",
     },
 
     transactionContainer: {

@@ -4,10 +4,13 @@ import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryRow } from "../../components/CategoryRow/CategoryRow";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { InitialCategoryData } from "../HandleCategory/HandleCategory";
 import { CategoryTypeSelector } from "../../components/CategoryTypeSelector/CategoryTypeSelector";
+import { SearchTransactionsBar } from "../../components/SearchTransactionBar/SearchTransactionsBar";
 import { FC, useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+
 import {
   RouteProp,
   useFocusEffect,
@@ -15,13 +18,21 @@ import {
   useRoute,
 } from "@react-navigation/native";
 
+import Logo from "../../assets/images/logo-mt.svg";
 import SearchIcon from "../../assets/images/search-btn-svg.svg";
 import PlusButton from "../../assets/images/plus.svg";
 import PlusCategoryButton from "../../assets/images/add-category-icon.svg";
 import ArrowLeftIcon from "../../assets/images/arrow-left-svg.svg";
 
+type TransactionType = "INCOME" | "EXPENSE";
+
 type StackNavigation = {
-  Home: undefined;
+  HandleCategory: {
+    token: string;
+    type: TransactionType;
+    initialData?: InitialCategoryData;
+    isEditing?: boolean;
+  };
 };
 
 type ParamList = {
@@ -31,10 +42,17 @@ type ParamList = {
   };
 };
 
-type TransactionType = "INCOME" | "EXPENSE";
-
 export const CategoriesList: FC = () => {
   const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+
+  const toggleSearch = () => setIsSearchVisible((prev) => !prev);
+  const closeSearch = () => {
+    setSearchQuery("");
+    setIsSearchVisible(false);
+  };
 
   const [categoriesType, setCategoriesType] =
     useState<TransactionType>("INCOME");
@@ -52,16 +70,24 @@ export const CategoriesList: FC = () => {
   /* every time that the screen to focus call refetch to reset cache */
   useFocusEffect(
     useCallback(() => {
-      refetch({ fetchType: "INCOME", resetCache: true });
-      refetch({ fetchType: "EXPENSE", resetCache: true });
-    }, [])
+      refetch({ resetCache: true });
+    }, [categoriesType])
   );
 
+  const filteredCategories =
+    categories.filter((category) =>
+      category.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    ) || [];
+
   const predefinedCategories =
-    categories.filter((category) => category.user_id === null) || [];
+    filteredCategories.filter((category) => category.user_id === null) || [];
 
   const userCategories =
-    categories.filter((category) => category.user_id === user_id) || [];
+    filteredCategories.filter((category) => category.user_id === user_id) || [];
 
   const color =
     categoriesType === "INCOME" ? Colors.incomeGreen : Colors.expenseRed;
@@ -69,24 +95,41 @@ export const CategoriesList: FC = () => {
   return (
     <SafeAreaView style={styles(color).container}>
       <View style={[styles(color).menuColor, styles(color).topMenu]}>
-        <View style={styles(color).topLogo}>
-          <TouchableOpacity onPress={handleBackBtn}>
-            <ArrowLeftIcon height={18} width={18} />
-          </TouchableOpacity>
-
-          <View style={styles(color).logo}>
-            <CustomText style={{ color: "#FFFFFF" }}>Money Track</CustomText>
-          </View>
-
-          <View style={styles(color).topRightButtons}>
-            <TouchableOpacity>
-              <SearchIcon height={18} width={18} />
+        {isSearchVisible ? (
+          <SearchTransactionsBar
+            visible={isSearchVisible}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClose={closeSearch}
+          />
+        ) : (
+          <View style={styles(color).topLogo}>
+            <TouchableOpacity onPress={handleBackBtn}>
+              <ArrowLeftIcon height={20} width={20} />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <PlusCategoryButton height={20} width={20} />
-            </TouchableOpacity>
+
+            <View style={styles(color).logo}>
+              <Logo width={30} height={40} />
+            </View>
+
+            <View style={styles(color).topRightButtons}>
+              <TouchableOpacity activeOpacity={0.9}>
+                <SearchIcon height={20} width={20} onPress={toggleSearch} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => {
+                  navigation.navigate("HandleCategory", {
+                    token,
+                    type: categoriesType,
+                  });
+                }}
+              >
+                <PlusCategoryButton height={22} width={22} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         <View>
           <CategoryTypeSelector
@@ -118,7 +161,15 @@ export const CategoriesList: FC = () => {
                   >
                     Minhas Categorias
                   </CustomText>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => {
+                      navigation.navigate("HandleCategory", {
+                        token,
+                        type: categoriesType,
+                      });
+                    }}
+                  >
                     <View style={styles(color).addCategoryButton}>
                       <PlusButton width={20} height={20} />
                     </View>
@@ -128,7 +179,22 @@ export const CategoriesList: FC = () => {
                 <View style={styles(color).categoriesRows}>
                   {userCategories.length > 0 ? (
                     userCategories.map((category) => (
-                      <TouchableOpacity key={category.id}>
+                      <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={() => {
+                          navigation.navigate("HandleCategory", {
+                            token,
+                            type: categoriesType,
+                            isEditing: true,
+                            initialData: {
+                              id: category.id,
+                              name: category.name,
+                              icon: category.icon,
+                            },
+                          });
+                        }}
+                        key={category.id}
+                      >
                         <CategoryRow
                           circleColor={category.icon.split("-")[0]}
                           icon={category.icon.split("-")[1]}

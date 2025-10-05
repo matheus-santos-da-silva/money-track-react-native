@@ -33,6 +33,7 @@ type StackNavigation = {
   Transactions: {
     id: string;
     name: string;
+    email: string;
     token: string;
     month: number;
     year: number;
@@ -54,20 +55,12 @@ export const BottomBar: FC<
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const navigateTo = (screen: keyof StackNavigation) => {
-    if (screen === "Menu") {
+    if (screen === "Menu" || screen === "Transactions") {
       if (!userProps.email) return;
-      navigation.navigate("Menu", {
+      navigation.navigate(screen, {
         id: userProps.id,
         name: userProps.name,
         email: userProps.email,
-        token: userProps.token,
-        month: userProps.month,
-        year: userProps.year,
-      });
-    } else if (screen === "Transactions") {
-      navigation.navigate("Transactions", {
-        id: userProps.id,
-        name: userProps.name,
         token: userProps.token,
         month: userProps.month,
         year: userProps.year,

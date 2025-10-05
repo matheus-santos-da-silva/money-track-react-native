@@ -14,16 +14,19 @@ type TransactionType = "INCOME" | "EXPENSE";
 interface CategoryTypeSelectorProps {
   typeSelected: TransactionType;
   onSelect: (type: TransactionType) => void;
+  disabled?: boolean;
 }
 
 export const CategoryTypeSelector: FC<CategoryTypeSelectorProps> = ({
   typeSelected,
   onSelect,
+  disabled = false,
 }) => {
   return (
     <View style={styles.container}>
       <View style={styles.boxSelector}>
         <TouchableOpacity
+          disabled={disabled}
           style={[styles.options, typeSelected === "INCOME" && styles.selected]}
           onPress={() => onSelect("INCOME")}
         >
@@ -44,6 +47,7 @@ export const CategoryTypeSelector: FC<CategoryTypeSelectorProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
+          disabled={disabled}
           style={[
             styles.options,
             typeSelected === "EXPENSE" && styles.selected,

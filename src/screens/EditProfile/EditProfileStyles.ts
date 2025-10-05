@@ -25,12 +25,14 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 10,
-    marginTop: 6,
+    paddingHorizontal: 6,
+    marginTop: 8,
   },
 
   logo: {
-    flex: 1,
+    position: "absolute",
+    left: 0,
+    right: 0,
     alignItems: "center",
   },
 
@@ -60,7 +62,7 @@ export const styles = StyleSheet.create({
 
   input: {
     width: "100%",
-    height: 42,
+    height: 46,
     alignItems: "center",
     paddingLeft: 16,
     position: "relative",
@@ -69,6 +71,7 @@ export const styles = StyleSheet.create({
     borderColor: Colors.primaryGray,
     color: Colors.primaryGray,
     borderRadius: 12,
+    fontFamily: "Poppins-Regular",
   },
 
   buttonDiv: {

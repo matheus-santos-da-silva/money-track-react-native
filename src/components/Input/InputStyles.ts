@@ -29,6 +29,7 @@ export const styles = StyleSheet.create({
     paddingRight: 44,
     position: "relative",
     color: Colors.primaryGray,
+    fontFamily: "Poppins-Regular",
   },
 
   icon: {
