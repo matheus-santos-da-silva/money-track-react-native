@@ -3,7 +3,6 @@ import { styles } from "./TransactionRowStyles";
 import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
 import { View, Text } from "react-native";
-import { selectColor } from "../../utils/colors";
 import { formatAmount } from "../../utils/format-amount";
 
 interface TransactionRowProps {
@@ -22,7 +21,7 @@ export const TransactionRow: FC<TransactionRowProps> = ({
   circleColor,
 }) => {
   const IconComponent = iconMap[icon];
-  const backgroundCircleColor = selectColor(circleColor);
+  const backgroundCircleColor = circleColor;
 
   return (
     <View style={styles.container}>
