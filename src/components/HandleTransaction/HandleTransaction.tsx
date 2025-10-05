@@ -2,7 +2,6 @@ import { styles } from "./HandleTransactionStyles";
 import { Colors } from "../../styles/colors";
 import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
-import { selectColor } from "../../utils/colors";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
 import { useTransactions } from "../../contexts/TransactionsContext";
@@ -24,6 +23,7 @@ import {
   View,
 } from "react-native";
 
+import Logo from "../../assets/images/logo-mt.svg";
 import DateIcon from "../../assets/images/gray-date-icon.svg";
 import ArrowLeftIcon from "../../assets/images/arrow-left-svg.svg";
 import CategoriesIcon from "../../assets/images/categories-menu-icon.svg";
@@ -221,11 +221,11 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       <View style={[styles(color).menuColor, styles(color).topMenu]}>
         <View style={styles(color).topLogo}>
           <TouchableOpacity onPress={handleBackBtn}>
-            <ArrowLeftIcon height={18} width={18} />
+            <ArrowLeftIcon height={20} width={20} />
           </TouchableOpacity>
 
           <View style={styles(color).logo}>
-            <CustomText style={{ color: "#FFFFFF" }}>Money Track</CustomText>
+            <Logo width={30} height={40} />
           </View>
 
           <View style={{ width: 24 }} />
@@ -458,10 +458,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           >
             {categories.map((category) => {
               const IconComponent = iconMap[category.icon.split("-")[1]];
-              const backgroundCircleColor = selectColor(
-                category.icon.split("-")[0]
-              );
-
+              const backgroundCircleColor = category.icon.split("-")[0];
               return (
                 <TouchableOpacity
                   key={category.id}

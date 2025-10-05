@@ -8,6 +8,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
 
+import Logo from "../../assets/images/logo-mt.svg";
 import BackButton from "../../assets/images/arrow-left-svg.svg";
 import EyeIcon from "../../assets/images/icon-eye-password.svg";
 
@@ -75,10 +76,10 @@ export const EditPassword: FC = () => {
       <View style={styles.topMenuContent}>
         <View style={styles.topContent}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <BackButton width={18} height={18} />
+            <BackButton width={20} height={20} />
           </TouchableOpacity>
           <View style={styles.logo}>
-            <CustomText style={{ color: "#FFFFFF" }}>Money Track</CustomText>
+            <Logo width={30} height={40} />
           </View>
         </View>
 
@@ -103,6 +104,7 @@ export const EditPassword: FC = () => {
 
             <TouchableOpacity
               onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              activeOpacity={0.6}
               style={styles.eyeIcon}
             >
               <EyeIcon width={20} height={20} />
@@ -125,6 +127,7 @@ export const EditPassword: FC = () => {
             />
 
             <TouchableOpacity
+              activeOpacity={0.6}
               onPress={() => setShowNewPassword(!showNewPassword)}
               style={styles.eyeIcon}
             >
@@ -151,6 +154,7 @@ export const EditPassword: FC = () => {
             />
 
             <TouchableOpacity
+              activeOpacity={0.6}
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               style={styles.eyeIcon}
             >
