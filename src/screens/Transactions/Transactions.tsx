@@ -27,6 +27,7 @@ type ParamList = {
     name: string;
     token: string;
     month: number;
+    email: string;
     year: number;
   };
 };
@@ -55,7 +56,7 @@ export const Transactions: FC = () => {
 
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
-  const { name, id, token, month, year } =
+  const { name, id, token, month, year, email } =
     useRoute<RouteProp<ParamList, "Params">>().params;
 
   const [currentYear] = useState<number>(year);
@@ -323,7 +324,7 @@ export const Transactions: FC = () => {
         )}
       </View>
       <BottomBar
-        userProps={{ id, name, token, month, year }}
+        userProps={{ id, name, token, month, year, email }}
         onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
       />
       <TransactionsFilterModal
