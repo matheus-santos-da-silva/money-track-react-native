@@ -48,6 +48,7 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: "white",
     opacity: 0.5,
+    lineHeight: 16,
   },
 
   leftArrowContainer: {
