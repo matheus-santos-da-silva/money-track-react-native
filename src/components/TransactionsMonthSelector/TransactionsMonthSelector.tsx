@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
 import { styles } from "./TransactionsMonthSelectorStyles";
 import { months } from "../MonthSelectorModal/MonthSelectorModal";
 import { CustomText } from "../CustomText/CustomText";
+import { FC, useEffect, useState } from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import Animated, {
   useSharedValue,
@@ -19,9 +19,11 @@ interface TransactionsMonthSelectorProps {
   filterSelected: string | null;
 }
 
-export const TransactionsMonthSelector: React.FC<
-  TransactionsMonthSelectorProps
-> = ({ monthIndex, onMonthChange, filterSelected }) => {
+export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
+  monthIndex,
+  onMonthChange,
+  filterSelected,
+}) => {
   const AnimatedText = Animated.createAnimatedComponent(Text);
 
   const [currentMonthIndex, setCurrentMonthIndex] = useState(monthIndex);

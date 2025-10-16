@@ -156,16 +156,19 @@ export const Transactions: FC = () => {
     [...filteredTransactions.incomes, ...filteredTransactions.expenses].forEach(
       (transaction) => {
         if (filterSelected === "today") {
-          const date = formatter.format(new Date());
+          const isoDate = new Date(transaction.transaction_date)
+            .toISOString()
+            .split("T")[0];
+
           if (
             new Date(transaction.transaction_date).getDate() ===
               new Date().getDate() &&
             new Date(transaction.transaction_date).getMonth() ===
               new Date().getMonth()
           ) {
-            if (!groupedByDate[date]) groupedByDate[date] = [];
+            if (!groupedByDate[isoDate]) groupedByDate[isoDate] = [];
 
-            groupedByDate[date].push({
+            groupedByDate[isoDate].push({
               id: transaction.id,
               recurrence: transaction.recurrence,
               total_installments: transaction.total_installments,
@@ -179,11 +182,13 @@ export const Transactions: FC = () => {
             });
           }
         } else {
-          const date = formatter.format(new Date(transaction.transaction_date));
+          const isoDate = new Date(transaction.transaction_date)
+            .toISOString()
+            .split("T")[0];
 
-          if (!groupedByDate[date]) groupedByDate[date] = [];
+          if (!groupedByDate[isoDate]) groupedByDate[isoDate] = [];
 
-          groupedByDate[date].push({
+          groupedByDate[isoDate].push({
             id: transaction.id,
             recurrence: transaction.recurrence,
             total_installments: transaction.total_installments,
@@ -199,6 +204,8 @@ export const Transactions: FC = () => {
       }
     );
   }
+
+  console.log(groupedByDate);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -246,72 +253,74 @@ export const Transactions: FC = () => {
           (filteredTransactions.incomes.length > 0 ||
             filteredTransactions.expenses.length > 0) ? (
           <ScrollView contentContainerStyle={styles.transactionsContent}>
-            {Object.entries(groupedByDate).map(([date, txList]) => (
-              <View key={date}>
-                <CustomText style={styles.transactionDateText}>
-                  {date}
-                </CustomText>
+            {Object.entries(groupedByDate)
+              .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+              .map(([isoDate, txList]) => (
+                <View key={isoDate}>
+                  <CustomText style={styles.transactionDateText}>
+                    {formatter.format(new Date(isoDate))}
+                  </CustomText>
 
-                {txList.map((tx, index) => {
-                  return (
-                    <TouchableOpacity
-                      key={`${tx.id}-${index}`}
-                      onPress={() => {
-                        const screen =
-                          tx.type === "Despesa"
-                            ? "CreateExpense"
-                            : "CreateIncome";
+                  {txList.map((tx, index) => {
+                    return (
+                      <TouchableOpacity
+                        key={`${tx.id}-${index}`}
+                        onPress={() => {
+                          const screen =
+                            tx.type === "Despesa"
+                              ? "CreateExpense"
+                              : "CreateIncome";
 
-                        const initialData: InitialTransactionData = {
-                          id: tx.id,
-                          amount: tx.amount,
-                          category: {
-                            id: tx.category.id,
-                            icon: tx.category.icon,
-                            name: tx.category.name,
-                          },
-                          description: tx.description,
-                          date: tx.transaction_date,
-                          transactionType:
-                            tx.recurrence !== "NONE"
-                              ? "recorrente"
-                              : tx.total_installments > 1
-                              ? "parcelada"
-                              : "fixa",
-                          recurrence: tx.recurrence as
-                            | "MONTHLY"
-                            | "YEARLY"
-                            | "NONE",
-                          installments: tx.total_installments,
-                        };
+                          const initialData: InitialTransactionData = {
+                            id: tx.id,
+                            amount: tx.amount,
+                            category: {
+                              id: tx.category.id,
+                              icon: tx.category.icon,
+                              name: tx.category.name,
+                            },
+                            description: tx.description,
+                            date: tx.transaction_date,
+                            transactionType:
+                              tx.recurrence !== "NONE"
+                                ? "recorrente"
+                                : tx.total_installments > 1
+                                ? "parcelada"
+                                : "fixa",
+                            recurrence: tx.recurrence as
+                              | "MONTHLY"
+                              | "YEARLY"
+                              | "NONE",
+                            installments: tx.total_installments,
+                          };
 
-                        if (screen === "CreateExpense") {
-                          navigation.navigate("CreateExpense", {
-                            user_id: id,
-                            token,
-                            initialData,
-                          });
-                        } else {
-                          navigation.navigate("CreateIncome", {
-                            user_id: id,
-                            token,
-                            initialData,
-                          });
-                        }
-                      }}
-                    >
-                      <TransactionRow
-                        title={tx.category.name}
-                        type={tx.type}
-                        value={tx.amount}
-                        icon={tx.category.icon.split("-")[1]}
-                        circleColor={tx.category.icon.split("-")[0]}
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ))}
+                          if (screen === "CreateExpense") {
+                            navigation.navigate("CreateExpense", {
+                              user_id: id,
+                              token,
+                              initialData,
+                            });
+                          } else {
+                            navigation.navigate("CreateIncome", {
+                              user_id: id,
+                              token,
+                              initialData,
+                            });
+                          }
+                        }}
+                      >
+                        <TransactionRow
+                          title={tx.category.name}
+                          type={tx.type}
+                          value={tx.amount}
+                          icon={tx.category.icon.split("-")[1]}
+                          circleColor={tx.category.icon.split("-")[0]}
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              ))}
           </ScrollView>
         ) : (
           <View

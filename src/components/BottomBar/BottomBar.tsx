@@ -30,6 +30,7 @@ type StackNavigation = {
     month: number;
     year: number;
   };
+
   Transactions: {
     id: string;
     name: string;
@@ -38,14 +39,26 @@ type StackNavigation = {
     month: number;
     year: number;
   };
+
+  Dashboard: {
+    id: string;
+    name: string;
+    email: string;
+    token: string;
+    month: number;
+    year: number;
+  };
+
   CreateExpense: {
     token: string;
     user_id: string;
   };
+
   CreateIncome: {
     token: string;
     user_id: string;
   };
+
   Home: undefined;
 };
 
@@ -55,7 +68,11 @@ export const BottomBar: FC<
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const navigateTo = (screen: keyof StackNavigation) => {
-    if (screen === "Menu" || screen === "Transactions") {
+    if (
+      screen === "Menu" ||
+      screen === "Transactions" ||
+      screen === "Dashboard"
+    ) {
       if (!userProps.email) return;
       navigation.navigate(screen, {
         id: userProps.id,
@@ -93,7 +110,9 @@ export const BottomBar: FC<
       </View>
 
       <View style={styles.iconGroup}>
-        <ChartsIcon height="24" width="24" />
+        <TouchableOpacity onPress={() => navigateTo("Dashboard")}>
+          <ChartsIcon height="24" width="24" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigateTo("Menu")}>
           <UserIcon height="24" width="24" />
         </TouchableOpacity>

@@ -7,14 +7,15 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Modal, View, Text, TouchableOpacity } from "react-native";
 
 export type RootStackParamList = {
-  CreateExpense: { token: string };
-  CreateIncome: { token: string };
+  CreateExpense: { token: string; user_id: string };
+  CreateIncome: { token: string; user_id: string };
 };
 
 interface TransactionTypeModalProps {
   visible: boolean;
   onClose: () => void;
   token: string;
+  user_id: string;
   type: "EXPENSE" | "INCOME";
 }
 
@@ -22,6 +23,7 @@ export const TransactionTypeModal: FC<TransactionTypeModalProps> = ({
   visible,
   onClose,
   token,
+  user_id,
   type,
 }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -33,7 +35,7 @@ export const TransactionTypeModal: FC<TransactionTypeModalProps> = ({
 
   const handlePress = () => {
     onClose();
-    navigation.navigate(targetRoute, { token });
+    navigation.navigate(targetRoute, { token, user_id });
   };
 
   return (

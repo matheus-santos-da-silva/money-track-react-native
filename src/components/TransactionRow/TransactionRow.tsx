@@ -34,7 +34,7 @@ export const TransactionRow: FC<TransactionRowProps> = ({
         >
           <IconComponent width={20} height={20} />
         </View>
-        <CustomText style={styles.titleText}>{title}</CustomText>
+        <Text style={styles.titleText}>{title}</Text>
       </View>
       <View style={styles.rightContent}>
         <CustomText
