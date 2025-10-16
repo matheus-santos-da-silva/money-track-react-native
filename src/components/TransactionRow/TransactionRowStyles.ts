@@ -10,6 +10,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
   },
+
   iconCircle: {
     width: 40,
     height: 40,
@@ -18,31 +19,41 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
+
   leftContent: {
     flexDirection: "row",
-    gap: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
     paddingLeft: 18,
   },
+
   rightContent: {
     paddingRight: 18,
     alignItems: "center",
   },
+
   titleText: {
     color: Colors.primaryGray,
     maxWidth: 180,
+    fontFamily: "Poppins-Regular",
   },
+
   typeText: {
     fontFamily: "Poppins-Regular",
     color: Colors.primaryGray,
     fontSize: 11,
   },
+
   valueText: {
     fontSize: 14,
     lineHeight: 16,
   },
+
   expenseColor: {
     color: "#E9523E",
   },
+
   incomeColor: {
     color: "#13AE5D",
   },
