@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Home } from "../screens/Home/Home";
 import { Menu } from "../screens/Menu/Menu";
+import { Dashboard } from "../screens/Dashboard/Dashboard";
 import { EditProfile } from "../screens/EditProfile/EditProfile";
 import { EditPassword } from "../screens/EditPassword/EditPassword";
 import { Transactions } from "../screens/Transactions/Transactions";
@@ -24,6 +25,7 @@ export const ProtectedRoutes: FC = () => {
       <Screen name="EditPassword" component={EditPassword} />
       <Screen name="CategoriesList" component={CategoriesList} />
       <Screen name="HandleCategory" component={HandleCategory} />
+      <Screen name="Dashboard" component={Dashboard} />
     </Navigator>
   );
 };
