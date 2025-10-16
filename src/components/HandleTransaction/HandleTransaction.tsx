@@ -251,6 +251,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
         visible={showTypeMenu}
         onClose={() => setShowTypeMenu(false)}
         token={token}
+        user_id={user_id}
         type={transactionType === "INCOME" ? "EXPENSE" : "INCOME"}
       />
 
