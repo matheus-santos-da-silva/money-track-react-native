@@ -30,18 +30,14 @@ export const setTransactionsCache = async (
   }
 };
 
-export const clearOldCache = async (user_id: string, keepMonths = 2) => {
+export const clearOldCache = async (user_id: string) => {
   try {
     const allKeys = await AsyncStorage.getAllKeys();
-
     const userKeys = allKeys.filter((key) =>
       key.startsWith(`@money-track-transactions_${user_id}_`)
     );
 
-    const sortedKeys = userKeys.sort();
-    const keysToRemove = sortedKeys.slice(0, -keepMonths);
-
-    if (keysToRemove.length > 0) await AsyncStorage.multiRemove(keysToRemove);
+    if (userKeys.length > 0) await AsyncStorage.multiRemove(userKeys);
   } catch (error) {
     console.error("Error clearing cache:", error);
   }
