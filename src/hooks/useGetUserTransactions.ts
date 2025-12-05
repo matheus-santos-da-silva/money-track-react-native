@@ -44,10 +44,14 @@ export const useGetUserTransactions = ({
         if (!forceRefresh) {
           const cachedData = await getTransactionsCache(user_id, month, year);
           if (cachedData) {
-            setTransactions(cachedData);
-            setLoading(false);
-
-            return cachedData;
+            if (
+              cachedData.expenses.length > 0 ||
+              cachedData.incomes.length > 0
+            ) {
+              setTransactions(cachedData);
+              setLoading(false);
+              return cachedData;
+            }
           }
         }
 

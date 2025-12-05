@@ -4,8 +4,9 @@ export interface CreateTransactionDTO {
   user_id: string;
   amount: number;
   total_installments: number;
+  current_installment: number;
   category_id: string;
-  recurrence: string;
+  recurrence: "MONTHLY" | "YEARLY" | "NONE";
   description?: string;
   transaction_date: string;
 }

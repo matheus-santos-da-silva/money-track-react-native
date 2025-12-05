@@ -4,6 +4,7 @@ import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { clearOldCache } from "../../utils/cache-helpers";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
 import { useGetCategories } from "../../hooks/useGetCategories";
@@ -47,6 +48,8 @@ export interface InitialTransactionData {
   date?: Date;
   transactionType?: "fixa" | "parcelada" | "recorrente";
   type?: "EXPENSE" | "INCOME";
+  applyToAll: boolean;
+  installment_group_id?: string;
 }
 
 type StackNavigation = {
@@ -178,7 +181,10 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       total_installments: installments,
       transaction_date: date.toISOString(),
       description,
-      ...(isEditing && { id: initialData?.id }),
+      ...(isEditing && {
+        applyToAll: initialData?.applyToAll,
+        installment_group_id: initialData?.installment_group_id,
+      }),
     };
 
     try {
@@ -194,7 +200,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           id: initialData.id,
         });
       } else {
-        success = await execute(transactionData);
+        success = await execute({ ...transactionData, current_installment: 1 });
       }
 
       if (success) {
@@ -204,6 +210,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
         );
 
         triggerRefetch();
+        await clearOldCache(user_id);
         navigation.goBack();
       } else {
         showSnackBar(
@@ -239,8 +246,12 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
             type={transactionType}
           />
         </View>
-        <TouchableOpacity onPress={() => setShowTypeMenu(true)}>
-          <View style={styles(color).typeMenu}>
+
+        <TouchableOpacity
+          disabled={isEditing}
+          onPress={() => setShowTypeMenu(true)}
+        >
+          <View style={[styles(color).typeMenu, isEditing && { opacity: 0.6 }]}>
             <CustomText style={{ color: "#FFFFFF" }}>{typeText}</CustomText>
             <WhiteDownArrowIcon />
           </View>
@@ -291,8 +302,16 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
               <DateIcon height={16} width={16} />
               <CustomText style={styles(color).grayText}>Data:</CustomText>
             </View>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-              <View style={styles(color).halfInput}>
+            <TouchableOpacity
+              disabled={isEditing && initialData?.applyToAll}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <View
+                style={[
+                  styles(color).halfInput,
+                  isEditing && initialData?.applyToAll && { opacity: 0.5 },
+                ]}
+              >
                 <Text style={styles(color).inputText}>{formatDate(date)}</Text>
                 <GrayDownArrowIcon height={12} width={12} />
               </View>
@@ -323,6 +342,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           <View style={styles(color).transactionButtonsContainer}>
             <View style={styles(color).transactionButtonWrapper}>
               <TouchableOpacity
+                disabled={isEditing}
                 onPress={() => {
                   handleSelectTransaction("fixa");
                   setRecurrence("NONE");
@@ -337,6 +357,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
                     selectedTransactionType === "fixa" && {
                       borderColor: color,
                     },
+                    isEditing && { opacity: 0.5 },
                   ]}
                 >
                   <CustomText
@@ -355,6 +376,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
 
             <View style={styles(color).transactionButtonWrapper}>
               <TouchableOpacity
+                disabled={isEditing}
                 onPress={() => {
                   handleSelectTransaction("parcelada");
                   setShowInstallmentsMenu(true);
@@ -366,6 +388,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
                     selectedTransactionType === "parcelada" && {
                       borderColor: color,
                     },
+                    isEditing && { opacity: 0.5 },
                   ]}
                 >
                   <CustomText
@@ -384,6 +407,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
 
             <View style={styles(color).transactionButtonWrapper}>
               <TouchableOpacity
+                disabled={isEditing}
                 onPress={() => {
                   handleSelectTransaction("recorrente");
                   setShowRecurrenceMenu(true);
@@ -395,6 +419,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
                     selectedTransactionType === "recorrente" && {
                       borderColor: color,
                     },
+                    isEditing && { opacity: 0.5 },
                   ]}
                 >
                   <CustomText
