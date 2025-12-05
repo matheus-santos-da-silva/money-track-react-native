@@ -4,14 +4,15 @@ import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
 import { filterOptions } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionRow } from "../../components/TransactionRow/TransactionRow";
+import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
 import { StackNavigation } from "../Home/Home";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SearchTransactionsBar } from "../../components/SearchTransactionBar/SearchTransactionsBar";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
-import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
 import { FC, useEffect, useState } from "react";
 import { TransactionsFilterModal } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
+import { TransactionSettingsModal } from "../../components/TransactionSettingsModal/TransactionSettingsModal";
 import { TransactionsMonthSelector } from "../../components/TransactionsMonthSelector/TransactionsMonthSelector";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { ActivityIndicator, ScrollView } from "react-native";
@@ -37,8 +38,10 @@ type GroupedTransactions = {
     id: string;
     description?: string;
     total_installments: number;
+    current_installment: number;
+    installment_group_id?: string;
     transaction_date: Date;
-    recurrence: string;
+    recurrence: "MONTHLY" | "YEARLY" | "NONE";
     type: "Receita" | "Despesa";
     amount: number;
     category: CategoryDTO;
@@ -83,6 +86,11 @@ export const Transactions: FC = () => {
     setSearchQuery("");
     setIsSearchVisible(false);
   };
+
+  const [isTransactionModalVisible, setIsTransactionModalVisible] =
+    useState(false);
+  const [transactionSettings, setTransactionSettings] =
+    useState<TransactionDTO | null>(null);
 
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [filterSelected, setFilterSelected] = useState<filterOptions | null>(
@@ -172,6 +180,7 @@ export const Transactions: FC = () => {
               id: transaction.id,
               recurrence: transaction.recurrence,
               total_installments: transaction.total_installments,
+              current_installment: transaction.current_installment,
               transaction_date: transaction.transaction_date,
               description: transaction?.description,
               type: filteredTransactions.incomes.includes(transaction)
@@ -179,6 +188,7 @@ export const Transactions: FC = () => {
                 : "Despesa",
               amount: transaction.amount,
               category: transaction.category,
+              installment_group_id: transaction.installment_group_id,
             });
           }
         } else {
@@ -192,6 +202,8 @@ export const Transactions: FC = () => {
             id: transaction.id,
             recurrence: transaction.recurrence,
             total_installments: transaction.total_installments,
+            current_installment: transaction.current_installment,
+            installment_group_id: transaction.installment_group_id,
             transaction_date: transaction.transaction_date,
             description: transaction?.description,
             type: filteredTransactions.incomes.includes(transaction)
@@ -204,8 +216,6 @@ export const Transactions: FC = () => {
       }
     );
   }
-
-  console.log(groupedByDate);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -266,47 +276,11 @@ export const Transactions: FC = () => {
                       <TouchableOpacity
                         key={`${tx.id}-${index}`}
                         onPress={() => {
-                          const screen =
-                            tx.type === "Despesa"
-                              ? "CreateExpense"
-                              : "CreateIncome";
-
-                          const initialData: InitialTransactionData = {
-                            id: tx.id,
-                            amount: tx.amount,
-                            category: {
-                              id: tx.category.id,
-                              icon: tx.category.icon,
-                              name: tx.category.name,
-                            },
-                            description: tx.description,
-                            date: tx.transaction_date,
-                            transactionType:
-                              tx.recurrence !== "NONE"
-                                ? "recorrente"
-                                : tx.total_installments > 1
-                                ? "parcelada"
-                                : "fixa",
-                            recurrence: tx.recurrence as
-                              | "MONTHLY"
-                              | "YEARLY"
-                              | "NONE",
-                            installments: tx.total_installments,
-                          };
-
-                          if (screen === "CreateExpense") {
-                            navigation.navigate("CreateExpense", {
-                              user_id: id,
-                              token,
-                              initialData,
-                            });
-                          } else {
-                            navigation.navigate("CreateIncome", {
-                              user_id: id,
-                              token,
-                              initialData,
-                            });
-                          }
+                          setIsTransactionModalVisible(true);
+                          setTransactionSettings({
+                            ...tx,
+                            category_id: tx.category.id,
+                          });
                         }}
                       >
                         <TransactionRow
@@ -350,6 +324,15 @@ export const Transactions: FC = () => {
         onSelect={(type) => {
           setIsTypeSelectorVisible(false);
           handleSelectType(type);
+        }}
+      />
+
+      <TransactionSettingsModal
+        visible={isTransactionModalVisible}
+        props={{ transaction: transactionSettings, token, user_id: id }}
+        onClose={() => {
+          setIsTransactionModalVisible(false);
+          setTransactionSettings(null);
         }}
       />
     </SafeAreaView>
