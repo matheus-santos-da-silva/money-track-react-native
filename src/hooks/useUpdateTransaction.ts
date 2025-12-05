@@ -11,8 +11,16 @@ export const useUpdateTransaction = () => {
     setUpdateTransactionLoading(true);
     setError(null);
 
+    const { applyToAll, ...updateData } = data;
+
+    if (applyToAll) {
+      delete updateData.transaction_date;
+      delete updateData.total_installments;
+      delete updateData.recurrence;
+    }
+
     try {
-      const res = await updateTransaction(data);
+      const res = await updateTransaction({ ...updateData, applyToAll });
 
       if (res.success) {
         return res.success;

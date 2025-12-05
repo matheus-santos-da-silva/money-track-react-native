@@ -7,8 +7,10 @@ export const updateTransaction = async (
   data: UpdateTransactionDTO
 ): Promise<CreateTransactionResponseDTO> => {
   try {
-    if (data.recurrence !== "NONE") data.total_installments = 1;
-    if (data.total_installments !== 1) data.recurrence = "NONE";
+    if (!data.applyToAll) {
+      if (data.recurrence !== "NONE") data.total_installments = 1;
+      if (data.total_installments !== 1) data.recurrence = "NONE";
+    }
 
     const { type, token, id, user_id, ...body } = data;
 

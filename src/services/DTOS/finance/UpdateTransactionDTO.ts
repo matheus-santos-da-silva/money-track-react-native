@@ -9,4 +9,6 @@ export interface UpdateTransactionDTO {
   recurrence?: string;
   description?: string;
   transaction_date?: string;
+  applyToAll?: boolean;
+  installment_group_id?: string;
 }
