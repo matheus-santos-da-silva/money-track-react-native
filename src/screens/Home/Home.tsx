@@ -31,10 +31,20 @@ export type StackNavigation = {
     user_id: string;
     initialData?: InitialTransactionData;
   };
+
   CreateIncome: {
     token: string;
     user_id: string;
     initialData?: InitialTransactionData;
+  };
+
+  Menu: {
+    user_id: string;
+    name: string;
+    email: string;
+    token: string;
+    month: number;
+    year: number;
   };
 };
 
@@ -44,7 +54,9 @@ export const Home: FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
   const currentDate = new Date();
-  const [currentYear] = useState<number>(currentDate.getFullYear());
+  const [currentYear, setCurrentYear] = useState<number>(
+    currentDate.getFullYear()
+  );
   const [currentMonth, setCurrentMonth] = useState<number>(
     currentDate.getMonth()
   );
@@ -57,8 +69,9 @@ export const Home: FC = () => {
 
   const { setTransactions } = useTransactions();
 
-  const handleMonthChange = (newMonth: number) => {
+  const handleMonthChange = (newMonth: number, newYear: number) => {
     setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
   };
 
   const toggleVisibility = () => {
@@ -139,11 +152,24 @@ export const Home: FC = () => {
       <View style={styles.topMenu}>
         <View style={styles.topMenuContent}>
           <View style={styles.profileContainer}>
-            <View style={styles.profileCircle}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.profileCircle}
+              onPress={() =>
+                navigation.navigate("Menu", {
+                  user_id: user?.id || "",
+                  name: user?.name || "",
+                  email: user?.email || "",
+                  token,
+                  month: currentMonth,
+                  year: currentYear,
+                })
+              }
+            >
               <Text style={styles.profileLetter}>
                 {user?.name ? user.name[0] : "U"}
               </Text>
-            </View>
+            </TouchableOpacity>
 
             <Text style={styles.greetingText}>
               {error
@@ -195,6 +221,7 @@ export const Home: FC = () => {
             visible={isModalVisible}
             onClose={() => setIsModalVisible(false)}
             onSelectMonth={handleMonthChange}
+            currentYear={currentYear}
           />
         </View>
       </View>

@@ -48,7 +48,7 @@ export const Dashboard: FC = () => {
 
   const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
 
-  const [currentYear] = useState<number>(year);
+  const [currentYear, setCurrentYear] = useState<number>(year);
   const [currentMonthIndex, setCurrentMonth] = useState(month);
   const [forceUpdate, setForceUpdate] = useState(false);
 
@@ -61,8 +61,9 @@ export const Dashboard: FC = () => {
     clearRefetch,
   } = useTransactions();
 
-  const handleMonthChange = (newMonth: number) => {
+  const handleMonthChange = (newMonth: number, newYear: number) => {
     setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
   };
 
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
@@ -188,6 +189,7 @@ export const Dashboard: FC = () => {
         <View>
           <TransactionsMonthSelector
             monthIndex={currentMonthIndex}
+            year={currentYear}
             onMonthChange={handleMonthChange}
             filterSelected={null}
           />

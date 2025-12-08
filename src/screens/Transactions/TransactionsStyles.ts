@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     borderBottomRightRadius: 14,
     backgroundColor: Colors.primaryBlue,
     paddingVertical: 16,
-    gap: 35,
+    gap: 20,
   },
 
   blueTopContent: {
