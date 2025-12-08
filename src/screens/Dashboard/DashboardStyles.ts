@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
     gap: 12,
     flex: 0.4,
     minHeight: 120,
-    maxHeight: 150,
+    maxHeight: 190,
     alignItems: "center",
     backgroundColor: Colors.primaryBlue,
     paddingVertical: 4,

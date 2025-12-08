@@ -15,22 +15,29 @@ import ArrowRightIcon from "../../assets/images/arrow-right-svg.svg";
 
 interface TransactionsMonthSelectorProps {
   monthIndex: number;
-  onMonthChange: (newMonthIndex: number) => void;
+  year: number;
+  onMonthChange: (newMonthIndex: number, newYear: number) => void;
   filterSelected: string | null;
 }
 
 export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
   monthIndex,
+  year,
   onMonthChange,
   filterSelected,
 }) => {
   const AnimatedText = Animated.createAnimatedComponent(Text);
 
   const [currentMonthIndex, setCurrentMonthIndex] = useState(monthIndex);
+  const [currentYear, setCurrentYear] = useState(year);
 
   useEffect(() => {
     setCurrentMonthIndex(monthIndex);
   }, [monthIndex]);
+
+  useEffect(() => {
+    setCurrentYear(year);
+  }, [year]);
 
   const previousMonth =
     currentMonthIndex === 0
@@ -61,10 +68,20 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
     });
 
     setTimeout(() => {
-      const newIndex =
-        currentMonthIndex === 0 ? months.length - 1 : currentMonthIndex - 1;
+      let newIndex: number;
+      let newYear: number;
+
+      if (currentMonthIndex === 0) {
+        newIndex = months.length - 1;
+        newYear = currentYear - 1;
+      } else {
+        newIndex = currentMonthIndex - 1;
+        newYear = currentYear;
+      }
+
       setCurrentMonthIndex(newIndex);
-      onMonthChange(newIndex);
+      setCurrentYear(newYear);
+      onMonthChange(newIndex, newYear);
 
       offset.value = 50;
       offset.value = withTiming(0, {
@@ -89,10 +106,20 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
     });
 
     setTimeout(() => {
-      const newIndex =
-        currentMonthIndex === months.length - 1 ? 0 : currentMonthIndex + 1;
+      let newIndex: number;
+      let newYear: number;
+
+      if (currentMonthIndex === months.length - 1) {
+        newIndex = 0;
+        newYear = currentYear + 1;
+      } else {
+        newIndex = currentMonthIndex + 1;
+        newYear = currentYear;
+      }
+
       setCurrentMonthIndex(newIndex);
-      onMonthChange(newIndex);
+      setCurrentYear(newYear);
+      onMonthChange(newIndex, newYear);
 
       offset.value = -50;
       offset.value = withTiming(0, {
@@ -108,6 +135,9 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
 
   return (
     <View style={styles.monthModalContainer}>
+      <CustomText style={{ color: "white", fontSize: 17 }}>
+        {currentYear}
+      </CustomText>
       <View style={styles.monthModal}>
         <TouchableOpacity
           onPress={handlePrevMonth}
@@ -125,9 +155,7 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
             <AnimatedText style={[styles.selectedMonth, animatedStyle]}>
               {filterSelected === "today"
                 ? "Hoje"
-                : filterSelected === "thisYear"
-                ? new Date().getFullYear()
-                : months[currentMonthIndex]}
+                : `${months[currentMonthIndex]}`}
             </AnimatedText>
           </View>
 

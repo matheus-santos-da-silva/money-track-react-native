@@ -62,12 +62,13 @@ export const Transactions: FC = () => {
   const { name, id, token, month, year, email } =
     useRoute<RouteProp<ParamList, "Params">>().params;
 
-  const [currentYear] = useState<number>(year);
+  const [currentYear, setCurrentYear] = useState<number>(year);
   const [currentMonthIndex, setCurrentMonth] = useState(month);
 
-  const handleMonthChange = (newMonth: number) => {
+  const handleMonthChange = (newMonth: number, newYear: number) => {
     setFilterSelected(null);
     setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
   };
   const isViewingCurrentMonth = currentMonthIndex === month;
 
@@ -98,7 +99,7 @@ export const Transactions: FC = () => {
   );
 
   const handleSelectFilter = (filter: filterOptions) => {
-    handleMonthChange(new Date().getMonth());
+    handleMonthChange(new Date().getMonth(), new Date().getFullYear());
     setFilterSelected(filter);
   };
 
@@ -248,6 +249,7 @@ export const Transactions: FC = () => {
 
         <TransactionsMonthSelector
           monthIndex={currentMonthIndex}
+          year={currentYear}
           onMonthChange={handleMonthChange}
           filterSelected={filterSelected}
         />
