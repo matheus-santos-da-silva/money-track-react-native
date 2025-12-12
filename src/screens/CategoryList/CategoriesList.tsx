@@ -2,11 +2,13 @@ import { styles } from "./CategoriesListStyles";
 import { Colors } from "../../styles/colors";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryRow } from "../../components/CategoryRow/CategoryRow";
+import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InitialCategoryData } from "../HandleCategory/HandleCategory";
 import { CategoryTypeSelector } from "../../components/CategoryTypeSelector/CategoryTypeSelector";
 import { SearchTransactionsBar } from "../../components/SearchTransactionBar/SearchTransactionsBar";
+import { CategorySettingsModal } from "../../components/CategorySettingsModal/CategorySettingsModal";
 import { FC, useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
@@ -47,6 +49,10 @@ export const CategoriesList: FC = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [manageModalVisible, setManageModalVisible] = useState(false);
+  const [categorySettings, setCategorySettings] = useState<CategoryDTO | null>(
+    null
+  );
 
   const toggleSearch = () => setIsSearchVisible((prev) => !prev);
   const closeSearch = () => {
@@ -182,16 +188,8 @@ export const CategoriesList: FC = () => {
                       <TouchableOpacity
                         activeOpacity={0.6}
                         onPress={() => {
-                          navigation.navigate("HandleCategory", {
-                            token,
-                            type: categoriesType,
-                            isEditing: true,
-                            initialData: {
-                              id: category.id,
-                              name: category.name,
-                              icon: category.icon,
-                            },
-                          });
+                          setCategorySettings(category);
+                          setManageModalVisible(true);
                         }}
                         key={category.id}
                       >
@@ -243,6 +241,17 @@ export const CategoriesList: FC = () => {
           )}
         </View>
       </ScrollView>
+
+      <CategorySettingsModal
+        visible={manageModalVisible}
+        onClose={() => setManageModalVisible(false)}
+        props={{
+          category: categorySettings,
+          token,
+          user_id,
+          type: categoriesType,
+        }}
+      />
     </SafeAreaView>
   );
 };

@@ -11,7 +11,13 @@ import { useUpdateCategory } from "../../hooks/useUpdateCategory";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { CategoryTypeSelector } from "../../components/CategoryTypeSelector/CategoryTypeSelector";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { SafeAreaView, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import PlusButton from "../../assets/images/plus.svg";
 import ArrowLeftIcon from "../../assets/images/arrow-left-svg.svg";
@@ -43,6 +49,8 @@ export const HandleCategory: FC = () => {
 
   const { execute, loading } = useCreateCategory();
   const { update, updateCategoryLoading } = useUpdateCategory();
+
+  const isSubmitting = loading || updateCategoryLoading;
 
   const [showColorsMenu, setShowColorsMenu] = useState<boolean>(false);
   const [showIconsMenu, setShowIconsMenu] = useState<boolean>(false);
@@ -220,12 +228,12 @@ export const HandleCategory: FC = () => {
         </View>
 
         <TouchableOpacity
-          disabled={loading || updateCategoryLoading}
+          disabled={isSubmitting}
           onPress={handleSubmit}
           activeOpacity={0.9}
           style={[
             styles(color).confirmButtonContainer,
-            loading && { opacity: 0.6 },
+            isSubmitting && { opacity: 0.6 },
           ]}
         >
           <View
@@ -234,9 +242,13 @@ export const HandleCategory: FC = () => {
               styles(color).confirmButton,
             ]}
           >
-            <CustomText style={{ color: "white", fontSize: 16 }}>
-              {isEditing ? "Atualizar" : "Criar"}
-            </CustomText>
+            {isSubmitting ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <CustomText style={{ color: "white", fontSize: 16 }}>
+                {isEditing ? "Atualizar" : "Criar"}
+              </CustomText>
+            )}
           </View>
         </TouchableOpacity>
       </View>
