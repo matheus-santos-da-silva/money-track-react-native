@@ -30,6 +30,7 @@ export const Button: FC<ButtonFieldProps> = ({
       onPressOut={() => setIsPressed(false)}
       onPress={onPress}
       activeOpacity={1}
+      disabled={isLoading}
     >
       <View>
         {isLoading ? (

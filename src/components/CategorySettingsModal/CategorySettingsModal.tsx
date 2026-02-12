@@ -51,7 +51,7 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
 
   const { translateY, panResponder, handleClose } = useModalAnimation(
     visible,
-    onClose
+    onClose,
   );
 
   const { deleteCategory, loading } = useDeleteCategory();

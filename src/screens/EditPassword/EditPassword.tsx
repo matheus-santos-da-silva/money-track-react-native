@@ -1,11 +1,12 @@
 import { styles } from "./EditPasswordStyles";
 import { Button } from "../../components/Button/Button";
+import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { useNavigation } from "@react-navigation/native";
 import { UpdatePassword } from "../../services/UpdatePasswordService";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
 
 import Logo from "../../assets/images/logo-mt.svg";
@@ -16,17 +17,10 @@ type StackNavigation = {
   Home: undefined;
 };
 
-type ParamList = {
-  Params: {
-    token: string;
-    user_id: string;
-  };
-};
-
 export const EditPassword: FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
-  const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { userToken, user } = useAuth();
 
   const [currentPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
@@ -37,6 +31,8 @@ export const EditPassword: FC = () => {
     useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUpdatePassword = async () => {
     if (
@@ -56,18 +52,22 @@ export const EditPassword: FC = () => {
       return;
     }
 
+    setIsLoading(true);
+
     const { success, message } = await UpdatePassword(
-      user_id,
-      token,
+      user?.id || "",
+      userToken?.token || "",
       currentPassword,
-      newPassword
+      newPassword,
     );
 
     if (!success) {
+      setIsLoading(false);
       showSnackBar(message || "Erro desconhecido!", "#de525a");
     } else {
-      showSnackBar("Senha editada com sucesso!!", "#407BFF");
+      showSnackBar("Senha editada com sucesso!!", "#4BB543");
       navigation.navigate("Home");
+      setIsLoading(false);
     }
   };
 
@@ -166,7 +166,7 @@ export const EditPassword: FC = () => {
           <Button
             value="Confirmar"
             onPress={handleUpdatePassword}
-            isLoading={false}
+            isLoading={isLoading}
           />
         </View>
       </View>

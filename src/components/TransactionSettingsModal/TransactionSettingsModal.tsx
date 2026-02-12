@@ -251,7 +251,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
                   }}
                 >
                   {new Date(
-                    props.transaction.transaction_date
+                    props.transaction.transaction_date,
                   ).toLocaleDateString("pt-BR")}
                 </Text>
               </View>

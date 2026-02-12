@@ -2,10 +2,10 @@ import { styles } from "./HomeStyles";
 import { useAuth } from "../../hooks/useAuth";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
-import { useGetUser } from "../../hooks/useGetUser";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useNavigation } from "@react-navigation/native";
 import { useTransactions } from "../../contexts/TransactionsContext";
@@ -20,31 +20,19 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import DownArrowIcon from "../../assets/images/white-arrow-down.svg";
 import NotificationIcon from "../../assets/images/bell-svg.svg";
 import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
 
 export type StackNavigation = {
+  Menu: undefined;
+
   CreateExpense: {
-    token: string;
-    user_id: string;
     initialData?: InitialTransactionData;
   };
 
   CreateIncome: {
-    token: string;
-    user_id: string;
     initialData?: InitialTransactionData;
-  };
-
-  Menu: {
-    user_id: string;
-    name: string;
-    email: string;
-    token: string;
-    month: number;
-    year: number;
   };
 };
 
@@ -55,17 +43,19 @@ export const Home: FC = () => {
 
   const currentDate = new Date();
   const [currentYear, setCurrentYear] = useState<number>(
-    currentDate.getFullYear()
+    currentDate.getFullYear(),
   );
   const [currentMonth, setCurrentMonth] = useState<number>(
-    currentDate.getMonth()
+    currentDate.getMonth(),
   );
 
   const { monthName } = getDateRange(currentYear, currentMonth);
-  const [token, setToken] = useState<string>("");
-  const { user, error } = useGetUser(token ?? "");
+
+  const { user, error, isPremium, userToken, logout } = useAuth();
+
   const [isHidden, setIsHidden] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
 
   const { setTransactions } = useTransactions();
 
@@ -81,21 +71,6 @@ export const Home: FC = () => {
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
-
-  const { logout } = useAuth();
-
-  useEffect(() => {
-    const loadTokenAndCleanCache = async () => {
-      const storedToken = await AsyncStorage.getItem("@money-track-token!");
-      if (storedToken) {
-        setToken(JSON.parse(storedToken).token);
-      } else {
-        logout();
-      }
-    };
-
-    loadTokenAndCleanCache();
-  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -116,7 +91,7 @@ export const Home: FC = () => {
   const { transactions, transactionsError, loading, refetch } =
     useGetUserTransactions({
       user_id: user?.id ?? "",
-      token: token ?? "",
+      token: userToken?.token ?? "",
       month: currentMonth,
       year: currentYear,
     });
@@ -141,10 +116,14 @@ export const Home: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    navigation.navigate(type === "EXPENSE" ? "CreateExpense" : "CreateIncome", {
-      user_id: user!.id,
-      token,
-    });
+    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+      setIsPremiumModalVisible(true);
+      return;
+    }
+    navigation.navigate(
+      type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
+      {},
+    );
   };
 
   return (
@@ -155,16 +134,7 @@ export const Home: FC = () => {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.profileCircle}
-              onPress={() =>
-                navigation.navigate("Menu", {
-                  user_id: user?.id || "",
-                  name: user?.name || "",
-                  email: user?.email || "",
-                  token,
-                  month: currentMonth,
-                  year: currentYear,
-                })
-              }
+              onPress={() => navigation.navigate("Menu")}
             >
               <Text style={styles.profileLetter}>
                 {user?.name ? user.name[0] : "U"}
@@ -252,12 +222,13 @@ export const Home: FC = () => {
                 <TransactionCard
                   type="expense"
                   isHidden={isHidden}
-                  onPress={() =>
-                    navigation.navigate("CreateExpense", {
-                      token,
-                      user_id: user!.id,
-                    })
-                  }
+                  onPress={() => {
+                    if (!isPremium) {
+                      setIsPremiumModalVisible(true);
+                      return;
+                    }
+                    navigation.navigate("CreateExpense", {});
+                  }}
                   amount={expenses}
                   isLoading={loading}
                 />
@@ -265,12 +236,14 @@ export const Home: FC = () => {
                 <TransactionCard
                   type="income"
                   isHidden={isHidden}
-                  onPress={() =>
-                    navigation.navigate("CreateIncome", {
-                      token,
-                      user_id: user!.id,
-                    })
-                  }
+                  onPress={() => {
+                    if (!isPremium) {
+                      setIsPremiumModalVisible(true);
+                      return;
+                    }
+
+                    navigation.navigate("CreateIncome", {});
+                  }}
                   amount={incomes}
                   isLoading={loading}
                 />
@@ -286,7 +259,7 @@ export const Home: FC = () => {
             id: user.id,
             name: user.name,
             email: user.email,
-            token,
+            token: userToken?.token ?? "",
             month: currentMonth,
             year: currentYear,
           }}
@@ -300,6 +273,14 @@ export const Home: FC = () => {
         onSelect={(type) => {
           setIsTypeSelectorVisible(false);
           handleSelectType(type);
+        }}
+      />
+      <PremiumModal
+        isVisible={isPremiumModalVisible}
+        onClose={() => setIsPremiumModalVisible(false)}
+        onSubscribe={(productId: string) => {
+          setIsPremiumModalVisible(false);
+          console.log("Subscribe to:", productId);
         }}
       />
     </View>

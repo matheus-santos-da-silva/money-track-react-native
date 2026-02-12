@@ -1,10 +1,12 @@
 import { styles } from "./DashboardStyles";
 import { Colors } from "../../styles/colors";
 import { colors } from "../../utils/colors";
+import { useAuth } from "../../hooks/useAuth";
 import { PieChart } from "react-native-gifted-charts";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { SubtitleRow } from "../../components/SubtitleRow/SubtitleRow";
+import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { StackNavigation } from "../Home/Home";
@@ -28,10 +30,6 @@ import GreenTrendingUp from "../../assets/images/green-trending-up.svg";
 
 type ParamList = {
   Params: {
-    id: string;
-    name: string;
-    email: string;
-    token: string;
     month: number;
     year: number;
   };
@@ -43,10 +41,11 @@ type CategoryGroup = {
 };
 
 export const Dashboard: FC = () => {
-  const { id, token, name, email, month, year } =
-    useRoute<RouteProp<ParamList, "Params">>().params;
+  const { month, year } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { user, userToken } = useAuth();
 
   const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+  const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
 
   const [currentYear, setCurrentYear] = useState<number>(year);
   const [currentMonthIndex, setCurrentMonth] = useState(month);
@@ -70,10 +69,15 @@ export const Dashboard: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    navigation.navigate(type === "EXPENSE" ? "CreateExpense" : "CreateIncome", {
-      user_id: id,
-      token,
-    });
+    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+      setIsPremiumModalVisible(true);
+      return;
+    } else {
+      navigation.navigate(
+        type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
+        {},
+      );
+    }
   };
 
   const {
@@ -81,8 +85,8 @@ export const Dashboard: FC = () => {
     loading,
     refetch,
   } = useGetUserTransactions({
-    user_id: id,
-    token: token,
+    user_id: user?.id || "",
+    token: userToken?.token || "",
     month: currentMonthIndex,
     year: currentYear,
   });
@@ -115,7 +119,7 @@ export const Dashboard: FC = () => {
     colors: string[],
     totalAmount: number,
     transactions?: TransactionDTO[],
-    maxCategories: number = 7
+    maxCategories: number = 7,
   ) => {
     if (!transactions?.length || totalAmount === 0) return [];
 
@@ -129,7 +133,7 @@ export const Dashboard: FC = () => {
         acc[categoryId].total += item.amount;
         return acc;
       },
-      {}
+      {},
     );
 
     const sorted = Object.values(grouped).sort((a, b) => b.total - a.total);
@@ -139,7 +143,7 @@ export const Dashboard: FC = () => {
     if (otherCategories.length > 0) {
       const othersTotal = otherCategories.reduce(
         (sum, cat) => sum + cat.total,
-        0
+        0,
       );
       topCategories.push({ name: "Outros...", total: othersTotal });
     }
@@ -169,12 +173,12 @@ export const Dashboard: FC = () => {
 
   const incomesPieData = useMemo(
     () => getPieDataByCategory(colors, incomesAmount, transactions?.incomes),
-    [transactions?.incomes, incomesAmount]
+    [transactions?.incomes, incomesAmount],
   );
 
   const expensesPieData = useMemo(
     () => getPieDataByCategory(colors, expensesAmount, transactions?.expenses),
-    [transactions?.expenses, expensesAmount]
+    [transactions?.expenses, expensesAmount],
   );
 
   return (
@@ -388,7 +392,14 @@ export const Dashboard: FC = () => {
       </ScrollView>
 
       <BottomBar
-        userProps={{ id, name, token, month, year, email }}
+        userProps={{
+          id: user?.id || "",
+          name: user?.name || "",
+          token: userToken?.token || "",
+          month,
+          year,
+          email: user?.email || "",
+        }}
         onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
       />
 
@@ -398,6 +409,15 @@ export const Dashboard: FC = () => {
         onSelect={(type) => {
           setIsTypeSelectorVisible(false);
           handleSelectType(type);
+        }}
+      />
+
+      <PremiumModal
+        isVisible={isPremiumModalVisible}
+        onClose={() => setIsPremiumModalVisible(false)}
+        onSubscribe={(productId: string) => {
+          setIsPremiumModalVisible(false);
+          console.log("Subscribe to:", productId);
         }}
       />
     </SafeAreaView>

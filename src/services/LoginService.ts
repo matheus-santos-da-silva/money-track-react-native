@@ -1,11 +1,11 @@
 import axios from "axios";
 import { validateData } from "../utils/validate-signUp";
-import { USERS_SERVICE_URL } from "@env";
 import { AuthResponseDTO } from "./DTOS/AuthServicesResponsesDTO";
+import { USERS_SERVICE_URL } from "@env";
 
 export const LoginUser = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<AuthResponseDTO> => {
   const { success, message } = validateData(email, password);
   if (message) return { success, message };
