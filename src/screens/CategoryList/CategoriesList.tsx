@@ -1,8 +1,10 @@
 import { styles } from "./CategoriesListStyles";
 import { Colors } from "../../styles/colors";
+import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryRow } from "../../components/CategoryRow/CategoryRow";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
+import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InitialCategoryData } from "../HandleCategory/HandleCategory";
@@ -11,14 +13,8 @@ import { SearchTransactionsBar } from "../../components/SearchTransactionBar/Sea
 import { CategorySettingsModal } from "../../components/CategorySettingsModal/CategorySettingsModal";
 import { FC, useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-
-import {
-  RouteProp,
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
 
 import Logo from "../../assets/images/logo-mt.svg";
 import SearchIcon from "../../assets/images/search-btn-svg.svg";
@@ -30,28 +26,21 @@ type TransactionType = "INCOME" | "EXPENSE";
 
 type StackNavigation = {
   HandleCategory: {
-    token: string;
     type: TransactionType;
     initialData?: InitialCategoryData;
     isEditing?: boolean;
   };
 };
 
-type ParamList = {
-  Params: {
-    token: string;
-    user_id: string;
-  };
-};
-
 export const CategoriesList: FC = () => {
-  const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { userToken, user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [manageModalVisible, setManageModalVisible] = useState(false);
+  const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
   const [categorySettings, setCategorySettings] = useState<CategoryDTO | null>(
-    null
+    null,
   );
 
   const toggleSearch = () => setIsSearchVisible((prev) => !prev);
@@ -69,7 +58,7 @@ export const CategoriesList: FC = () => {
   };
 
   const { categories, loading, refetch } = useGetCategories({
-    token,
+    token: userToken?.token || "",
     type: categoriesType,
   });
 
@@ -77,7 +66,7 @@ export const CategoriesList: FC = () => {
   useFocusEffect(
     useCallback(() => {
       refetch({ resetCache: true });
-    }, [categoriesType])
+    }, [categoriesType]),
   );
 
   const filteredCategories =
@@ -86,14 +75,15 @@ export const CategoriesList: FC = () => {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+        .includes(searchQuery.toLowerCase()),
     ) || [];
 
   const predefinedCategories =
     filteredCategories.filter((category) => category.user_id === null) || [];
 
   const userCategories =
-    filteredCategories.filter((category) => category.user_id === user_id) || [];
+    filteredCategories.filter((category) => category.user_id === user?.id) ||
+    [];
 
   const color =
     categoriesType === "INCOME" ? Colors.incomeGreen : Colors.expenseRed;
@@ -125,10 +115,17 @@ export const CategoriesList: FC = () => {
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => {
-                  navigation.navigate("HandleCategory", {
-                    token,
-                    type: categoriesType,
-                  });
+                  if (
+                    user?.plan === "FREE" &&
+                    new Date(user.trialEndsAt) < new Date()
+                  ) {
+                    setIsPremiumModalVisible(true);
+                    return;
+                  } else {
+                    navigation.navigate("HandleCategory", {
+                      type: categoriesType,
+                    });
+                  }
                 }}
               >
                 <PlusCategoryButton height={22} width={22} />
@@ -170,10 +167,17 @@ export const CategoriesList: FC = () => {
                   <TouchableOpacity
                     activeOpacity={0.9}
                     onPress={() => {
-                      navigation.navigate("HandleCategory", {
-                        token,
-                        type: categoriesType,
-                      });
+                      if (
+                        user?.plan === "FREE" &&
+                        new Date(user.trialEndsAt) < new Date()
+                      ) {
+                        setIsPremiumModalVisible(true);
+                        return;
+                      } else {
+                        navigation.navigate("HandleCategory", {
+                          type: categoriesType,
+                        });
+                      }
                     }}
                   >
                     <View style={styles(color).addCategoryButton}>
@@ -247,9 +251,18 @@ export const CategoriesList: FC = () => {
         onClose={() => setManageModalVisible(false)}
         props={{
           category: categorySettings,
-          token,
-          user_id,
+          token: userToken?.token || "",
+          user_id: user?.id || "",
           type: categoriesType,
+        }}
+      />
+
+      <PremiumModal
+        isVisible={isPremiumModalVisible}
+        onClose={() => setIsPremiumModalVisible(false)}
+        onSubscribe={(productId: string) => {
+          setIsPremiumModalVisible(false);
+          console.log("Subscribe to:", productId);
         }}
       />
     </SafeAreaView>

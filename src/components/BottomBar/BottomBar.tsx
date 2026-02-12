@@ -23,43 +23,23 @@ interface ButtonFieldProps {
 
 type StackNavigation = {
   Menu: {
-    id: string;
-    name: string;
-    email: string;
-    token: string;
     month: number;
     year: number;
   };
 
   Transactions: {
-    id: string;
-    name: string;
-    email: string;
-    token: string;
     month: number;
     year: number;
   };
 
   Dashboard: {
-    id: string;
-    name: string;
-    email: string;
-    token: string;
     month: number;
     year: number;
   };
 
-  CreateExpense: {
-    token: string;
-    user_id: string;
-  };
-
-  CreateIncome: {
-    token: string;
-    user_id: string;
-  };
-
   Home: undefined;
+  CreateExpense: undefined;
+  CreateIncome: undefined;
 };
 
 export const BottomBar: FC<
@@ -73,22 +53,12 @@ export const BottomBar: FC<
       screen === "Transactions" ||
       screen === "Dashboard"
     ) {
-      if (!userProps.email) return;
       navigation.navigate(screen, {
-        id: userProps.id,
-        name: userProps.name,
-        email: userProps.email,
-        token: userProps.token,
         month: userProps.month,
         year: userProps.year,
       });
-    } else if (screen === "CreateExpense" || screen === "CreateIncome") {
-      navigation.navigate(screen, {
-        token: userProps.token,
-        user_id: userProps.id,
-      });
     } else {
-      navigation.navigate("Home");
+      navigation.navigate(screen);
     }
   };
 

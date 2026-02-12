@@ -94,23 +94,23 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
   const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
 
   const [amount, setAmount] = useState(
-    initialData?.amount ? initialData.amount : 0
+    initialData?.amount ? initialData.amount : 0,
   );
 
   const [category, setCategory] = useState(initialData?.category || null);
 
   const [showRecurrenceMenu, setShowRecurrenceMenu] = useState(false);
   const [recurrence, setRecurrence] = useState<"MONTHLY" | "YEARLY" | "NONE">(
-    initialData?.recurrence || "NONE"
+    initialData?.recurrence || "NONE",
   );
 
   const [showInstallmentsMenu, setShowInstallmentsMenu] = useState(false);
   const [installments, setInstallments] = useState(
-    initialData?.installments || 1
+    initialData?.installments || 1,
   );
 
   const [description, setDescription] = useState(
-    initialData?.description || ""
+    initialData?.description || "",
   );
 
   const [selectedTransactionType, setSelectedTransactionType] = useState<
@@ -118,7 +118,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
   >(initialData?.transactionType || null);
 
   const handleSelectTransaction = (
-    type: "fixa" | "parcelada" | "recorrente"
+    type: "fixa" | "parcelada" | "recorrente",
   ) => {
     setSelectedTransactionType(type);
   };
@@ -128,7 +128,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       ? typeof initialData.date === "string"
         ? new Date(initialData.date)
         : initialData.date
-      : new Date()
+      : new Date(),
   );
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
@@ -163,7 +163,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
     if (!selectedTransactionType) {
       showSnackBar(
         "Escolha um tipo para a sua Transação! Fixa, Parcelada ou Recorrente.",
-        "#de525a"
+        "#de525a",
       );
       return;
     }
@@ -200,13 +200,14 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           id: initialData.id,
         });
       } else {
-        success = await execute({ ...transactionData, current_installment: 1 });
+        const { id, ...data } = transactionData;
+        success = await execute({ ...data, current_installment: 1 });
       }
 
       if (success) {
         showSnackBar(
           `Transação ${isEditing ? "atualizada" : "criada"} com sucesso!`,
-          "#4BB543"
+          "#4BB543",
         );
 
         triggerRefetch();
@@ -215,7 +216,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       } else {
         showSnackBar(
           `Erro ao ${isEditing ? "atualizar" : "criar"} transação`,
-          "#de525a"
+          "#de525a",
         );
       }
     } catch (error) {

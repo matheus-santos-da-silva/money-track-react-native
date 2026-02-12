@@ -1,15 +1,15 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { FC } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { ProtectedRoutes } from "./ProtectedRoutes";
 import { PublicRoutes } from "./PublicRoutes";
+import { ProtectedRoutes } from "./ProtectedRoutes";
+import { NavigationContainer } from "@react-navigation/native";
 
-export const Stack: React.FC = () => {
-  const { user } = useAuth();
+export const Stack: FC = () => {
+  const { userToken } = useAuth();
 
   return (
     <NavigationContainer>
-      {user?.token ? <ProtectedRoutes /> : <PublicRoutes />}
+      {userToken ? <ProtectedRoutes /> : <PublicRoutes />}
     </NavigationContainer>
   );
 };

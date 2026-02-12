@@ -1,9 +1,9 @@
-import { USERS_SERVICE_URL } from "@env";
 import axios from "axios";
+import { USERS_SERVICE_URL } from "@env";
 import { UserServiceResponseDTO } from "./DTOS/UserServiceResponseDTO";
 
 export const getUser = async (
-  token: string
+  token: string,
 ): Promise<UserServiceResponseDTO> => {
   try {
     const response = await axios.get(`${USERS_SERVICE_URL}/users`, {
@@ -21,6 +21,7 @@ export const getUser = async (
       const errorMessage =
         error.response?.data?.message ||
         `Erro ao trazer os dados do usuário. Status: ${error.response?.status}`;
+
       return { success: false, message: errorMessage };
     }
 

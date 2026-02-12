@@ -1,6 +1,7 @@
 import { styles } from "./HandleCategoryStyles";
 import { Colors } from "../../styles/colors";
 import { iconMap } from "../../utils/icons";
+import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { IconSelector } from "../../components/IconSelector/IconSelector";
 import { FC, useState } from "react";
@@ -36,7 +37,6 @@ type TransactionType = "INCOME" | "EXPENSE";
 
 type ParamList = {
   Params: {
-    token: string;
     type: TransactionType;
     initialData?: InitialCategoryData;
     isEditing?: boolean;
@@ -44,8 +44,10 @@ type ParamList = {
 };
 
 export const HandleCategory: FC = () => {
-  const { token, type, initialData, isEditing } =
+  const { type, initialData, isEditing } =
     useRoute<RouteProp<ParamList, "Params">>().params;
+
+  const { userToken } = useAuth();
 
   const { execute, loading } = useCreateCategory();
   const { update, updateCategoryLoading } = useUpdateCategory();
@@ -57,14 +59,14 @@ export const HandleCategory: FC = () => {
 
   const [categoryType, setCategoryType] = useState<TransactionType>(type);
   const [categoryName, setCategoryName] = useState<string>(
-    initialData?.name || ""
+    initialData?.name || "",
   );
 
   const iconParts = initialData?.icon ? initialData.icon.split("-") : [];
 
   const [icon, setIcon] = useState<string>(iconParts[1] ?? "");
   const [iconColor, setIconColor] = useState<string>(
-    iconParts[0] ?? Colors.primaryGray
+    iconParts[0] ?? Colors.primaryGray,
   );
 
   const IconComponent = icon ? iconMap[icon] : null;
@@ -81,7 +83,7 @@ export const HandleCategory: FC = () => {
     if (!categoryName || categoryName.length < 3 || categoryName.length > 20) {
       showSnackBar(
         "O nome da categoria precisa ter entre 3 a 20 caracteres!",
-        "#de525a"
+        "#de525a",
       );
       return;
     }
@@ -89,7 +91,7 @@ export const HandleCategory: FC = () => {
     if (!icon) {
       showSnackBar(
         "Você precisa escolhar um ícone para a categoria!",
-        "#de525a"
+        "#de525a",
       );
       return;
     }
@@ -97,7 +99,7 @@ export const HandleCategory: FC = () => {
     if (!iconColor) {
       showSnackBar(
         "Você precisa escolhar uma cor para a categoria!",
-        "#de525a"
+        "#de525a",
       );
       return;
     }
@@ -113,14 +115,14 @@ export const HandleCategory: FC = () => {
         success = await update({
           category_id: initialData?.id,
           type: categoryType,
-          token,
+          token: userToken?.token || "",
           icon: `${iconColor}-${icon}`,
           name: categoryName,
         });
       } else {
         success = await execute({
           type: categoryType,
-          token,
+          token: userToken?.token || "",
           icon: `${iconColor}-${icon}`,
           name: categoryName,
           created_at: new Date().toISOString(),
@@ -130,14 +132,14 @@ export const HandleCategory: FC = () => {
       if (success) {
         showSnackBar(
           `Categoria ${isEditing ? "atualizada" : "criada"} com sucesso!`,
-          "#4BB543"
+          "#4BB543",
         );
 
         navigation.goBack();
       } else {
         showSnackBar(
           `Erro ao ${isEditing ? "atualizar" : "criar"} categoria.`,
-          "#de525a"
+          "#de525a",
         );
       }
     } catch (error) {

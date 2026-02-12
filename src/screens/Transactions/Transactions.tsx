@@ -1,7 +1,9 @@
 import { styles } from "./TransactionsStyles";
+import { useAuth } from "../../hooks/useAuth";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
+import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { filterOptions } from "../../components/TransactionsFilterModal/TransactionsFilterModal";
 import { TransactionRow } from "../../components/TransactionRow/TransactionRow";
 import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
@@ -24,11 +26,7 @@ import DateFilterIcon from "../../assets/images/date-filter-svg.svg";
 
 type ParamList = {
   Params: {
-    id: string;
-    name: string;
-    token: string;
     month: number;
-    email: string;
     year: number;
   };
 };
@@ -55,12 +53,13 @@ const formatter = new Intl.DateTimeFormat("pt-BR", {
 
 export const Transactions: FC = () => {
   const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+  const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(false);
 
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
 
-  const { name, id, token, month, year, email } =
-    useRoute<RouteProp<ParamList, "Params">>().params;
+  const { month, year } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { user, userToken } = useAuth();
 
   const [currentYear, setCurrentYear] = useState<number>(year);
   const [currentMonthIndex, setCurrentMonth] = useState(month);
@@ -95,7 +94,7 @@ export const Transactions: FC = () => {
 
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [filterSelected, setFilterSelected] = useState<filterOptions | null>(
-    null
+    null,
   );
 
   const handleSelectFilter = (filter: filterOptions) => {
@@ -108,8 +107,8 @@ export const Transactions: FC = () => {
     loading,
     refetch,
   } = useGetUserTransactions({
-    user_id: id,
-    token: token,
+    user_id: user?.id ?? "",
+    token: userToken?.token || "",
     month: currentMonthIndex,
     year: currentYear,
   });
@@ -123,10 +122,15 @@ export const Transactions: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    navigation.navigate(type === "EXPENSE" ? "CreateExpense" : "CreateIncome", {
-      user_id: id,
-      token,
-    });
+    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+      setIsPremiumModalVisible(true);
+      return;
+    } else {
+      navigation.navigate(
+        type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
+        {},
+      );
+    }
   };
 
   useEffect(() => {
@@ -152,11 +156,11 @@ export const Transactions: FC = () => {
     ? {
         incomes:
           transactions?.incomes.filter((tx) =>
-            tx.category.name.toLowerCase().includes(searchQuery.toLowerCase())
+            tx.category.name.toLowerCase().includes(searchQuery.toLowerCase()),
           ) ?? [],
         expenses:
           transactions?.expenses.filter((tx) =>
-            tx.category.name.toLowerCase().includes(searchQuery.toLowerCase())
+            tx.category.name.toLowerCase().includes(searchQuery.toLowerCase()),
           ) ?? [],
       }
     : transactions;
@@ -214,7 +218,7 @@ export const Transactions: FC = () => {
             category: transaction.category,
           });
         }
-      }
+      },
     );
   }
 
@@ -309,7 +313,13 @@ export const Transactions: FC = () => {
         )}
       </View>
       <BottomBar
-        userProps={{ id, name, token, month, year, email }}
+        userProps={{
+          id: user?.id || "",
+          name: user?.name || "",
+          token: userToken?.token || "",
+          month,
+          year,
+        }}
         onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
       />
       <TransactionsFilterModal
@@ -331,10 +341,23 @@ export const Transactions: FC = () => {
 
       <TransactionSettingsModal
         visible={isTransactionModalVisible}
-        props={{ transaction: transactionSettings, token, user_id: id }}
+        props={{
+          transaction: transactionSettings,
+          token: userToken?.token || "",
+          user_id: user?.id || "",
+        }}
         onClose={() => {
           setIsTransactionModalVisible(false);
           setTransactionSettings(null);
+        }}
+      />
+
+      <PremiumModal
+        isVisible={isPremiumModalVisible}
+        onClose={() => setIsPremiumModalVisible(false)}
+        onSubscribe={(productId: string) => {
+          setIsPremiumModalVisible(false);
+          console.log("Subscribe to:", productId);
         }}
       />
     </SafeAreaView>
