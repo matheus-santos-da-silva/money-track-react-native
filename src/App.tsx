@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Stack } from "./routes/Stack";
 import { SlashScreen } from "./screens/SlashScreen/SlashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
+import { withIAPContext } from "react-native-iap";
 import { TransactionsProvider } from "./contexts/TransactionsContext";
 
 function App(): React.JSX.Element {
@@ -24,4 +25,4 @@ function App(): React.JSX.Element {
   );
 }
 
-export default App;
+export default withIAPContext(App);
