@@ -1,17 +1,25 @@
-import { FC, useEffect, useState } from "react";
 import { styles } from "./PremiumModalStyles";
+import { Colors } from "../../styles/colors";
+import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../CustomText/CustomText";
-import { ErrorCode, requestPurchase, useIAP } from "react-native-iap";
+import { ValidatePurchase } from "../../services/ValidatePurchaseService";
+import { FC, useEffect, useState } from "react";
+import {
+  ErrorCode,
+  useIAP,
+  SubscriptionAndroid,
+  Subscription,
+} from "react-native-iap";
 import {
   View,
   TouchableOpacity,
   Text,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 
 import Modal from "react-native-modal";
-import { Colors } from "../../styles/colors";
 
 const productIds = ["plano_mensal", "plano_anual"];
 
@@ -53,33 +61,51 @@ interface PremiumModalProps {
   onSubscribe?: (productId: string) => void;
 }
 
+const getPrice = (sub: Subscription): string => {
+  if ("subscriptionOfferDetails" in sub) {
+    return (
+      sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]
+        ?.formattedPrice ?? ""
+    );
+  }
+  return (sub as { localizedPrice?: string }).localizedPrice ?? "";
+};
+
 export const PremiumModal: FC<PremiumModalProps> = ({
   isVisible,
   onClose,
   onSubscribe,
 }) => {
+  const { userToken, refreshUser } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  let filteredSubscriptions = [];
 
   const {
     connected,
     subscriptions,
-    getActiveSubscriptions,
+    getSubscriptions,
+    requestSubscription,
     finishTransaction,
   } = useIAP({
     onPurchaseSuccess: async (purchase) => {
-      console.log("✅ Compra bem-sucedida:", purchase);
-      // IMPORTANTE: Validar no seu backend antes de finalizar
-      // const isValid = await validatePurchaseOnBackend(purchase);
-      // if (isValid) {
-      await finishTransaction({ purchase, isConsumable: false });
-      // Aqui você pode navegar para tela de sucesso, atualizar estado do usuário, etc.
-      // }
+      if (!userToken || !purchase.purchaseToken) return;
+
+      const result = await ValidatePurchase(
+        purchase.purchaseToken,
+        purchase.productId,
+        userToken.token,
+      );
+
+      if (result.success) {
+        await finishTransaction({ purchase, isConsumable: false });
+        refreshUser();
+      } else {
+        console.error("❌ Compra inválida:", result.message);
+      }
     },
 
     onPurchaseError: (error) => {
-      if (error.code !== ErrorCode.UserCancelled) {
+      if (error.code !== ErrorCode.E_USER_CANCELLED) {
         console.error("❌ Erro na compra:", error);
       }
     },
@@ -98,7 +124,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
         await new Promise((resolve) => setTimeout(resolve, 500));
         setProducts(MOCK_PRODUCTS);
       } else {
-        if (connected) await getActiveSubscriptions(productIds);
+        if (connected) await getSubscriptions({ skus: productIds });
       }
     } catch (e) {
       console.log("Erro ao carregar planos:", e);
@@ -110,10 +136,10 @@ export const PremiumModal: FC<PremiumModalProps> = ({
   useEffect(() => {
     if (!USE_MOCK && subscriptions.length > 0) {
       const formattedProducts = subscriptions.map((sub) => ({
-        productId: sub.id,
+        productId: sub.productId,
         title: sub.title || "Plano",
-        localizedPrice: `R$ ${sub.price}`,
-        pricePerMonth: `R$ ${sub.price}`,
+        localizedPrice: getPrice(sub),
+        pricePerMonth: getPrice(sub),
         description: sub.description || "",
       }));
 
@@ -125,15 +151,16 @@ export const PremiumModal: FC<PremiumModalProps> = ({
     try {
       if (USE_MOCK) {
         console.log("MOCK - Assinatura:", productId);
-      } else {
-        await requestPurchase({
-          request: {
-            google: {
-              skus: [productId],
-            },
-          },
-          type: "subs",
+      } else if (Platform.OS === "android") {
+        const sub = subscriptions.find(
+          (s) => s.productId === productId,
+        ) as SubscriptionAndroid;
+        const offerToken = sub?.subscriptionOfferDetails?.[0]?.offerToken ?? "";
+        await requestSubscription({
+          subscriptionOffers: [{ sku: productId, offerToken }],
         });
+      } else {
+        await requestSubscription({ sku: productId });
       }
     } catch (err) {
       console.log("Erro ao assinar:", err);
@@ -168,6 +195,13 @@ export const PremiumModal: FC<PremiumModalProps> = ({
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.primaryBlue} />
             <Text style={styles.loadingText}>Carregando planos...</Text>
+          </View>
+        ) : products.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>
+              Nenhum plano disponível no momento.{"\n"}Tente novamente mais
+              tarde.
+            </Text>
           </View>
         ) : (
           <ScrollView

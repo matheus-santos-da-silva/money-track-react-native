@@ -39,17 +39,20 @@ export const styles = StyleSheet.create({
   editProfileText: {
     fontSize: 22,
     color: "white",
+    marginBottom: 8,
   },
 
   mainContent: {
-    width: "82%",
-    marginLeft: 34,
-    marginTop: 40,
-    gap: 18,
+    paddingHorizontal: 24,
+    marginTop: 36,
+    gap: 20,
+  },
+
+  fieldGroup: {
+    gap: 8,
   },
 
   label: {
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -57,26 +60,31 @@ export const styles = StyleSheet.create({
 
   labelText: {
     color: Colors.primaryGray,
-    fontSize: 18,
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
   },
 
   input: {
     width: "100%",
-    height: 46,
-    alignItems: "center",
+    height: 52,
     paddingLeft: 16,
-    paddingRight: 40,
-    position: "relative",
-    backgroundColor: "transparent",
+    paddingRight: 48,
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: Colors.primaryGray,
-    color: Colors.primaryGray,
-    borderRadius: 12,
+    borderColor: "#EBEBEB",
+    color: "#1A1A2E",
+    borderRadius: 14,
     fontFamily: "Poppins-Regular",
+    fontSize: 15,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
 
   buttonDiv: {
-    marginTop: 18,
+    marginTop: 12,
   },
 
   inputContainer: {
@@ -87,7 +95,7 @@ export const styles = StyleSheet.create({
 
   eyeIcon: {
     position: "absolute",
-    right: 12,
+    right: 14,
     top: "50%",
     transform: [{ translateY: -10 }],
     zIndex: 1,

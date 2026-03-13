@@ -7,7 +7,7 @@ import { showSnackBar } from "../../utils/show-snack-bar";
 import { useNavigation } from "@react-navigation/native";
 import { UpdatePassword } from "../../services/UpdatePasswordService";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
+import { Text, View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
 
 import Logo from "../../assets/images/logo-mt.svg";
 import BackButton from "../../assets/images/arrow-left-svg.svg";
@@ -27,10 +27,8 @@ export const EditPassword: FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
-  const [showCurrentPassword, setShowCurrentPassword] =
-    useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -87,21 +85,19 @@ export const EditPassword: FC = () => {
       </View>
 
       <View style={styles.mainContent}>
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
             <CustomText style={styles.labelText}>Senha Atual</CustomText>
           </View>
-
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder={"Digite sua senha atual"}
-              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              placeholder="Digite sua senha atual"
+              placeholderTextColor="rgba(100, 100, 100, 0.5)"
               onChangeText={setCurrentPassword}
               value={currentPassword}
               secureTextEntry={!showCurrentPassword}
             />
-
             <TouchableOpacity
               onPress={() => setShowCurrentPassword(!showCurrentPassword)}
               activeOpacity={0.6}
@@ -112,20 +108,19 @@ export const EditPassword: FC = () => {
           </View>
         </View>
 
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
             <CustomText style={styles.labelText}>Nova Senha</CustomText>
           </View>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder={"Digite a nova senha"}
-              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              placeholder="Digite a nova senha"
+              placeholderTextColor="rgba(100, 100, 100, 0.5)"
               onChangeText={setNewPassword}
               value={newPassword}
               secureTextEntry={!showNewPassword}
             />
-
             <TouchableOpacity
               activeOpacity={0.6}
               onPress={() => setShowNewPassword(!showNewPassword)}
@@ -136,23 +131,19 @@ export const EditPassword: FC = () => {
           </View>
         </View>
 
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
-            <CustomText style={styles.labelText}>
-              Confirmar Nova Senha
-            </CustomText>
+            <CustomText style={styles.labelText}>Confirmar Nova Senha</CustomText>
           </View>
-
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder={"Confirme a nova senha"}
-              placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+              placeholder="Confirme a nova senha"
+              placeholderTextColor="rgba(100, 100, 100, 0.5)"
               onChangeText={setConfirmPassword}
               value={confirmPassword}
               secureTextEntry={!showConfirmPassword}
             />
-
             <TouchableOpacity
               activeOpacity={0.6}
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -162,6 +153,7 @@ export const EditPassword: FC = () => {
             </TouchableOpacity>
           </View>
         </View>
+
         <View style={styles.buttonDiv}>
           <Button
             value="Confirmar"

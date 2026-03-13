@@ -1,5 +1,4 @@
-import { Colors } from "../../styles/colors";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 import { styles, SHEET_HEIGHT } from "./CreateTransactionTypeSelectorStyles";
 import {
@@ -9,6 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+import ExpenseIcon from "../../assets/images/icon-despesa-svg.svg";
+import IncomeIcon from "../../assets/images/icon-receita-svg.svg";
 
 interface CreateTransactionTypeSelectorProps {
   visible: boolean;
@@ -20,12 +22,10 @@ export const CreateTransactionTypeSelector: FC<
   CreateTransactionTypeSelectorProps
 > = ({ visible, onClose, onSelect }) => {
   const { translateY, panResponder } = useModalAnimation(visible, onClose);
-  const [selected, setSelected] = useState<"EXPENSE" | "INCOME" | null>(null);
 
   if (!visible) return null;
 
   const handleSelect = (type: "EXPENSE" | "INCOME") => {
-    setSelected(type);
     onSelect(type);
     onClose();
   };
@@ -42,21 +42,31 @@ export const CreateTransactionTypeSelector: FC<
         {...panResponder.panHandlers}
       >
         <View style={styles.dragIndicator} />
-        <Text style={styles.title}>Tipo de Transação</Text>
+
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Novo Lançamento</Text>
+          <Text style={styles.subtitle}>Escolha o tipo de transação</Text>
+        </View>
 
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={[styles.optionButton, styles.expenseButton]}
             onPress={() => handleSelect("EXPENSE")}
+            activeOpacity={0.85}
           >
-            <Text style={[styles.optionText]}>Despesa</Text>
+            <ExpenseIcon width={44} height={44} />
+            <Text style={styles.optionText}>Despesa</Text>
+            <Text style={styles.optionSubtitle}>Saída de dinheiro</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.optionButton, styles.incomeButton]}
             onPress={() => handleSelect("INCOME")}
+            activeOpacity={0.85}
           >
-            <Text style={[styles.optionText]}>Receita</Text>
+            <IncomeIcon width={44} height={44} />
+            <Text style={styles.optionText}>Receita</Text>
+            <Text style={styles.optionSubtitle}>Entrada de dinheiro</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>

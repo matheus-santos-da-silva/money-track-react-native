@@ -18,6 +18,9 @@ import {
   ActivityIndicator,
 } from "react-native";
 
+import WhitePencil from "../../assets/images/white-pencil.svg";
+import WhiteTrashIcon from "../../assets/images/white-trash.svg";
+
 type TransactionType = "INCOME" | "EXPENSE";
 
 export type StackNavigation = {
@@ -128,21 +131,22 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
                   { backgroundColor: props.category.icon.split("-")[0] },
                 ]}
               >
-                <IconComponent width={26} height={26} />
+                <IconComponent width={28} height={28} />
               </View>
               <CustomText style={styles.categoryName}>
                 {props.category.name}
               </CustomText>
             </View>
 
+            <View style={styles.separator} />
+
             <View style={styles.actionsContainer}>
               <TouchableOpacity
                 style={[styles.actionButton, styles.editButton]}
                 activeOpacity={0.8}
-                onPress={() => {
-                  handleOptionSelect("edit");
-                }}
+                onPress={() => handleOptionSelect("edit")}
               >
+                <WhitePencil width={18} height={18} />
                 <CustomText style={styles.actionText}>Editar</CustomText>
               </TouchableOpacity>
 
@@ -150,16 +154,15 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
                 style={[styles.actionButton, styles.deleteButton]}
                 activeOpacity={0.8}
                 disabled={loading}
-                onPress={() => {
-                  handleOptionSelect("delete");
-                }}
+                onPress={() => handleOptionSelect("delete")}
               >
                 {loading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <View>
+                  <>
+                    <WhiteTrashIcon width={18} height={18} />
                     <CustomText style={styles.actionText}>Excluir</CustomText>
-                  </View>
+                  </>
                 )}
               </TouchableOpacity>
             </View>

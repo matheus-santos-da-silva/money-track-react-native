@@ -3,7 +3,7 @@ import { Colors } from "../../styles/colors";
 import { styles } from "./TransactionSettingsModalStyles";
 import { iconMap } from "../../utils/icons";
 import { useState } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, Text } from "react-native";
 import { CustomText } from "../CustomText/CustomText";
 import { showSnackBar } from "../../utils/show-snack-bar";
 import { useNavigation } from "@react-navigation/native";
@@ -14,12 +14,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 import { InitialTransactionData } from "../HandleTransaction/HandleTransaction";
 import { ManageTransactionOptionsModal } from "../ManageTransactionOptionsModal/ManageTransactionOptionsModal";
+import { formatAmount } from "../../utils/format-amount";
 import {
   Animated,
   Pressable,
-  Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 
 import WhiteTrashIcon from "../../assets/images/white-trash.svg";
@@ -171,26 +172,16 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
     return null;
   }
 
-  let heightValue: number = 0.3;
+  const isExpense = props.transaction.type === "Despesa";
 
+  let heightValue: number = 0.48;
   if (props?.transaction.description) {
-    if (props?.transaction.description?.length >= 150) {
-      heightValue = 0.35;
-    }
-  } else {
-    heightValue = 0.2;
+    heightValue =
+      props.transaction.description.length >= 150 ? 0.62 : 0.55;
   }
 
   const SHEET_HEIGHT = screenHeight * heightValue;
   const IconComponent = iconMap[props.transaction.category.icon.split("-")[1]];
-
-  let transactionType: TransactionType = "fixa";
-
-  if (props.transaction.recurrence !== "NONE") {
-    transactionType = "recorrente";
-  } else if (props.transaction.total_installments > 1) {
-    transactionType = "parcelada";
-  }
 
   const recurrenceOptions = {
     MONTHLY: "Mensal",
@@ -200,12 +191,15 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   const recurrence =
     props.transaction.recurrence !== "NONE"
       ? recurrenceOptions[props.transaction.recurrence]
-      : "Nenhuma.";
+      : "Nenhuma";
 
   const installments: string =
     props.transaction.total_installments > 1
       ? `${props.transaction.current_installment}/${props.transaction.total_installments}`
-      : "À vista.";
+      : "À vista";
+
+  const amountColor = isExpense ? Colors.expenseRed : Colors.incomeGreen;
+  const amountPrefix = isExpense ? "-R$ " : "R$ ";
 
   return (
     <View style={styles.overlay}>
@@ -221,110 +215,89 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
         <View style={styles.dragIndicator} />
 
         <View style={styles.mainContent}>
-          <View style={styles.topContent}>
-            <View style={styles.leftTopContent}>
-              <View
-                style={[
-                  styles.iconCircle,
-                  {
-                    backgroundColor:
-                      props.transaction.category.icon.split("-")[0],
-                  },
-                ]}
-              >
-                <IconComponent width={30} height={30} />
-              </View>
-              <View style={styles.transactionsTitle}>
-                <CustomText
-                  style={{
-                    color: Colors.primaryGray,
-                    fontSize: 18,
-                    lineHeight: 16,
-                  }}
-                >
-                  {props.transaction.category.name}
-                </CustomText>
-                <Text
-                  style={{
-                    color: Colors.primaryGray,
-                    fontSize: 16,
-                  }}
-                >
-                  {new Date(
-                    props.transaction.transaction_date,
-                  ).toLocaleDateString("pt-BR")}
-                </Text>
-              </View>
+          <View style={styles.headerSection}>
+            <View
+              style={[
+                styles.iconCircle,
+                {
+                  backgroundColor:
+                    props.transaction.category.icon.split("-")[0],
+                },
+              ]}
+            >
+              <IconComponent width={30} height={30} />
             </View>
 
-            <View style={styles.rightTopContent}>
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={handleEditPress}
-                style={[
-                  styles.optionsCircle,
-                  { backgroundColor: Colors.primaryBlue },
-                ]}
-              >
-                <WhitePencil width={16} height={16} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={handleDeletePress}
-                style={[
-                  styles.optionsCircle,
-                  { backgroundColor: Colors.expenseRed },
-                ]}
-              >
-                <WhiteTrashIcon width={18} height={18} />
-              </TouchableOpacity>
+            <View style={styles.headerText}>
+              <CustomText style={styles.categoryName}>
+                {props.transaction.category.name}
+              </CustomText>
+              <Text style={styles.dateText}>
+                {new Date(
+                  props.transaction.transaction_date,
+                ).toLocaleDateString("pt-BR")}
+              </Text>
+              <Text style={[styles.amountText, { color: amountColor }]}>
+                {amountPrefix}{formatAmount(props.transaction.amount)}
+              </Text>
             </View>
           </View>
 
-          <View style={styles.transactionsContent}>
-            <View style={styles.recurrenceContent}>
-              <View style={{ flexDirection: "row", gap: 6 }}>
-                <CustomText style={styles.transactionsContentKonkhmerText}>
-                  Parcelas:
-                </CustomText>
-                <Text style={styles.transactionsContentPoppinsText}>
-                  {installments}
-                </Text>
-              </View>
+          <View style={styles.separator} />
 
-              <View style={{ flexDirection: "row", gap: 6 }}>
-                <CustomText style={styles.transactionsContentKonkhmerText}>
-                  Recorrência:
-                </CustomText>
-                <Text style={styles.transactionsContentPoppinsText}>
-                  {recurrence}
-                </Text>
-              </View>
+          <View style={styles.infoSection}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Parcelas</Text>
+              <Text style={styles.infoValue}>{installments}</Text>
             </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Recorrência</Text>
+              <Text style={styles.infoValue}>{recurrence}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Tipo</Text>
+              <Text style={styles.infoValue}>{props.transaction.type}</Text>
+            </View>
+          </View>
 
-            {props.transaction.description ? (
-              <View style={[{ gap: 6 }]}>
-                <CustomText
-                  style={[
-                    styles.transactionsContentKonkhmerText,
-                    { textAlign: "center" },
-                  ]}
-                >
-                  Descrição:
-                </CustomText>
-
-                <Text
-                  style={[
-                    styles.transactionsContentPoppinsText,
-                    { textAlign: "center" },
-                  ]}
-                >
+          {props.transaction.description ? (
+            <>
+              <View style={styles.separator} />
+              <View style={styles.descriptionSection}>
+                <Text style={styles.descriptionLabel}>Descrição</Text>
+                <Text style={styles.descriptionText}>
                   {props.transaction.description}
                 </Text>
               </View>
-            ) : (
-              <View></View>
-            )}
+            </>
+          ) : null}
+
+          <View style={styles.separator} />
+
+          <View style={styles.actionsRow}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handleEditPress}
+              style={[styles.actionButton, styles.editButton]}
+            >
+              <WhitePencil width={17} height={17} />
+              <Text style={styles.actionButtonText}>Editar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handleDeletePress}
+              style={[styles.actionButton, styles.deleteButton]}
+            >
+              {deleteTransactionLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <WhiteTrashIcon width={17} height={17} />
+                  <Text style={styles.actionButtonText}>Excluir</Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </Animated.View>

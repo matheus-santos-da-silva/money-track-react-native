@@ -3,7 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 
 const { height: screenHeight } = Dimensions.get("window");
 
-export const SHEET_HEIGHT = screenHeight * 0.25;
+export const SHEET_HEIGHT = screenHeight * 0.42;
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -13,57 +13,71 @@ export const styles = StyleSheet.create({
 
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
 
   container: {
     backgroundColor: "#fff",
     width: "100%",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 14,
-    paddingLeft: 36,
-    paddingRight: 36,
-    paddingHorizontal: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    paddingBottom: 36,
   },
 
   dragIndicator: {
-    width: 50,
+    width: 40,
     height: 4,
     borderRadius: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: "#E0E0E0",
     alignSelf: "center",
-    marginBottom: 12,
+    marginBottom: 24,
+  },
+
+  titleContainer: {
+    alignItems: "center",
+    marginBottom: 28,
   },
 
   title: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 19,
     textAlign: "center",
-    marginBottom: 30,
     color: Colors.primaryGray,
+    fontFamily: "KonkhmerSleokchher-Regular",
+    marginBottom: 6,
+  },
+
+  subtitle: {
+    fontSize: 13,
+    color: "#AAAAAA",
+    fontFamily: "Poppins-Regular",
+    textAlign: "center",
   },
 
   optionsContainer: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 18,
+    gap: 14,
   },
 
   optionButton: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 22,
+    borderRadius: 22,
     alignItems: "center",
+    gap: 8,
   },
 
   optionText: {
     color: "white",
     fontFamily: "KonkhmerSleokchher-Regular",
-    fontSize: 15,
-    letterSpacing: 0.4,
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
+
+  optionSubtitle: {
+    color: "rgba(255,255,255,0.72)",
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
   },
 
   expenseButton: {

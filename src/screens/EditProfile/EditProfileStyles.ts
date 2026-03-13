@@ -39,17 +39,20 @@ export const styles = StyleSheet.create({
   editProfileText: {
     fontSize: 22,
     color: "white",
+    marginBottom: 8,
   },
 
   mainContent: {
-    width: "82%",
-    marginLeft: 34,
-    marginTop: 40,
-    gap: 18,
+    paddingHorizontal: 24,
+    marginTop: 36,
+    gap: 20,
+  },
+
+  fieldGroup: {
+    gap: 8,
   },
 
   label: {
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -57,24 +60,43 @@ export const styles = StyleSheet.create({
 
   labelText: {
     color: Colors.primaryGray,
-    fontSize: 18,
+    fontSize: 14,
+    fontFamily: "Poppins-SemiBold",
   },
 
   input: {
     width: "100%",
-    height: 46,
-    alignItems: "center",
+    height: 52,
     paddingLeft: 16,
-    position: "relative",
-    backgroundColor: "transparent",
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: Colors.primaryGray,
-    color: Colors.primaryGray,
-    borderRadius: 12,
+    borderColor: "#EBEBEB",
+    color: "#1A1A2E",
+    borderRadius: 14,
     fontFamily: "Poppins-Regular",
+    fontSize: 15,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+
+  passwordRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingRight: 16,
+  },
+
+  passwordText: {
+    color: Colors.primaryGray,
+    fontFamily: "Poppins-Regular",
+    fontSize: 15,
+    letterSpacing: 2,
   },
 
   buttonDiv: {
-    marginTop: 18,
+    marginTop: 12,
   },
 });

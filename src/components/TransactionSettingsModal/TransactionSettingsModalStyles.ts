@@ -9,93 +9,146 @@ export const styles = StyleSheet.create({
 
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
 
   container: {
     backgroundColor: "#fff",
     width: "100%",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 14,
-    paddingLeft: 30,
-    paddingRight: 30,
-    paddingHorizontal: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+    paddingTop: 0,
   },
 
   dragIndicator: {
-    width: 50,
+    width: 40,
     height: 4,
     borderRadius: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: "#E0E0E0",
     alignSelf: "center",
-    marginBottom: 12,
+    marginTop: 14,
+    marginBottom: 20,
   },
 
   mainContent: {
     flexDirection: "column",
-  },
-
-  topContent: {
-    justifyContent: "space-between",
-    flexDirection: "row",
-    marginBottom: 25,
-  },
-
-  leftTopContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  rightTopContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 13,
-  },
-
-  transactionsTitle: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-  },
-
-  optionsCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  transactionsContent: {
-    flexDirection: "column",
     gap: 20,
   },
 
-  recurrenceContent: {
+  headerSection: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 14,
+  },
+
+  iconCircle: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  headerText: {
+    flexDirection: "column",
+    flex: 1,
+    gap: 2,
+  },
+
+  categoryName: {
+    color: Colors.primaryGray,
+    fontSize: 17,
+    lineHeight: 22,
+  },
+
+  dateText: {
+    color: Colors.primaryGray,
+    fontFamily: "Poppins-Regular",
+    fontSize: 13,
+  },
+
+  amountText: {
+    fontFamily: "KonkhmerSleokchher-Regular",
+    fontSize: 22,
+    lineHeight: 26,
+  },
+
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#F0F0F0",
+  },
+
+  infoSection: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+
+  infoItem: {
+    alignItems: "center",
+    gap: 2,
+  },
+
+  infoLabel: {
+    color: "#AAAAAA",
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+  },
+
+  infoValue: {
+    color: "#1A1A2E",
+    fontFamily: "Poppins-SemiBold",
+    fontSize: 14,
+  },
+
+  descriptionSection: {
+    backgroundColor: "#F8F8F8",
+    borderRadius: 14,
+    padding: 14,
+    gap: 4,
+  },
+
+  descriptionLabel: {
+    color: "#AAAAAA",
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+  },
+
+  descriptionText: {
+    color: Colors.primaryGray,
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  actionsRow: {
+    flexDirection: "row",
     gap: 12,
   },
 
-  transactionsContentPoppinsText: {
-    color: Colors.primaryGray,
-    fontFamily: "Poppins-Regular",
-    fontSize: 16,
-    lineHeight: 18,
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 15,
+    borderRadius: 16,
+    gap: 8,
   },
 
-  transactionsContentKonkhmerText: {
-    color: Colors.primaryGray,
-    fontSize: 17,
-    lineHeight: 18,
+  editButton: {
+    backgroundColor: Colors.primaryBlue,
+  },
+
+  deleteButton: {
+    backgroundColor: Colors.expenseRed,
+  },
+
+  actionButtonText: {
+    color: "#fff",
+    fontFamily: "Poppins-SemiBold",
+    fontSize: 15,
   },
 });
