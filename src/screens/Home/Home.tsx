@@ -14,9 +14,9 @@ import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSel
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
@@ -110,6 +110,28 @@ export const Home: FC = () => {
     return unsubscribe;
   }, [navigation, refetch]);
 
+  const errorFadeAnim = useRef(new Animated.Value(0)).current;
+  const errorSlideAnim = useRef(new Animated.Value(24)).current;
+
+  useEffect(() => {
+    if (transactionsError) {
+      errorFadeAnim.setValue(0);
+      errorSlideAnim.setValue(24);
+      Animated.parallel([
+        Animated.timing(errorFadeAnim, {
+          toValue: 1,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(errorSlideAnim, {
+          toValue: 0,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [transactionsError]);
+
   const handleRetry = () => {
     refetch();
   };
@@ -200,23 +222,34 @@ export const Home: FC = () => {
         <View style={styles.mainContainer}>
           <View style={styles.mainContent}>
             {transactionsError ? (
-              <View style={styles.errorCard}>
+              <Animated.View
+                style={[
+                  styles.errorCard,
+                  {
+                    opacity: errorFadeAnim,
+                    transform: [{ translateY: errorSlideAnim }],
+                  },
+                ]}
+              >
                 <View style={styles.errorIconContainer}>
-                  <AlertTriangleIcon width={30} height={30} />
+                  <AlertTriangleIcon width={32} height={32} />
                 </View>
-                <Text style={styles.errorTitle}>Ops, algo deu errado!</Text>
-                <Text style={styles.errorMessage}>
-                  Não foi possível carregar suas transações
+                <Text style={styles.errorTitle}>
+                  Não conseguimos nos conectar
                 </Text>
-
+                <Text style={styles.errorMessage}>
+                  Não se preocupe, seus dados estão salvos.{"\n"}Verifique sua
+                  conexão e tente novamente.
+                </Text>
                 <TouchableOpacity
                   style={styles.retryButton}
                   onPress={handleRetry}
+                  activeOpacity={0.8}
                 >
                   <RefreshIcon width={16} height={16} />
                   <Text style={styles.retryButtonText}>Tentar novamente</Text>
                 </TouchableOpacity>
-              </View>
+              </Animated.View>
             ) : (
               <>
                 <TransactionCard
