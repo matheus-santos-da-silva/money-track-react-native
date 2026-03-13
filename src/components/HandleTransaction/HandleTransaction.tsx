@@ -1,9 +1,11 @@
 import { styles } from "./HandleTransactionStyles";
 import { Colors } from "../../styles/colors";
+import { useAuth } from "../../hooks/useAuth";
 import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { useNavigation } from "@react-navigation/native";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
@@ -15,7 +17,6 @@ import { TransactionTypeModal } from "../TransactionTypeModal/TransactionTypeMod
 import { CurrencyInputWithKeypad } from "../CurrencyInput/CurrencyInput";
 import { TransactionRecurrenceSelector } from "../TransactionRecurrenceSelector/TransactionRecurrenceSelector";
 import { TransactionInstallmentsSelector } from "../TransactionInstallmentsSelector/TransactionInstallmentsSelector";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import {
   SafeAreaView,
   Text,
@@ -61,13 +62,6 @@ type StackNavigation = {
   };
 };
 
-type ParamList = {
-  Params: {
-    token: string;
-    user_id: string;
-  };
-};
-
 type TransactionType = "INCOME" | "EXPENSE";
 
 interface HandleTransactionProps {
@@ -85,7 +79,8 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
   initialData,
   isEditing,
 }) => {
-  const { token, user_id } = useRoute<RouteProp<ParamList, "Params">>().params;
+  const { user, userToken } = useAuth();
+
   const { triggerRefetch } = useTransactions();
 
   const { execute, transactionLoading } = useCreateTransaction();
@@ -145,7 +140,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
   };
 
   const { categories, categoriesError, loading } = useGetCategories({
-    token,
+    token: userToken!.token,
     type: transactionType,
   });
 
@@ -173,8 +168,8 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       type: (transactionType === "INCOME" ? "incomes" : "expenses") as
         | "incomes"
         | "expenses",
-      token,
-      user_id,
+      token: userToken!.token,
+      user_id: user!.id,
       amount,
       category_id: category.id,
       recurrence,
@@ -211,7 +206,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
         );
 
         triggerRefetch();
-        await clearOldCache(user_id);
+        await clearOldCache(user!.id);
         navigation.goBack();
       } else {
         showSnackBar(
@@ -262,8 +257,8 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       <TransactionTypeModal
         visible={showTypeMenu}
         onClose={() => setShowTypeMenu(false)}
-        token={token}
-        user_id={user_id}
+        token={userToken!.token}
+        user_id={user!.id}
         type={transactionType === "INCOME" ? "EXPENSE" : "INCOME"}
       />
 

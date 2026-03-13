@@ -8,10 +8,17 @@ import { showSnackBar } from "../../utils/show-snack-bar";
 import { validateEmail } from "../../utils/validate-email";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { View, SafeAreaView, TouchableOpacity, TextInput } from "react-native";
+import {
+  Text,
+  View,
+  SafeAreaView,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 
 import Logo from "../../assets/images/logo-mt.svg";
 import BackButton from "../../assets/images/arrow-left-svg.svg";
+import BlueRightArrow from "../../assets/images/blue-right-arrow.svg";
 
 type StackNavigation = {
   Home: undefined;
@@ -83,47 +90,51 @@ export const EditProfile: FC = () => {
       </View>
 
       <View style={styles.mainContent}>
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
             <CustomText style={styles.labelText}>Nome</CustomText>
           </View>
           <TextInput
             style={styles.input}
-            placeholder={"Digite seu nome"}
-            placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+            placeholder="Digite seu nome"
+            placeholderTextColor="rgba(100, 100, 100, 0.5)"
             onChangeText={setCustomerName}
             value={customerName}
           />
         </View>
 
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
             <CustomText style={styles.labelText}>Email</CustomText>
           </View>
           <TextInput
             style={styles.input}
-            placeholder={"Digite seu email"}
-            placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
+            placeholder="Digite seu email"
+            placeholderTextColor="rgba(100, 100, 100, 0.5)"
             onChangeText={setCustomerEmail}
             value={customerEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
-        <View>
+        <View style={styles.fieldGroup}>
           <View style={styles.label}>
             <CustomText style={styles.labelText}>Senha</CustomText>
           </View>
-          <TextInput
+          <TouchableOpacity
+            style={[styles.input, styles.passwordRow]}
             onPress={() => navigation.navigate("EditPassword")}
-            style={styles.input}
-            placeholder={"Digite sua senha"}
-            placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
-            value={"*********"}
-          />
+            activeOpacity={0.7}
+          >
+            <Text style={styles.passwordText}>• • • • • • • • •</Text>
+            <BlueRightArrow width={14} height={14} />
+          </TouchableOpacity>
         </View>
+
         <View style={styles.buttonDiv}>
           <Button
-            value="Editar"
+            value="Salvar"
             onPress={handleUpdateUser}
             isLoading={isLoading}
           />
