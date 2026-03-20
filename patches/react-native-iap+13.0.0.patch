@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-iap/android/build.gradle b/node_modules/react-native-iap/android/build.gradle
+index 1234567..abcdefg 100644
+--- a/node_modules/react-native-iap/android/build.gradle
++++ b/node_modules/react-native-iap/android/build.gradle
+@@ -33,6 +33,7 @@ def getExtOrIntegerDefault(name) {
+ }
+
+ android {
++  namespace "com.dooboolab.rniap"
+   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+   defaultConfig {
+diff --git a/node_modules/react-native-iap/android/src/main/AndroidManifest.xml b/node_modules/react-native-iap/android/src/main/AndroidManifest.xml
+index 1234567..abcdefg 100644
+--- a/node_modules/react-native-iap/android/src/main/AndroidManifest.xml
++++ b/node_modules/react-native-iap/android/src/main/AndroidManifest.xml
+@@ -1,4 +1,3 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-          android:exported="true"
+-          package="com.dooboolab.rniap">
++          android:exported="true">
+

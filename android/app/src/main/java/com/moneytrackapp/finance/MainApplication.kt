@@ -1,4 +1,4 @@
-package com.moneytrack.app
+package com.moneytrackapp.finance
 
 import android.app.Application
 import com.facebook.react.PackageList
