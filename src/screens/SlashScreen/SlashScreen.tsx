@@ -3,7 +3,7 @@ import { SafeAreaView, View } from "react-native";
 import { styles } from "./SlashScreenStyle";
 import { CustomText } from "../../components/CustomText/CustomText";
 import Logo from "../../assets/images/logo-mt.svg";
-import FastImage from "react-native-fast-image";
+import FastImage from "@d11/react-native-fast-image";
 
 export const SlashScreen: React.FC = () => {
   return (

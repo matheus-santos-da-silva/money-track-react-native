@@ -1,4 +1,4 @@
-package com.moneytrack.app
+package com.moneytrackapp.finance
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
