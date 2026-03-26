@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { styles } from "./BottomBarStyles";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TouchableOpacity, View } from "react-native";
 
@@ -46,6 +47,7 @@ export const BottomBar: FC<
   ButtonFieldProps & { onShowTypeSelector: () => void }
 > = ({ userProps, onShowTypeSelector }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const insets = useSafeAreaInsets();
 
   const navigateTo = (screen: keyof StackNavigation) => {
     if (
@@ -63,7 +65,12 @@ export const BottomBar: FC<
   };
 
   return (
-    <View style={styles.bottomMenu}>
+    <View
+      style={[
+        styles.bottomMenu,
+        { paddingBottom: 10 + insets.bottom, height: 60 + insets.bottom },
+      ]}
+    >
       <View style={styles.iconGroup}>
         <TouchableOpacity onPress={() => navigateTo("Home")}>
           <HomeIcon height="24" width="24" />

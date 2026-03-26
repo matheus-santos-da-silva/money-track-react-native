@@ -10,13 +10,20 @@ import { clearOldCache } from "../../utils/cache-helpers";
 import { useNavigation } from "@react-navigation/native";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { TransactionCard } from "../../components/TransactionCard/TransactionCard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
 import { FC, useEffect, useRef, useState } from "react";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
-import { Animated, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
@@ -101,6 +108,7 @@ export const Home: FC = () => {
   }, [transactions]);
 
   const { total, expenses, incomes } = useBalance(transactions);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -150,7 +158,9 @@ export const Home: FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topMenu}>
+      <View
+        style={[styles.topMenu, { paddingTop: Math.max(20, insets.top + 8) }]}
+      >
         <View style={styles.topMenuContent}>
           <View style={styles.profileContainer}>
             <TouchableOpacity
