@@ -3,6 +3,7 @@ import { Colors } from "./colors";
 
 export const homeScreensStyle = StyleSheet.create({
   topContent: {
+    width: "100%",
     alignItems: "center",
     gap: 16,
   },

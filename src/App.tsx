@@ -3,6 +3,7 @@ import { Stack } from "./routes/Stack";
 import { SlashScreen } from "./screens/SlashScreen/SlashScreen";
 import { AuthProvider } from "./contexts/AuthContext";
 import { withIAPContext } from "react-native-iap";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { TransactionsProvider } from "./contexts/TransactionsContext";
 
 function App(): React.JSX.Element {
@@ -13,15 +14,17 @@ function App(): React.JSX.Element {
     }, 2000);
   }, []);
   return (
-    <AuthProvider>
-      {isSplashVisible ? (
-        <SlashScreen />
-      ) : (
-        <TransactionsProvider>
-          <Stack />
-        </TransactionsProvider>
-      )}
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        {isSplashVisible ? (
+          <SlashScreen />
+        ) : (
+          <TransactionsProvider>
+            <Stack />
+          </TransactionsProvider>
+        )}
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 

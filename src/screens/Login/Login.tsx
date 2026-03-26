@@ -6,10 +6,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { homeScreensStyle } from "../../styles/home-screens.style";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import LoginImage from "../../assets/images/login-image.svg";
 

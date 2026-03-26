@@ -69,7 +69,7 @@ export const Transactions: FC = () => {
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
   };
-  const isViewingCurrentMonth = currentMonthIndex === month;
+  const isViewingCurrentMonth = currentMonthIndex === month && currentYear === year;
 
   const {
     transactions: contextTransactions,
