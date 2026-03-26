@@ -51,7 +51,7 @@ export const Dashboard: FC = () => {
   const [currentMonthIndex, setCurrentMonth] = useState(month);
   const [forceUpdate, setForceUpdate] = useState(false);
 
-  const isViewingCurrentMonth = currentMonthIndex === month;
+  const isViewingCurrentMonth = currentMonthIndex === month && currentYear === year;
 
   const {
     transactions: contextTransactions,

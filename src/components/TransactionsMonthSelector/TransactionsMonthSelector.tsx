@@ -147,9 +147,11 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
         </TouchableOpacity>
 
         <View style={styles.monthsCenterContent}>
-          <CustomText style={styles.monthsOptionsText}>
-            {previousMonth}
-          </CustomText>
+          <View style={styles.monthSideLeft}>
+            <CustomText style={styles.monthsOptionsText}>
+              {previousMonth}
+            </CustomText>
+          </View>
 
           <View style={styles.monthMarker}>
             <AnimatedText style={[styles.selectedMonth, animatedStyle]}>
@@ -159,9 +161,11 @@ export const TransactionsMonthSelector: FC<TransactionsMonthSelectorProps> = ({
             </AnimatedText>
           </View>
 
-          <CustomText style={[styles.monthsOptionsText]}>
-            {nextMonth}
-          </CustomText>
+          <View style={styles.monthSideRight}>
+            <CustomText style={styles.monthsOptionsText}>
+              {nextMonth}
+            </CustomText>
+          </View>
         </View>
 
         <TouchableOpacity

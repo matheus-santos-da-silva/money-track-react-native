@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   monthModalContainer: {
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -11,7 +12,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "transparent",
-    width: 370,
+    width: "100%",
     height: 65,
     borderWidth: 2,
     borderColor: "white",
@@ -63,9 +64,21 @@ export const styles = StyleSheet.create({
   },
 
   monthsCenterContent: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 32,
+    paddingHorizontal: 40,
+  },
+
+  monthSideLeft: {
+    flex: 1,
+    alignItems: "flex-end",
+    paddingRight: 16,
+  },
+
+  monthSideRight: {
+    flex: 1,
+    alignItems: "flex-start",
+    paddingLeft: 16,
   },
 });
