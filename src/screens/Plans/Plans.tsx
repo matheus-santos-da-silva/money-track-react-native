@@ -52,6 +52,27 @@ const getPrice = (sub: Subscription): string => {
   return (sub as { localizedPrice?: string }).localizedPrice ?? "";
 };
 
+const getPricePerMonth = (sub: Subscription): string | undefined => {
+  if (sub.productId !== "plano_anual") return undefined;
+
+  if ("subscriptionOfferDetails" in sub) {
+    const phase =
+      sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0];
+    const micros = phase?.priceAmountMicros;
+    if (micros) {
+      const monthly = Number(micros) / 12 / 1_000_000;
+      return `R$ ${monthly.toFixed(2).replace(".", ",")}/mês`;
+    }
+    const formatted = phase?.formattedPrice ?? "";
+    const numeric = parseFloat(formatted.replace(/[^\d,]/g, "").replace(",", "."));
+    if (!isNaN(numeric)) {
+      const monthly = numeric / 12;
+      return `R$ ${monthly.toFixed(2).replace(".", ",")}/mês`;
+    }
+  }
+  return undefined;
+};
+
 const getDaysRemaining = (trialEndsAt: Date): number => {
   const now = new Date();
   const end = new Date(trialEndsAt);
@@ -127,13 +148,17 @@ export const Plans: FC = () => {
 
   useEffect(() => {
     if (subscriptions.length > 0) {
-      const formattedProducts = subscriptions.map((sub) => ({
-        productId: sub.productId,
-        title: sub.title || "Plano",
-        localizedPrice: getPrice(sub),
-        pricePerMonth: getPrice(sub),
-        description: sub.description || "",
-      }));
+      const formattedProducts = subscriptions.map((sub) => {
+        const fullPrice = getPrice(sub);
+        const monthlyPrice = getPricePerMonth(sub);
+        return {
+          productId: sub.productId,
+          title: (sub.title || "Plano").replace(/\s*\(.*\)\s*$/, "").trim(),
+          localizedPrice: monthlyPrice ?? fullPrice,
+          pricePerMonth: monthlyPrice ? fullPrice : undefined,
+          description: sub.description || "",
+        };
+      });
 
       setProducts(formattedProducts);
     }
