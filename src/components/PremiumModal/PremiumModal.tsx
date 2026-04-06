@@ -33,28 +33,6 @@ interface Product {
   discount?: string;
 }
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    productId: "plano_mensal",
-    title: "Plano Mensal",
-    localizedPrice: "R$ 19,90",
-    pricePerMonth: "R$ 19,90/mês",
-    description: "Flexibilidade total. Cancele quando quiser.",
-  },
-  {
-    productId: "plano_anual",
-    title: "Plano Anual",
-    localizedPrice: "R$ 189,90",
-    pricePerMonth: "R$ 15,82/mês",
-    description: "Melhor custo-benefício.",
-    savings: "Economize R$ 48,90",
-    discount: "21% OFF",
-  },
-];
-
-// Flag para controlar se usa mock ou API real
-const USE_MOCK = true;
-
 interface PremiumModalProps {
   isVisible: boolean;
   onClose: () => void;
@@ -120,12 +98,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
   const loadProducts = async () => {
     try {
       setIsLoading(true);
-      if (USE_MOCK) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setProducts(MOCK_PRODUCTS);
-      } else {
-        if (connected) await getSubscriptions({ skus: productIds });
-      }
+      if (connected) await getSubscriptions({ skus: productIds });
     } catch (e) {
       console.log("Erro ao carregar planos:", e);
     } finally {
@@ -134,7 +107,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
   };
 
   useEffect(() => {
-    if (!USE_MOCK && subscriptions.length > 0) {
+    if (subscriptions.length > 0) {
       const formattedProducts = subscriptions.map((sub) => ({
         productId: sub.productId,
         title: sub.title || "Plano",
@@ -149,9 +122,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
 
   const handleSubscribe = async (productId: string) => {
     try {
-      if (USE_MOCK) {
-        console.log("MOCK - Assinatura:", productId);
-      } else if (Platform.OS === "android") {
+      if (Platform.OS === "android") {
         const sub = subscriptions.find(
           (s) => s.productId === productId,
         ) as SubscriptionAndroid;
