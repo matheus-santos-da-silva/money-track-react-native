@@ -1,3 +1,5 @@
+import { toDateOnlyString } from "./date-only";
+
 export const getDateRange = (year: number, month: number) => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -8,7 +10,8 @@ export const getDateRange = (year: number, month: number) => {
 
   return {
     monthName: capitalize(rawMonthName),
-    startDate: firstDay.toISOString().split("T")[0],
-    endDate: lastDay.toISOString().split("T")[0],
+    // Dia local (não toISOString): meia-noite local vira o dia anterior em UTC+.
+    startDate: toDateOnlyString(firstDay),
+    endDate: toDateOnlyString(lastDay),
   };
 };

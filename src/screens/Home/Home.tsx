@@ -4,7 +4,6 @@ import { BottomBar } from "../../components/BottomBar/BottomBar";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { useBalance } from "../../hooks/useBalance";
 import { getDateRange } from "../../utils/get-date-range";
-import { showSnackBar } from "../../utils/show-snack-bar";
 import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useNavigation } from "@react-navigation/native";
@@ -58,7 +57,7 @@ export const Home: FC = () => {
 
   const { monthName } = getDateRange(currentYear, currentMonth);
 
-  const { user, error, isPremium, userToken, logout } = useAuth();
+  const { user, isPremium, userToken } = useAuth();
 
   const [isHidden, setIsHidden] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -83,17 +82,7 @@ export const Home: FC = () => {
     if (user?.id) {
       clearOldCache(user.id);
     }
-
-    if (error) {
-      showSnackBar("Sua sessão expirou. Faça login novamente.", "#de525a");
-
-      const timer = setTimeout(() => {
-        logout();
-      }, 1500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [user?.id, error, logout]);
+  }, [user?.id]);
 
   const { transactions, transactionsError, loading, refetch } =
     useGetUserTransactions({
@@ -146,7 +135,7 @@ export const Home: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+    if (user?.isPremium === false) {
       setIsPremiumModalVisible(true);
       return;
     }
@@ -174,11 +163,7 @@ export const Home: FC = () => {
             </TouchableOpacity>
 
             <Text style={styles.greetingText}>
-              {error
-                ? "Sessão expirada..."
-                : user
-                ? `Olá, ${user.name}!`
-                : "Carregando..."}
+              {user ? `Olá, ${user.name}!` : "Carregando..."}
             </Text>
           </View>
           <NotificationIcon fill="white" height="24" width="24" />

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { subtractAmounts, sumAmounts } from "../utils/money";
 import { UserTransactionsDTO } from "../services/DTOS/UserTransactionsDTO";
 
 interface BalanceResponse {
@@ -11,28 +12,16 @@ export const useBalance = (
   transactions: UserTransactionsDTO | null
 ): BalanceResponse => {
   return useMemo(() => {
-    let total = 0;
-    let expenses = 0;
-    let incomes = 0;
-
-    if (transactions?.expenses) {
-      expenses = transactions.expenses.reduce(
-        (sum, expense) => sum + expense.amount,
-        0
-      );
-      total -= expenses;
-    }
-
-    if (transactions?.incomes) {
-      incomes = transactions.incomes.reduce(
-        (sum, income) => sum + income.amount,
-        0
-      );
-      total += incomes;
-    }
+    // Soma em centavos inteiros: somar floats acumula erro.
+    const expenses = sumAmounts(
+      (transactions?.expenses ?? []).map((expense) => expense.amount)
+    );
+    const incomes = sumAmounts(
+      (transactions?.incomes ?? []).map((income) => income.amount)
+    );
 
     return {
-      total,
+      total: subtractAmounts(incomes, expenses),
       expenses,
       incomes,
     };

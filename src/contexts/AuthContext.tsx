@@ -2,6 +2,10 @@ import { UserDTO } from "../services/DTOS/UserDTO";
 import { LoginUser } from "../services/LoginService";
 import { useGetUser } from "../hooks/useGetUser";
 import { SignUpProps, SignUpUser } from "../services/SignUpService";
+import axios from "axios";
+import { FINANCE_SERVICE_URL, USERS_SERVICE_URL } from "@env";
+import { showSnackBar } from "../utils/show-snack-bar";
+import { createSessionExpiredHandler } from "../utils/session-expired-handler";
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -54,9 +58,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     checkAuthStatus();
   }, []);
 
-  const isPremium =
-    user?.plan === "PREMIUM" ||
-    (user?.plan === "FREE" && new Date(user.trialEndsAt) >= new Date());
+  const isPremium = user?.isPremium ?? false;
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setError(null);
@@ -106,6 +108,27 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     await AsyncStorage.removeItem("@money-track-token!");
     setUserToken(null);
   };
+
+  // 401 em qualquer chamada autenticada = token expirado/inválido: encerra a sessão.
+  // É recriado a cada novo token, o que também reinicia o "avisar só uma vez".
+  useEffect(() => {
+    const token = userToken?.token;
+    if (!token) return;
+
+    const interceptorId = axios.interceptors.response.use(
+      (response) => response,
+      createSessionExpiredHandler({
+        apiUrls: [USERS_SERVICE_URL, FINANCE_SERVICE_URL],
+        token,
+        onSessionExpired: () => {
+          showSnackBar("Sua sessão expirou. Faça login novamente.", "#de525a");
+          logout();
+        },
+      }),
+    );
+
+    return () => axios.interceptors.response.eject(interceptorId);
+  }, [userToken?.token]);
 
   return (
     <AuthContext.Provider

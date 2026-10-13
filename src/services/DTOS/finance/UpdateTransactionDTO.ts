@@ -2,7 +2,6 @@ export interface UpdateTransactionDTO {
   id: string;
   type?: "expenses" | "incomes";
   token: string;
-  user_id: string;
   amount?: number;
   total_installments?: number;
   category_id?: string;

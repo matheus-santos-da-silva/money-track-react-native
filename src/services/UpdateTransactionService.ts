@@ -12,7 +12,7 @@ export const updateTransaction = async (
       if (data.total_installments !== 1) data.recurrence = "NONE";
     }
 
-    const { type, token, id, user_id, ...body } = data;
+    const { type, token, id, ...body } = data;
 
     let endpoint = `${FINANCE_SERVICE_URL}/${type}/${id}`;
 

@@ -7,6 +7,7 @@ import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
 import { useNavigation } from "@react-navigation/native";
 import { clearOldCache } from "../../utils/cache-helpers";
+import { parseDateOnly, toDateOnlyString } from "../../utils/date-only";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
 import { useGetCategories } from "../../hooks/useGetCategories";
@@ -118,12 +119,9 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
     setSelectedTransactionType(type);
   };
 
+  // A data da transação é um dia de calendário: lê o dia do servidor sem conta de fuso.
   const [date, setDate] = useState<Date>(
-    initialData?.date
-      ? typeof initialData.date === "string"
-        ? new Date(initialData.date)
-        : initialData.date
-      : new Date(),
+    initialData?.date ? parseDateOnly(initialData.date) : new Date(),
   );
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
@@ -169,12 +167,11 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
         | "incomes"
         | "expenses",
       token: userToken!.token,
-      user_id: user!.id,
       amount,
       category_id: category.id,
       recurrence,
       total_installments: installments,
-      transaction_date: date.toISOString(),
+      transaction_date: toDateOnlyString(date),
       description,
       ...(isEditing && {
         applyToAll: initialData?.applyToAll,

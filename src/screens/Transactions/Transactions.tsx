@@ -1,3 +1,4 @@
+import { dateOnlyKey, parseDateOnly, todayKey } from "../../utils/date-only";
 import { styles } from "./TransactionsStyles";
 import { useAuth } from "../../hooks/useAuth";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
@@ -122,7 +123,7 @@ export const Transactions: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+    if (user?.isPremium === false) {
       setIsPremiumModalVisible(true);
       return;
     } else {
@@ -169,16 +170,9 @@ export const Transactions: FC = () => {
     [...filteredTransactions.incomes, ...filteredTransactions.expenses].forEach(
       (transaction) => {
         if (filterSelected === "today") {
-          const isoDate = new Date(transaction.transaction_date)
-            .toISOString()
-            .split("T")[0];
+          const isoDate = dateOnlyKey(transaction.transaction_date);
 
-          if (
-            new Date(transaction.transaction_date).getDate() ===
-              new Date().getDate() &&
-            new Date(transaction.transaction_date).getMonth() ===
-              new Date().getMonth()
-          ) {
+          if (isoDate === todayKey()) {
             if (!groupedByDate[isoDate]) groupedByDate[isoDate] = [];
 
             groupedByDate[isoDate].push({
@@ -197,9 +191,7 @@ export const Transactions: FC = () => {
             });
           }
         } else {
-          const isoDate = new Date(transaction.transaction_date)
-            .toISOString()
-            .split("T")[0];
+          const isoDate = dateOnlyKey(transaction.transaction_date);
 
           if (!groupedByDate[isoDate]) groupedByDate[isoDate] = [];
 
@@ -274,7 +266,7 @@ export const Transactions: FC = () => {
               .map(([isoDate, txList]) => (
                 <View key={isoDate}>
                   <CustomText style={styles.transactionDateText}>
-                    {formatter.format(new Date(isoDate))}
+                    {formatter.format(parseDateOnly(isoDate))}
                   </CustomText>
 
                   {txList.map((tx, index) => {
