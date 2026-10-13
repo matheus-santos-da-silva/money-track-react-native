@@ -41,7 +41,7 @@ export const EditPassword: FC = () => {
       confirmPassword.length < 7 ||
       confirmPassword.length > 30
     ) {
-      showSnackBar("A senha deve ter entre 8 a 30 caracteres", "#de525a");
+      showSnackBar("A senha deve ter entre 7 e 30 caracteres", "#de525a");
       return;
     }
 

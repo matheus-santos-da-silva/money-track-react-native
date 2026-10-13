@@ -4,6 +4,7 @@ import { iconMap } from "../../utils/icons";
 import { CustomText } from "../CustomText/CustomText";
 import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { useAuth } from "../../hooks/useAuth";
 import { useNavigation } from "@react-navigation/native";
 import { useDeleteCategory } from "../../hooks/useDeleteCategory";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
@@ -51,6 +52,7 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
   props,
 }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const { user } = useAuth();
 
   const { translateY, panResponder, handleClose } = useModalAnimation(
     visible,
@@ -61,6 +63,15 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
 
   const handleOptionSelect = (modalAction: "edit" | "delete") => {
     if (modalAction === "edit") {
+      // Plano gratuito com trial vencido é somente leitura (o servidor também bloqueia).
+      if (user?.isPremium === false) {
+        showSnackBar(
+          "Seu período gratuito acabou. Assine o Premium para editar categorias.",
+          "#de525a",
+        );
+        return;
+      }
+
       navigation.navigate("HandleCategory", {
         token: props.token,
         type: props.type,

@@ -3,14 +3,13 @@ import axios from "axios";
 import { GetUserTransactionsResponseDTO } from "./DTOS/GetUserTransactionsResponseDTO";
 
 export const getUserTransactions = async (
-  user_id: string,
   token: string,
   startDate: string,
   endDate: string
 ): Promise<GetUserTransactionsResponseDTO> => {
   try {
     const response = await axios.get(
-      `${FINANCE_SERVICE_URL}/transactions/${user_id}?start_date=${startDate}&end_date=${endDate}`,
+      `${FINANCE_SERVICE_URL}/transactions?start_date=${startDate}&end_date=${endDate}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

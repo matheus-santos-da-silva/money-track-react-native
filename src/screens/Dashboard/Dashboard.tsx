@@ -1,6 +1,7 @@
 import { styles } from "./DashboardStyles";
 import { Colors } from "../../styles/colors";
 import { colors } from "../../utils/colors";
+import { sumAmounts, subtractAmounts } from "../../utils/money";
 import { useAuth } from "../../hooks/useAuth";
 import { PieChart } from "react-native-gifted-charts";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
@@ -69,7 +70,7 @@ export const Dashboard: FC = () => {
 
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
-    if (user?.plan === "FREE" && new Date(user.trialEndsAt) < new Date()) {
+    if (user?.isPremium === false) {
       setIsPremiumModalVisible(true);
       return;
     } else {
@@ -162,14 +163,16 @@ export const Dashboard: FC = () => {
     });
   };
 
-  const expensesAmount: number =
-    transactions?.expenses.reduce((acc, expense) => acc + expense.amount, 0) ||
-    0;
+  // Soma em centavos inteiros (somar floats acumula erro).
+  const expensesAmount: number = sumAmounts(
+    (transactions?.expenses ?? []).map((expense) => expense.amount),
+  );
 
-  const incomesAmount: number =
-    transactions?.incomes.reduce((acc, income) => acc + income.amount, 0) || 0;
+  const incomesAmount: number = sumAmounts(
+    (transactions?.incomes ?? []).map((income) => income.amount),
+  );
 
-  const totalAmount = incomesAmount - expensesAmount;
+  const totalAmount = subtractAmounts(incomesAmount, expensesAmount);
 
   const incomesPieData = useMemo(
     () => getPieDataByCategory(colors, incomesAmount, transactions?.incomes),

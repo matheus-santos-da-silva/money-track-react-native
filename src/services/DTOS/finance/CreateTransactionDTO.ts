@@ -1,7 +1,6 @@
 export interface CreateTransactionDTO {
   type: "expenses" | "incomes";
   token: string;
-  user_id: string;
   amount: number;
   total_installments: number;
   current_installment: number;

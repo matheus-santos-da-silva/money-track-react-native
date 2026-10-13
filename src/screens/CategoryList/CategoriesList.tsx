@@ -115,10 +115,7 @@ export const CategoriesList: FC = () => {
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => {
-                  if (
-                    user?.plan === "FREE" &&
-                    new Date(user.trialEndsAt) < new Date()
-                  ) {
+                  if (user?.isPremium === false) {
                     setIsPremiumModalVisible(true);
                     return;
                   } else {
@@ -167,10 +164,7 @@ export const CategoriesList: FC = () => {
                   <TouchableOpacity
                     activeOpacity={0.9}
                     onPress={() => {
-                      if (
-                        user?.plan === "FREE" &&
-                        new Date(user.trialEndsAt) < new Date()
-                      ) {
+                      if (user?.isPremium === false) {
                         setIsPremiumModalVisible(true);
                         return;
                       } else {

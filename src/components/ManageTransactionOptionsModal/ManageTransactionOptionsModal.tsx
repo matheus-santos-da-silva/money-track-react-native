@@ -13,12 +13,18 @@ interface ManageTransactionOptionsModalProps {
   action: "edit" | "delete";
   onClose: () => void;
   onSelectOption: (applyToAll: boolean) => void;
+  // parcelada: "esta parcela / todas"; recorrente: "esta / esta e as seguintes"
+  kind?: "installment" | "recurring";
 }
 
 export const ManageTransactionOptionsModal: FC<
   ManageTransactionOptionsModalProps
-> = ({ visible, action, onClose, onSelectOption }) => {
+> = ({ visible, action, onClose, onSelectOption, kind = "installment" }) => {
   const isEdit = action === "edit";
+  const labels =
+    kind === "recurring"
+      ? { one: "Apenas esta", all: "Esta e as seguintes" }
+      : { one: "Apenas esta parcela", all: "Todas as parcelas" };
   const title = isEdit ? "Editar Transação" : "Excluir Transação";
   const subtitle = isEdit
     ? "Como você gostaria de editar esta transação?"
@@ -44,7 +50,7 @@ export const ManageTransactionOptionsModal: FC<
                   activeOpacity={0.8}
                   onPress={() => onSelectOption(false)}
                 >
-                  <Text style={styles.optionText}>Apenas esta parcela</Text>
+                  <Text style={styles.optionText}>{labels.one}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -52,7 +58,7 @@ export const ManageTransactionOptionsModal: FC<
                   activeOpacity={0.8}
                   onPress={() => onSelectOption(true)}
                 >
-                  <Text style={styles.optionText}>Todas as parcelas</Text>
+                  <Text style={styles.optionText}>{labels.all}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity

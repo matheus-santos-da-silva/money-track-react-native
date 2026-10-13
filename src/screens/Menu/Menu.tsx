@@ -20,6 +20,7 @@ type StackNavigation = {
   CategoriesList: undefined;
   EditProfile: undefined;
   Plans: undefined;
+  DeleteAccount: undefined;
 };
 
 export const Menu: FC = () => {
@@ -120,6 +121,25 @@ export const Menu: FC = () => {
                   <LogoutIcon height="22" width="22" />
                 </View>
                 <CustomText style={styles.menuText}>Sair</CustomText>
+              </View>
+              <BlueRightArrow width={14} height={14} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.divisionLine} />
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("DeleteAccount")}
+          >
+            <View style={styles.menuOption}>
+              <View style={styles.menuOptionLeft}>
+                <View
+                  style={[styles.iconWrapper, { backgroundColor: "#FDECEA" }]}
+                >
+                  <UserIcon height="22" width="22" />
+                </View>
+                <CustomText style={styles.menuText}>Excluir conta</CustomText>
               </View>
               <BlueRightArrow width={14} height={14} />
             </View>

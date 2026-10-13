@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Dimensions, Text } from "react-native";
 import { CustomText } from "../CustomText/CustomText";
 import { showSnackBar } from "../../utils/show-snack-bar";
+import { useAuth } from "../../hooks/useAuth";
+import { parseDateOnly } from "../../utils/date-only";
 import { useNavigation } from "@react-navigation/native";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
@@ -61,6 +63,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   props,
 }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const { user } = useAuth();
 
   const { translateY, panResponder } = useModalAnimation(visible, onClose);
 
@@ -70,11 +73,25 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   const [manageModalVisible, setManageModalVisible] = useState(false);
   const [modalAction, setModalAction] = useState<"edit" | "delete">("edit");
 
+  // Parcelada ou recorrente: pergunta se vale só para esta ou para as demais.
+  const scopeKind: "installment" | "recurring" | null =
+    (props.transaction?.total_installments ?? 1) > 1
+      ? "installment"
+      : props.transaction && props.transaction.recurrence !== "NONE"
+      ? "recurring"
+      : null;
+
   const handleEditPress = () => {
-    if (
-      props.transaction?.total_installments &&
-      props.transaction?.total_installments > 1
-    ) {
+    // Plano gratuito com trial vencido é somente leitura (o servidor também bloqueia).
+    if (user?.isPremium === false) {
+      showSnackBar(
+        "Seu período gratuito acabou. Assine o Premium para editar transações.",
+        "#de525a",
+      );
+      return;
+    }
+
+    if (scopeKind) {
       setModalAction("edit");
       setManageModalVisible(true);
     } else {
@@ -83,10 +100,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   };
 
   const handleDeletePress = async () => {
-    if (
-      props.transaction?.total_installments &&
-      props.transaction?.total_installments > 1
-    ) {
+    if (scopeKind) {
       setModalAction("delete");
       setManageModalVisible(true);
     } else {
@@ -150,7 +164,6 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
           token: props.token,
           id: props.transaction?.id,
           applyToAll: applyToAll,
-          user_id: props.user_id,
         });
 
         if (success) {
@@ -233,7 +246,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
                 {props.transaction.category.name}
               </CustomText>
               <Text style={styles.dateText}>
-                {new Date(
+                {parseDateOnly(
                   props.transaction.transaction_date,
                 ).toLocaleDateString("pt-BR")}
               </Text>
@@ -305,6 +318,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
       <ManageTransactionOptionsModal
         visible={manageModalVisible}
         action={modalAction}
+        kind={scopeKind ?? "installment"}
         onClose={() => setManageModalVisible(false)}
         onSelectOption={handleOptionSelect}
       />

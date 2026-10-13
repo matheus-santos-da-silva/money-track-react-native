@@ -5,6 +5,7 @@ import { Plans } from "../screens/Plans/Plans";
 import { Dashboard } from "../screens/Dashboard/Dashboard";
 import { EditProfile } from "../screens/EditProfile/EditProfile";
 import { EditPassword } from "../screens/EditPassword/EditPassword";
+import { DeleteAccount } from "../screens/DeleteAccount/DeleteAccount";
 import { Transactions } from "../screens/Transactions/Transactions";
 import { CreateIncome } from "../screens/Create-Income/CreateIncome";
 import { CreateExpense } from "../screens/Create-Expense/CreateExpense";
@@ -24,6 +25,7 @@ export const ProtectedRoutes: FC = () => {
       <Screen name="CreateIncome" component={CreateIncome} />
       <Screen name="EditProfile" component={EditProfile} />
       <Screen name="EditPassword" component={EditPassword} />
+      <Screen name="DeleteAccount" component={DeleteAccount} />
       <Screen name="CategoriesList" component={CategoriesList} />
       <Screen name="HandleCategory" component={HandleCategory} />
       <Screen name="Dashboard" component={Dashboard} />
