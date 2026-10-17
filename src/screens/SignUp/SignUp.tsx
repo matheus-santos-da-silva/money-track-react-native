@@ -1,101 +1,132 @@
-import { Logo } from "../../components/Logo/Logo";
-import { Input } from "../../components/Input/Input";
 import { styles } from "./SignUpStyles";
-import { Button } from "../../components/Button/Button";
-import { useAuth } from "../../hooks/useAuth";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { FC, useState } from "react";
-import { validateData } from "../../utils/validate-signUp";
-import { showSnackBar } from "../../utils/show-snack-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "../../styles/colors";
+import { FormField } from "../../components/FormField/FormField";
+import { AuthScreen } from "../../components/AuthScreen/AuthScreen";
+import { FooterButton } from "../../components/FooterButton/FooterButton";
+import { SignUpHeader } from "../../components/SignUpHeader/SignUpHeader";
 import { useNavigation } from "@react-navigation/native";
-import { homeScreensStyle } from "../../styles/home-screens.style";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { Pressable, Text, View } from "react-native";
+import { AuthFooterLink } from "../../components/AuthFooterLink/AuthFooterLink";
+import { FC, useRef, useState } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Text, TextInput, View } from "react-native";
+import {
+  isSignUpEmailValid,
+  isSignUpPasswordValid,
+} from "../../utils/validate-signUp";
 
-import SignUpImage from "../../assets/images/signup-image.svg";
+import CheckIcon from "../../assets/images/icons/check.svg";
+import CircleIcon from "../../assets/images/icons/circle.svg";
 
 export type StackNavigation = {
   Login: undefined;
-  Home: undefined;
   ProfileCompletion: { email: string; password: string };
 };
 
 export const SignUp: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackNavigation>>();
 
-  const { isLoading } = useAuth();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSignUpBtn = () => {
-    navigation.navigate("Login");
-  };
+  const passwordRef = useRef<TextInput>(null);
 
-  const handleSignUp = async () => {
-    const { message } = validateData(email, password);
+  const trimmedEmail = email.trim();
+  const isEmailValid = isSignUpEmailValid(trimmedEmail);
+  const isPasswordValid = isSignUpPasswordValid(password);
+  const canContinue = isEmailValid && isPasswordValid;
 
-    if (message) {
-      showSnackBar(message || "Erro desconhecido!", "#de525a");
-    } else {
-      navigation.navigate("ProfileCompletion", { email, password });
-    }
+  const ruleColor = isPasswordValid ? Colors.incomeText : Colors.muted;
+  const RuleIcon = isPasswordValid ? CheckIcon : CircleIcon;
+
+  const handleContinue = () => {
+    if (!canContinue) return;
+
+    navigation.navigate("ProfileCompletion", {
+      email: trimmedEmail,
+      password,
+    });
   };
 
   return (
-    <SafeAreaView style={styles.signUpContainer}>
-      <View style={homeScreensStyle.topContent}>
-        <Logo />
-        <CustomText style={styles.signUpMsg}>Crie sua conta</CustomText>
-      </View>
-      <View style={homeScreensStyle.mainContent}>
-        <View style={homeScreensStyle.middleContent}>
-          <SignUpImage width={250} height={250} />
-          <View style={homeScreensStyle.form}>
-            <Input
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Digite seu email"
-              isPassword={false}
-            />
-            <Input
-              label="Senha"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Digite sua senha"
-              isPassword={true}
-            />
-          </View>
-        </View>
-        <View style={styles.bottomContent}>
-          <Button
-            isLoading={isLoading}
-            onPress={handleSignUp}
-            value="Cadastrar"
-          />
-          <View style={homeScreensStyle.divisionContainer}>
-            <View style={homeScreensStyle.orLine} />
-            <Text style={homeScreensStyle.orText}>OU</Text>
-            <View style={homeScreensStyle.orLine} />
-          </View>
-          <View style={homeScreensStyle.footer}>
-            <CustomText style={homeScreensStyle.text}>
-              Já tem uma conta
-            </CustomText>
-            <Text
-              style={[homeScreensStyle.text, homeScreensStyle.questionMark]}
+    <AuthScreen
+      header={
+        <SignUpHeader
+          step={1}
+          title="Crie sua conta"
+          subtitle="Leva menos de um minuto. Você só precisa de um e-mail."
+        />
+      }
+      overlap={28}
+      gap={18}
+    >
+      <View style={styles.fields}>
+        <FormField
+          label="E-mail"
+          surface="ground"
+          value={email}
+          onChangeText={setEmail}
+          error={
+            trimmedEmail !== "" && !isEmailValid
+              ? "Digite um e-mail válido."
+              : null
+          }
+          placeholder="voce@email.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+        />
+
+        <FormField
+          ref={passwordRef}
+          label="Crie uma senha"
+          surface="ground"
+          secure
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Pelo menos 7 caracteres"
+          autoCapitalize="none"
+          autoComplete="new-password"
+          textContentType="newPassword"
+          returnKeyType="next"
+          onSubmitEditing={handleContinue}
+          hint={
+            <View
+              style={styles.rule}
+              accessible
+              accessibilityLabel={`Pelo menos 7 caracteres${
+                isPasswordValid ? ", cumprido" : ""
+              }`}
             >
-              ?
-            </Text>
-            <Pressable onPress={handleSignUpBtn}>
-              <CustomText style={homeScreensStyle.bottomLink}>
-                Acesse a conta
-              </CustomText>
-            </Pressable>
-          </View>
-        </View>
+              <RuleIcon width={14} height={14} color={ruleColor} />
+              <Text style={[styles.ruleText, { color: ruleColor }]}>
+                Pelo menos 7 caracteres
+              </Text>
+            </View>
+          }
+        />
       </View>
-    </SafeAreaView>
+
+      <View style={styles.spacer} />
+
+      <FooterButton
+        label="Continuar"
+        size="large"
+        onPress={handleContinue}
+        disabled={!canContinue}
+      />
+
+      <View style={styles.footer}>
+        <AuthFooterLink
+          question="Já tem conta?"
+          label="Entrar"
+          onPress={() => navigation.navigate("Login")}
+        />
+      </View>
+    </AuthScreen>
   );
 };

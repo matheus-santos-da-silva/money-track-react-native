@@ -3,8 +3,8 @@ import { Colors } from "../../styles/colors";
 import { styles } from "./TransactionSettingsModalStyles";
 import { iconMap } from "../../utils/icons";
 import { useState } from "react";
-import { Dimensions, Text } from "react-native";
-import { CustomText } from "../CustomText/CustomText";
+import { sheetStyles } from "../../styles/sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { showSnackBar } from "../../utils/show-snack-bar";
 import { useAuth } from "../../hooks/useAuth";
 import { parseDateOnly } from "../../utils/date-only";
@@ -16,19 +16,19 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 import { InitialTransactionData } from "../HandleTransaction/HandleTransaction";
 import { ManageTransactionOptionsModal } from "../ManageTransactionOptionsModal/ManageTransactionOptionsModal";
-import { formatAmount } from "../../utils/format-amount";
+import { formatSignedCurrency } from "../../utils/format-amount";
 import {
   Animated,
+  Dimensions,
   Pressable,
+  Text,
   TouchableOpacity,
   View,
   ActivityIndicator,
 } from "react-native";
 
-import WhiteTrashIcon from "../../assets/images/white-trash.svg";
-import WhitePencil from "../../assets/images/white-pencil.svg";
-
-const { height: screenHeight } = Dimensions.get("window");
+import TrashIcon from "../../assets/images/icons/trash.svg";
+import PencilIcon from "../../assets/images/icons/pencil.svg";
 
 type TransactionType = "fixa" | "parcelada" | "recorrente";
 
@@ -65,7 +65,14 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
   const { user } = useAuth();
 
-  const { translateY, panResponder } = useModalAnimation(visible, onClose);
+  const insets = useSafeAreaInsets();
+
+  // O conteúdo define a altura do sheet; a animação parte de fora da tela.
+  const { translateY, panResponder } = useModalAnimation(
+    visible,
+    onClose,
+    Dimensions.get("window").height,
+  );
 
   const { deleteTransactionFunc, deleteTransactionLoading } =
     useDeleteTransaction();
@@ -185,16 +192,10 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
     return null;
   }
 
-  const isExpense = props.transaction.type === "Despesa";
-
-  let heightValue: number = 0.48;
-  if (props?.transaction.description) {
-    heightValue =
-      props.transaction.description.length >= 150 ? 0.62 : 0.55;
-  }
-
-  const SHEET_HEIGHT = screenHeight * heightValue;
-  const IconComponent = iconMap[props.transaction.category.icon.split("-")[1]];
+  const { transaction } = props;
+  const isExpense = transaction.type === "Despesa";
+  const [categoryColor, iconKey] = transaction.category.icon.split("-");
+  const IconComponent = iconMap[iconKey];
 
   const recurrenceOptions = {
     MONTHLY: "Mensal",
@@ -202,116 +203,113 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   };
 
   const recurrence =
-    props.transaction.recurrence !== "NONE"
-      ? recurrenceOptions[props.transaction.recurrence]
+    transaction.recurrence !== "NONE"
+      ? recurrenceOptions[transaction.recurrence]
       : "Nenhuma";
 
   const installments: string =
-    props.transaction.total_installments > 1
-      ? `${props.transaction.current_installment}/${props.transaction.total_installments}`
+    transaction.total_installments > 1
+      ? `${transaction.current_installment}/${transaction.total_installments}`
       : "À vista";
 
-  const amountColor = isExpense ? Colors.expenseRed : Colors.incomeGreen;
-  const amountPrefix = isExpense ? "-R$ " : "R$ ";
+  const fullDate = parseDateOnly(transaction.transaction_date).toLocaleDateString(
+    "pt-BR",
+    { day: "numeric", month: "long", year: "numeric" },
+  );
 
   return (
-    <View style={styles.overlay}>
-      <Pressable style={styles.backdrop} onPress={onClose} />
+    <View style={sheetStyles.overlay}>
+      <Pressable style={sheetStyles.backdrop} onPress={onClose} />
 
       <Animated.View
         style={[
-          styles.container,
-          { transform: [{ translateY }], height: SHEET_HEIGHT },
+          sheetStyles.sheet,
+          styles.sheet,
+          { paddingBottom: 28 + insets.bottom, transform: [{ translateY }] },
         ]}
         {...panResponder.panHandlers}
       >
-        <View style={styles.dragIndicator} />
+        <View style={sheetStyles.handle} />
 
-        <View style={styles.mainContent}>
-          <View style={styles.headerSection}>
-            <View
-              style={[
-                styles.iconCircle,
-                {
-                  backgroundColor:
-                    props.transaction.category.icon.split("-")[0],
-                },
-              ]}
-            >
-              <IconComponent width={30} height={30} />
-            </View>
-
-            <View style={styles.headerText}>
-              <CustomText style={styles.categoryName}>
-                {props.transaction.category.name}
-              </CustomText>
-              <Text style={styles.dateText}>
-                {parseDateOnly(
-                  props.transaction.transaction_date,
-                ).toLocaleDateString("pt-BR")}
-              </Text>
-              <Text style={[styles.amountText, { color: amountColor }]}>
-                {amountPrefix}{formatAmount(props.transaction.amount)}
-              </Text>
-            </View>
+        <View style={styles.identity}>
+          <View style={[styles.iconCircle, { backgroundColor: categoryColor }]}>
+            {IconComponent && <IconComponent width={24} height={24} />}
           </View>
 
-          <View style={styles.separator} />
-
-          <View style={styles.infoSection}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Parcelas</Text>
-              <Text style={styles.infoValue}>{installments}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Recorrência</Text>
-              <Text style={styles.infoValue}>{recurrence}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Tipo</Text>
-              <Text style={styles.infoValue}>{props.transaction.type}</Text>
-            </View>
+          <View style={styles.identityTexts}>
+            <Text style={styles.categoryName} numberOfLines={1}>
+              {transaction.category.name}
+            </Text>
+            <Text style={styles.dateText}>{fullDate}</Text>
           </View>
 
-          {props.transaction.description ? (
-            <>
-              <View style={styles.separator} />
-              <View style={styles.descriptionSection}>
-                <Text style={styles.descriptionLabel}>Descrição</Text>
-                <Text style={styles.descriptionText}>
-                  {props.transaction.description}
+          <Text
+            style={[
+              styles.typeTag,
+              isExpense ? styles.expenseTag : styles.incomeTag,
+            ]}
+          >
+            {transaction.type}
+          </Text>
+        </View>
+
+        <Text
+          style={[
+            styles.amountText,
+            isExpense ? styles.expenseAmount : styles.incomeAmount,
+          ]}
+        >
+          {formatSignedCurrency(
+            isExpense ? -transaction.amount : transaction.amount,
+          )}
+        </Text>
+
+        <View style={styles.infoRow}>
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoLabel}>Parcelas</Text>
+            <Text style={styles.infoValue}>{installments}</Text>
+          </View>
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoLabel}>Recorrência</Text>
+            <Text style={styles.infoValue}>{recurrence}</Text>
+          </View>
+        </View>
+
+        {transaction.description ? (
+          <View style={styles.description}>
+            <Text style={styles.infoLabel}>Descrição</Text>
+            <Text style={styles.descriptionText}>{transaction.description}</Text>
+          </View>
+        ) : null}
+
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleDeletePress}
+            style={[styles.actionButton, styles.deleteButton]}
+            accessibilityRole="button"
+          >
+            {deleteTransactionLoading ? (
+              <ActivityIndicator size="small" color={Colors.expenseText} />
+            ) : (
+              <>
+                <TrashIcon width={18} height={18} color={Colors.expenseText} />
+                <Text style={[styles.actionText, styles.deleteText]}>
+                  Excluir
                 </Text>
-              </View>
-            </>
-          ) : null}
+              </>
+            )}
+          </TouchableOpacity>
 
-          <View style={styles.separator} />
-
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleEditPress}
-              style={[styles.actionButton, styles.editButton]}
-            >
-              <WhitePencil width={17} height={17} />
-              <Text style={styles.actionButtonText}>Editar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleDeletePress}
-              style={[styles.actionButton, styles.deleteButton]}
-            >
-              {deleteTransactionLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <>
-                  <WhiteTrashIcon width={17} height={17} />
-                  <Text style={styles.actionButtonText}>Excluir</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleEditPress}
+            style={[styles.actionButton, styles.editButton]}
+            accessibilityRole="button"
+          >
+            <PencilIcon width={18} height={18} color={Colors.surface} />
+            <Text style={[styles.actionText, styles.editText]}>Editar</Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
 

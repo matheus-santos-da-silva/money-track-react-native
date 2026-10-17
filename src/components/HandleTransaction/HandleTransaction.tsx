@@ -1,40 +1,50 @@
+import Animated from "react-native-reanimated";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { styles } from "./HandleTransactionStyles";
 import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
-import { iconMap } from "../../utils/icons";
-import { CustomText } from "../CustomText/CustomText";
-import { FC, useState } from "react";
+import { FormField } from "../FormField/FormField";
+import { OptionChip } from "../OptionChip/OptionChip";
+import { TypeSwitch } from "../TypeSwitch/TypeSwitch";
+import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
+import { FooterButton } from "../FooterButton/FooterButton";
+import { PremiumModal } from "../PremiumModal/PremiumModal";
 import { showSnackBar } from "../../utils/show-snack-bar";
-import { useNavigation } from "@react-navigation/native";
 import { clearOldCache } from "../../utils/cache-helpers";
-import { parseDateOnly, toDateOnlyString } from "../../utils/date-only";
+import { CurrencyInput } from "../CurrencyInput/CurrencyInput";
+import { CategoryChoice } from "../CategoryChoice/CategoryChoice";
+import { formatCurrency } from "../../utils/format-amount";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
 import { useGetCategories } from "../../hooks/useGetCategories";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { InstallmentsStepper } from "../InstallmentsStepper/InstallmentsStepper";
 import { useCreateTransaction } from "../../hooks/useCreateTransaction";
 import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
-import { TransactionTypeModal } from "../TransactionTypeModal/TransactionTypeModal";
-import { CurrencyInputWithKeypad } from "../CurrencyInput/CurrencyInput";
-import { TransactionRecurrenceSelector } from "../TransactionRecurrenceSelector/TransactionRecurrenceSelector";
-import { TransactionInstallmentsSelector } from "../TransactionInstallmentsSelector/TransactionInstallmentsSelector";
+import { useKeyboardFooterPadding } from "../../hooks/useKeyboardFooterPadding";
+import { FC, useEffect, useRef, useState } from "react";
+import { parseDateOnly, toDateOnlyString } from "../../utils/date-only";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
-  SafeAreaView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+  dateOption,
+  MIN_INSTALLMENTS,
+  rankCategoryShortcuts,
+  recurrenceSummary,
+  SHORTCUT_COUNT,
+} from "../../utils/transaction-form";
+import { useNavigation } from "@react-navigation/native";
 
-import Logo from "../../assets/images/logo-mt.svg";
-import DateIcon from "../../assets/images/gray-date-icon.svg";
-import ArrowLeftIcon from "../../assets/images/arrow-left-svg.svg";
-import CategoriesIcon from "../../assets/images/categories-menu-icon.svg";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import DescriptionIcon from "../../assets/images/description-icon.svg";
-import TransactionIcon from "../../assets/images/transaction-icon.svg";
-import GrayDownArrowIcon from "../../assets/images/arrow-down-svg.svg";
-import WhiteDownArrowIcon from "../../assets/images/white-arrow-down.svg";
+import XIcon from "../../assets/images/icons/close.svg";
+import InfoIcon from "../../assets/images/icons/info.svg";
+import PencilIcon from "../../assets/images/icons/pencil.svg";
+import CalendarIcon from "../../assets/images/icons/calendar.svg";
+import ArrowUpRightIcon from "../../assets/images/icons/arrow-up-right.svg";
+import ArrowDownLeftIcon from "../../assets/images/icons/arrow-down-left.svg";
+
+type TransactionType = "INCOME" | "EXPENSE";
+type Repetition = "fixa" | "parcelada" | "recorrente";
+type Recurrence = "MONTHLY" | "YEARLY" | "NONE";
 
 export interface InitialTransactionData {
   id?: string;
@@ -44,128 +54,171 @@ export interface InitialTransactionData {
     icon: string;
     name: string;
   };
-  recurrence?: "MONTHLY" | "YEARLY" | "NONE";
+  recurrence?: Recurrence;
   installments?: number;
   description?: string;
-  date?: Date;
-  transactionType?: "fixa" | "parcelada" | "recorrente";
-  type?: "EXPENSE" | "INCOME";
+  date?: string | Date;
+  transactionType?: Repetition;
+  type?: TransactionType;
   applyToAll: boolean;
   installment_group_id?: string;
 }
 
 type StackNavigation = {
-  Home: undefined;
-  CreateTransaction: {
-    token: string;
-    user_id: string;
-    initialData?: InitialTransactionData;
-  };
+  HandleCategory: { type: TransactionType };
 };
 
-type TransactionType = "INCOME" | "EXPENSE";
+const TYPE_OPTIONS = [
+  {
+    value: "EXPENSE" as const,
+    label: "Despesa",
+    icon: ArrowUpRightIcon,
+    selectedColor: Colors.expenseText,
+  },
+  {
+    value: "INCOME" as const,
+    label: "Receita",
+    icon: ArrowDownLeftIcon,
+    selectedColor: Colors.incomeText,
+  },
+];
+
+const REPETITION_OPTIONS: { value: Repetition; label: string }[] = [
+  { value: "fixa", label: "Única" },
+  { value: "parcelada", label: "Parcelada" },
+  { value: "recorrente", label: "Recorrente" },
+];
 
 interface HandleTransactionProps {
   transactionType: TransactionType;
-  color: string;
   initialData?: InitialTransactionData;
   isEditing?: boolean;
-  typeText: string;
 }
 
 export const HandleTransaction: FC<HandleTransactionProps> = ({
-  transactionType,
-  color,
-  typeText,
+  transactionType: initialType,
   initialData,
-  isEditing,
+  isEditing = false,
 }) => {
-  const { user, userToken } = useAuth();
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const insets = useSafeAreaInsets();
+  const footerPadding = useKeyboardFooterPadding();
 
-  const { triggerRefetch } = useTransactions();
+  const { user, userToken } = useAuth();
+  const { transactions, triggerRefetch } = useTransactions();
 
   const { execute, transactionLoading } = useCreateTransaction();
   const { update, updateTransactionLoading } = useUpdateTransaction();
 
-  const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
-
-  const [amount, setAmount] = useState(
-    initialData?.amount ? initialData.amount : 0,
-  );
-
-  const [category, setCategory] = useState(initialData?.category || null);
-
-  const [showRecurrenceMenu, setShowRecurrenceMenu] = useState(false);
-  const [recurrence, setRecurrence] = useState<"MONTHLY" | "YEARLY" | "NONE">(
-    initialData?.recurrence || "NONE",
-  );
-
-  const [showInstallmentsMenu, setShowInstallmentsMenu] = useState(false);
-  const [installments, setInstallments] = useState(
-    initialData?.installments || 1,
-  );
-
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>(initialType);
+  const [amount, setAmount] = useState(initialData?.amount ?? 0);
+  const [category, setCategory] = useState(initialData?.category ?? null);
   const [description, setDescription] = useState(
-    initialData?.description || "",
+    initialData?.description ?? ""
   );
-
-  const [selectedTransactionType, setSelectedTransactionType] = useState<
-    "fixa" | "parcelada" | "recorrente" | null
-  >(initialData?.transactionType || null);
-
-  const handleSelectTransaction = (
-    type: "fixa" | "parcelada" | "recorrente",
-  ) => {
-    setSelectedTransactionType(type);
-  };
-
-  // A data da transação é um dia de calendário: lê o dia do servidor sem conta de fuso.
   const [date, setDate] = useState<Date>(
-    initialData?.date ? parseDateOnly(initialData.date) : new Date(),
+    initialData?.date ? parseDateOnly(initialData.date) : new Date()
   );
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [repetition, setRepetition] = useState<Repetition>(
+    initialData?.transactionType ?? "fixa"
+  );
+  const [installments, setInstallments] = useState(
+    initialData?.installments ?? 1
+  );
+  const [recurrence, setRecurrence] = useState<Recurrence>(
+    initialData?.recurrence ?? "NONE"
+  );
 
-  const formatDate = (date: Date) => {
-    if (!date) return "Selecione uma data";
-    return date.toLocaleDateString("pt-BR");
-  };
+  const [isKeypadVisible, setIsKeypadVisible] = useState(false);
+  const [isCategorySheetVisible, setIsCategorySheetVisible] = useState(false);
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
 
-  const [showTypeMenu, setShowTypeMenu] = useState(false);
+  const shouldReloadCategories = useRef(false);
 
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
-  const handleBackBtn = () => {
-    navigation.goBack();
-  };
-
-  const { categories, categoriesError, loading } = useGetCategories({
-    token: userToken!.token,
+  const { categories, categoriesError, loading, refetch } = useGetCategories({
+    token: userToken?.token ?? "",
     type: transactionType,
   });
 
+  useEffect(
+    () =>
+      navigation.addListener("focus", () => {
+        if (!shouldReloadCategories.current) return;
+
+        shouldReloadCategories.current = false;
+        refetch({ resetCache: true });
+      }),
+    [navigation, refetch]
+  );
+
+  const isExpense = transactionType === "EXPENSE";
+  const typeName = isExpense ? "despesa" : "receita";
+  const isDateLocked = isEditing && !!initialData?.applyToAll;
+  const isSubmitting = transactionLoading || updateTransactionLoading;
+  const canSubmit = amount > 0 && category !== null;
+
+  const shortcuts = rankCategoryShortcuts(
+    categories,
+    isExpense ? transactions.expenses : transactions.incomes,
+    category?.id
+  );
+
+  const selectedDateOption = dateOption(date);
+
+  const changeType = (type: TransactionType) => {
+    if (type === transactionType) return;
+
+    setTransactionType(type);
+    setCategory(null);
+  };
+
+  const selectCategory = (selected: CategoryDTO) => {
+    setCategory(selected);
+    setIsCategorySheetVisible(false);
+  };
+
+  const openCreateCategory = () => {
+    setIsCategorySheetVisible(false);
+
+    if (user?.isPremium === false) {
+      setIsPremiumModalVisible(true);
+      return;
+    }
+
+    shouldReloadCategories.current = true;
+    navigation.navigate("HandleCategory", { type: transactionType });
+  };
+
+  const selectRelativeDate = (daysAgo: number) => {
+    const today = new Date();
+    setDate(
+      new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo)
+    );
+  };
+
+  const changeRepetition = (value: Repetition) => {
+    setRepetition(value);
+
+    if (value === "fixa") {
+      setRecurrence("NONE");
+      setInstallments(1);
+    } else if (value === "parcelada") {
+      setRecurrence("NONE");
+      setInstallments((current) => Math.max(current, MIN_INSTALLMENTS));
+    } else {
+      setInstallments(1);
+      setRecurrence((current) => (current === "NONE" ? "MONTHLY" : current));
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!category) {
-      showSnackBar("Você precisa escolhar uma categoria!", "#de525a");
-      return;
-    }
-
-    if (amount === 0) {
-      showSnackBar("Valor da Transação não pode ser R$ 0,00!", "#de525a");
-      return;
-    }
-
-    if (!selectedTransactionType) {
-      showSnackBar(
-        "Escolha um tipo para a sua Transação! Fixa, Parcelada ou Recorrente.",
-        "#de525a",
-      );
-      return;
-    }
+    if (!category) return;
 
     const transactionData = {
       id: initialData?.id,
-      type: (transactionType === "INCOME" ? "incomes" : "expenses") as
-        | "incomes"
-        | "expenses",
+      type: (isExpense ? "expenses" : "incomes") as "incomes" | "expenses",
       token: userToken!.token,
       amount,
       category_id: category.id,
@@ -187,10 +240,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           return;
         }
 
-        success = await update({
-          ...transactionData,
-          id: initialData.id,
-        });
+        success = await update({ ...transactionData, id: initialData.id });
       } else {
         const { id, ...data } = transactionData;
         success = await execute({ ...data, current_installment: 1 });
@@ -199,7 +249,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       if (success) {
         showSnackBar(
           `Transação ${isEditing ? "atualizada" : "criada"} com sucesso!`,
-          "#4BB543",
+          "#4BB543"
         );
 
         triggerRefetch();
@@ -208,7 +258,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
       } else {
         showSnackBar(
           `Erro ao ${isEditing ? "atualizar" : "criar"} transação`,
-          "#de525a",
+          "#de525a"
         );
       }
     } catch (error) {
@@ -216,327 +266,267 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
     }
   };
 
+  const renderShortcuts = () => {
+    if (categoriesError && !loading) {
+      return (
+        <View style={styles.categoriesError}>
+          <Text style={styles.categoriesErrorText}>
+            Não foi possível carregar as categorias.
+          </Text>
+          <TouchableOpacity
+            style={styles.textButton}
+            onPress={() => refetch({ resetCache: true })}
+            accessibilityRole="button"
+          >
+            <Text style={styles.textButtonLabel}>Tentar novamente</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView
+        horizontal
+        style={styles.shortcutsScroll}
+        contentContainerStyle={styles.shortcuts}
+        showsHorizontalScrollIndicator={false}
+        accessibilityRole="radiogroup"
+      >
+        {loading
+          ? Array.from({ length: SHORTCUT_COUNT }, (_, index) => (
+              <View key={index} style={styles.shortcutPlaceholder}>
+                <View style={styles.placeholderCircle} />
+              </View>
+            ))
+          : shortcuts.map((shortcut) => (
+              <CategoryChoice
+                key={shortcut.id}
+                style={styles.shortcut}
+                size="regular"
+                name={shortcut.name}
+                icon={shortcut.icon}
+                selected={shortcut.id === category?.id}
+                onPress={() => setCategory(shortcut)}
+              />
+            ))}
+      </ScrollView>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles(color).container}>
-      <View style={[styles(color).menuColor, styles(color).topMenu]}>
-        <View style={styles(color).topLogo}>
-          <TouchableOpacity onPress={handleBackBtn}>
-            <ArrowLeftIcon height={20} width={20} />
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            style={styles.close}
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar"
+          >
+            <XIcon width={22} height={22} color={Colors.surface} />
           </TouchableOpacity>
 
-          <View style={styles(color).logo}>
-            <Logo width={30} height={40} />
-          </View>
-
-          <View style={{ width: 24 }} />
-        </View>
-
-        <View style={styles(color).amountDiv}>
-          <Text style={styles(color).valueText}>Valor:</Text>
-          <CurrencyInputWithKeypad
-            value={amount}
-            onChange={setAmount}
-            type={transactionType}
-          />
-        </View>
-
-        <TouchableOpacity
-          disabled={isEditing}
-          onPress={() => setShowTypeMenu(true)}
-        >
-          <View style={[styles(color).typeMenu, isEditing && { opacity: 0.6 }]}>
-            <CustomText style={{ color: "#FFFFFF" }}>{typeText}</CustomText>
-            <WhiteDownArrowIcon />
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <TransactionTypeModal
-        visible={showTypeMenu}
-        onClose={() => setShowTypeMenu(false)}
-        token={userToken!.token}
-        user_id={user!.id}
-        type={transactionType === "INCOME" ? "EXPENSE" : "INCOME"}
-      />
-
-      <View style={styles(color).mainContent}>
-        <View>
-          <View style={styles(color).label}>
-            <DescriptionIcon height={16} width={16} />
-            <CustomText style={styles(color).grayText}>Descrição:</CustomText>
-          </View>
-          <TextInput
-            style={styles(color).descriptionInput}
-            placeholder={"Adicione sua descrição"}
-            placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
-            onChangeText={setDescription}
-            value={description}
-          />
-        </View>
-
-        <View style={styles(color).halfDiv}>
-          <View style={styles(color).halfCard}>
-            <View style={styles(color).label}>
-              <CategoriesIcon height={18} width={18} />
-              <CustomText style={styles(color).grayText}>Categoria:</CustomText>
-            </View>
-            <TouchableOpacity onPress={() => setShowCategoriesMenu(true)}>
-              <View style={styles(color).halfInput}>
-                <Text style={styles(color).inputText}>
-                  {category ? category.name : "Categorias"}
-                </Text>
-                <GrayDownArrowIcon height={12} width={12} />
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles(color).halfCard}>
-            <View style={styles(color).label}>
-              <DateIcon height={16} width={16} />
-              <CustomText style={styles(color).grayText}>Data:</CustomText>
-            </View>
-            <TouchableOpacity
-              disabled={isEditing && initialData?.applyToAll}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <View
-                style={[
-                  styles(color).halfInput,
-                  isEditing && initialData?.applyToAll && { opacity: 0.5 },
-                ]}
-              >
-                <Text style={styles(color).inputText}>{formatDate(date)}</Text>
-                <GrayDownArrowIcon height={12} width={12} />
-              </View>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display="calendar"
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(false);
-                  if (event.type === "set" && selectedDate) {
-                    setDate(selectedDate);
-                  }
-                }}
-              />
-            )}
-          </View>
-        </View>
-
-        <View style={styles(color).transactionContainer}>
-          <View style={styles(color).label}>
-            <TransactionIcon height={18} width={18} />
-            <CustomText style={styles(color).grayText}>Transação:</CustomText>
-          </View>
-
-          <View style={styles(color).transactionButtonsContainer}>
-            <View style={styles(color).transactionButtonWrapper}>
-              <TouchableOpacity
-                disabled={isEditing}
-                onPress={() => {
-                  handleSelectTransaction("fixa");
-                  setRecurrence("NONE");
-                  setShowRecurrenceMenu(false);
-                  setInstallments(1);
-                  setShowInstallmentsMenu(false);
-                }}
-              >
-                <View
-                  style={[
-                    styles(color).transactionButton,
-                    selectedTransactionType === "fixa" && {
-                      borderColor: color,
-                    },
-                    isEditing && { opacity: 0.5 },
-                  ]}
-                >
-                  <CustomText
-                    style={[
-                      styles(color).transactionButtonText,
-                      selectedTransactionType === "fixa" && {
-                        color: color,
-                      },
-                    ]}
-                  >
-                    Fixa
-                  </CustomText>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles(color).transactionButtonWrapper}>
-              <TouchableOpacity
-                disabled={isEditing}
-                onPress={() => {
-                  handleSelectTransaction("parcelada");
-                  setShowInstallmentsMenu(true);
-                }}
-              >
-                <View
-                  style={[
-                    styles(color).transactionButton,
-                    selectedTransactionType === "parcelada" && {
-                      borderColor: color,
-                    },
-                    isEditing && { opacity: 0.5 },
-                  ]}
-                >
-                  <CustomText
-                    style={[
-                      styles(color).transactionButtonText,
-                      selectedTransactionType === "parcelada" && {
-                        color: color,
-                      },
-                    ]}
-                  >
-                    Parcelada
-                  </CustomText>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles(color).transactionButtonWrapper}>
-              <TouchableOpacity
-                disabled={isEditing}
-                onPress={() => {
-                  handleSelectTransaction("recorrente");
-                  setShowRecurrenceMenu(true);
-                }}
-              >
-                <View
-                  style={[
-                    styles(color).transactionButton,
-                    selectedTransactionType === "recorrente" && {
-                      borderColor: color,
-                    },
-                    isEditing && { opacity: 0.5 },
-                  ]}
-                >
-                  <CustomText
-                    style={[
-                      styles(color).transactionButtonText,
-                      selectedTransactionType === "recorrente" && {
-                        color: color,
-                      },
-                    ]}
-                  >
-                    Recorrente
-                  </CustomText>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          disabled={transactionLoading}
-          onPress={handleSubmit}
-          style={[
-            styles(color).confirmButtonContainer,
-            transactionLoading && { opacity: 0.6 },
-          ]}
-        >
-          <View
-            style={[
-              styles(color).confirmButtonColor,
-              styles(color).confirmButton,
-            ]}
-          >
-            <CustomText style={styles(color).confirmButtonText}>
-              {transactionLoading || updateTransactionLoading
-                ? "Salvando..."
-                : isEditing
-                ? "Atualizar"
-                : "Adicionar"}
-            </CustomText>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <CategorySelector
-        visible={showCategoriesMenu}
-        onClose={() => setShowCategoriesMenu(false)}
-      >
-        {loading ? (
-          <Text style={{ textAlign: "center" }}>Carregando...</Text>
-        ) : categoriesError ? (
-          <Text style={{ textAlign: "center", color: "green" }}>
-            Erro ao carregar categorias
+          <Text style={styles.title} accessibilityRole="header">
+            {isEditing ? "Editar" : "Nova"} {typeName}
           </Text>
-        ) : (
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            {categories.map((category) => {
-              const IconComponent = iconMap[category.icon.split("-")[1]];
-              const backgroundCircleColor = category.icon.split("-")[0];
-              return (
-                <TouchableOpacity
-                  key={category.id}
-                  style={{
-                    width: "30%",
-                    alignItems: "center",
-                    marginBottom: 20,
-                  }}
-                  onPress={() => {
-                    setCategory(category);
-                    setShowCategoriesMenu(false);
-                  }}
-                >
-                  <View
-                    style={[
-                      styles(color).iconCircle,
-                      { backgroundColor: backgroundCircleColor },
-                    ]}
-                  >
-                    <IconComponent width={20} height={20} />
-                  </View>
 
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: Colors.primaryGray,
-                      marginTop: 5,
-                    }}
-                  >
-                    {category.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View style={styles.close} />
+        </View>
+
+        <TypeSwitch
+          style={styles.typeSwitch}
+          tone="onBlue"
+          options={TYPE_OPTIONS}
+          selected={transactionType}
+          onSelect={changeType}
+          disabled={isEditing}
+          accessibilityLabel="Tipo"
+        />
+
+        <TouchableOpacity
+          style={styles.amountButton}
+          activeOpacity={0.8}
+          onPress={() => setIsKeypadVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`Valor da ${typeName}, ${formatCurrency(
+            amount
+          )}. Toque para editar`}
+        >
+          <Text style={styles.amountLabel}>Valor da {typeName}</Text>
+          <View style={styles.amountRow}>
+            <Text style={[styles.amount, amount === 0 && styles.amountEmpty]}>
+              {formatCurrency(amount)}
+            </Text>
+            <PencilIcon width={20} height={20} color={Colors.onBlueMuted} />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {isDateLocked && (
+          <View style={styles.notice}>
+            <InfoIcon width={18} height={18} color={Colors.brandInk} />
+            <Text style={styles.noticeText}>
+              As alterações valem para esta e as próximas{" "}
+              {initialData?.recurrence && initialData.recurrence !== "NONE"
+                ? "ocorrências"
+                : "parcelas"}
+              . A data e a forma de pagamento não mudam.
+            </Text>
           </View>
         )}
-      </CategorySelector>
 
-      <TransactionInstallmentsSelector
-        onSelect={(value) => {
-          setInstallments(value);
-          setRecurrence("NONE");
-        }}
-        visible={showInstallmentsMenu}
-        onClose={() => setShowInstallmentsMenu(false)}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Categoria</Text>
+            <TouchableOpacity
+              style={styles.textButton}
+              onPress={() => setIsCategorySheetVisible(true)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textButtonLabel}>Ver todas</Text>
+            </TouchableOpacity>
+          </View>
+
+          {renderShortcuts()}
+        </View>
+
+        <FormField
+          label="Descrição"
+          optional
+          value={description}
+          onChangeText={setDescription}
+          placeholder={
+            isExpense ? "Ex.: Mercado do mês" : "Ex.: Projeto freelance"
+          }
+        />
+
+        <View style={[styles.section, isDateLocked && styles.locked]}>
+          <Text style={styles.sectionLabel}>Data</Text>
+          <View style={styles.optionsRow} accessibilityRole="radiogroup">
+            <OptionChip
+              label="Hoje"
+              selected={selectedDateOption === "today"}
+              onPress={() => selectRelativeDate(0)}
+              disabled={isDateLocked}
+            />
+            <OptionChip
+              label="Ontem"
+              selected={selectedDateOption === "yesterday"}
+              onPress={() => selectRelativeDate(1)}
+              disabled={isDateLocked}
+            />
+            <OptionChip
+              label={
+                selectedDateOption === "other"
+                  ? date.toLocaleDateString("pt-BR")
+                  : "Outra data"
+              }
+              icon={CalendarIcon}
+              selected={selectedDateOption === "other"}
+              onPress={() => setIsDatePickerVisible(true)}
+              disabled={isDateLocked}
+            />
+          </View>
+
+          {isDatePickerVisible && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="calendar"
+              onChange={(event, selectedDate) => {
+                setIsDatePickerVisible(false);
+                if (event.type === "set" && selectedDate) {
+                  setDate(selectedDate);
+                }
+              }}
+            />
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Repetição</Text>
+          <TypeSwitch
+            tone="light"
+            options={REPETITION_OPTIONS}
+            selected={repetition}
+            onSelect={changeRepetition}
+            disabled={isEditing}
+            accessibilityLabel="Repetição"
+          />
+
+          {repetition === "parcelada" && (
+            <InstallmentsStepper
+              amount={amount}
+              installments={installments}
+              date={date}
+              disabled={isEditing}
+              onChange={setInstallments}
+            />
+          )}
+
+          {repetition === "recorrente" && recurrence !== "NONE" && (
+            <View style={[styles.recurrenceCard, isEditing && styles.locked]}>
+              <View style={styles.optionsRow} accessibilityRole="radiogroup">
+                <OptionChip
+                  label="Todo mês"
+                  selected={recurrence === "MONTHLY"}
+                  onPress={() => setRecurrence("MONTHLY")}
+                  disabled={isEditing}
+                />
+                <OptionChip
+                  label="Todo ano"
+                  selected={recurrence === "YEARLY"}
+                  onPress={() => setRecurrence("YEARLY")}
+                  disabled={isEditing}
+                />
+              </View>
+              <Text style={styles.recurrenceSummary}>
+                {recurrenceSummary(date, recurrence)}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      <Animated.View style={[styles.footer, footerPadding]}>
+        <FooterButton
+          label={isEditing ? "Salvar alterações" : `Adicionar ${typeName}`}
+          onPress={handleSubmit}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+        />
+      </Animated.View>
+
+      <CurrencyInput
+        visible={isKeypadVisible}
+        amount={amount}
         type={transactionType}
-        value={installments}
+        onChange={setAmount}
+        onClose={() => setIsKeypadVisible(false)}
       />
 
-      <TransactionRecurrenceSelector
-        onSelect={(value) => {
-          setRecurrence(value);
-          setInstallments(1);
-        }}
-        visible={showRecurrenceMenu}
-        onClose={() => setShowRecurrenceMenu(false)}
+      <CategorySelector
+        visible={isCategorySheetVisible}
         type={transactionType}
-        value={recurrence}
+        categories={categories}
+        loading={loading}
+        selectedId={category?.id}
+        onSelect={selectCategory}
+        onCreate={openCreateCategory}
+        onClose={() => setIsCategorySheetVisible(false)}
       />
-    </SafeAreaView>
+
+      <PremiumModal
+        isVisible={isPremiumModalVisible}
+        onClose={() => setIsPremiumModalVisible(false)}
+        onSubscribe={() => setIsPremiumModalVisible(false)}
+      />
+    </View>
   );
 };

@@ -2,30 +2,29 @@ import { styles } from "./HandleCategoryStyles";
 import { Colors } from "../../styles/colors";
 import { iconMap } from "../../utils/icons";
 import { useAuth } from "../../hooks/useAuth";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { IconSelector } from "../../components/IconSelector/IconSelector";
-import { FC, useState } from "react";
+import { FormField } from "../../components/FormField/FormField";
+import { FormScreen } from "../../components/FormScreen/FormScreen";
+import { TypeSwitch } from "../../components/TypeSwitch/TypeSwitch";
+import { FooterButton } from "../../components/FooterButton/FooterButton";
 import { showSnackBar } from "../../utils/show-snack-bar";
-import { ColorSelector } from "../../components/ColorSelector/ColorSelector";
 import { useCreateCategory } from "../../hooks/useCreateCategory";
 import { useUpdateCategory } from "../../hooks/useUpdateCategory";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { CategoryTypeSelector } from "../../components/CategoryTypeSelector/CategoryTypeSelector";
+import { FC, useState } from "react";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
-  ActivityIndicator,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+  canSaveCategory,
+  CATEGORY_ICONS,
+  CATEGORY_NAME_MAX_LENGTH,
+  categoryNameError,
+  CategoryOption,
+  colorOptions,
+  formatCategoryIcon,
+  parseCategoryIcon,
+} from "../../utils/categories";
 
-import PlusButton from "../../assets/images/plus.svg";
-import ArrowLeftIcon from "../../assets/images/arrow-left-svg.svg";
-
-type StackNavigation = {
-  Home: undefined;
-};
+import PlusIcon from "../../assets/images/icons/plus.svg";
+import CheckIcon from "../../assets/images/icons/check.svg";
 
 export interface InitialCategoryData {
   id?: string;
@@ -43,7 +42,27 @@ type ParamList = {
   };
 };
 
+const TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
+  { value: "EXPENSE", label: "Despesa" },
+  { value: "INCOME", label: "Receita" },
+];
+
+const ICON_COLUMNS = 6;
+const COLOR_COLUMNS = 8;
+
+const toRows = <T,>(items: T[], columns: number) =>
+  Array.from({ length: Math.ceil(items.length / columns) }, (_, index) =>
+    items.slice(index * columns, (index + 1) * columns)
+  );
+
+const fillRow = (count: number, columns: number) =>
+  Array.from({ length: columns - count }, (_, index) => (
+    <View key={`empty-${index}`} style={styles.gridSpacer} />
+  ));
+
 export const HandleCategory: FC = () => {
+  const navigation = useNavigation();
+
   const { type, initialData, isEditing } =
     useRoute<RouteProp<ParamList, "Params">>().params;
 
@@ -52,220 +71,225 @@ export const HandleCategory: FC = () => {
   const { execute, loading } = useCreateCategory();
   const { update, updateCategoryLoading } = useUpdateCategory();
 
-  const isSubmitting = loading || updateCategoryLoading;
-
-  const [showColorsMenu, setShowColorsMenu] = useState<boolean>(false);
-  const [showIconsMenu, setShowIconsMenu] = useState<boolean>(false);
+  const initialIcon = parseCategoryIcon(initialData?.icon);
+  const original = isEditing
+    ? {
+        name: initialData?.name ?? "",
+        icon: initialIcon.icon,
+        color: initialIcon.color,
+      }
+    : undefined;
 
   const [categoryType, setCategoryType] = useState<TransactionType>(type);
-  const [categoryName, setCategoryName] = useState<string>(
-    initialData?.name || "",
-  );
+  const [name, setName] = useState(original?.name ?? "");
+  const [icon, setIcon] = useState(original?.icon ?? "");
+  const [color, setColor] = useState(original?.color ?? "");
 
-  const iconParts = initialData?.icon ? initialData.icon.split("-") : [];
+  const [colors] = useState(() => colorOptions(original?.color ?? ""));
 
-  const [icon, setIcon] = useState<string>(iconParts[1] ?? "");
-  const [iconColor, setIconColor] = useState<string>(
-    iconParts[0] ?? Colors.primaryGray,
-  );
-
-  const IconComponent = icon ? iconMap[icon] : null;
-
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
-  const handleBackBtn = () => {
-    navigation.goBack();
-  };
-
-  const color =
-    categoryType === "INCOME" ? Colors.incomeGreen : Colors.expenseRed;
+  const isExpense = categoryType === "EXPENSE";
+  const trimmedName = name.trim();
+  const nameError = categoryNameError(name);
+  const PreviewIcon = icon && color ? iconMap[icon] : null;
 
   const handleSubmit = async () => {
-    if (!categoryName || categoryName.length < 3 || categoryName.length > 20) {
-      showSnackBar(
-        "O nome da categoria precisa ter entre 3 a 20 caracteres!",
-        "#de525a",
-      );
-      return;
-    }
+    const payload = {
+      type: categoryType,
+      token: userToken?.token || "",
+      icon: formatCategoryIcon(color, icon),
+      name: trimmedName,
+    };
 
-    if (!icon) {
-      showSnackBar(
-        "Você precisa escolhar um ícone para a categoria!",
-        "#de525a",
-      );
-      return;
-    }
-
-    if (!iconColor) {
-      showSnackBar(
-        "Você precisa escolhar uma cor para a categoria!",
-        "#de525a",
-      );
+    if (isEditing && !initialData?.id) {
+      showSnackBar("ID da categoria não encontrado", "#de525a");
       return;
     }
 
     try {
-      let success;
-      if (isEditing) {
-        if (!initialData?.id) {
-          showSnackBar("ID da categoria não encontrado", "#de525a");
-          return;
-        }
+      const success = isEditing
+        ? await update({ ...payload, category_id: initialData?.id ?? "" })
+        : await execute({ ...payload, created_at: new Date().toISOString() });
 
-        success = await update({
-          category_id: initialData?.id,
-          type: categoryType,
-          token: userToken?.token || "",
-          icon: `${iconColor}-${icon}`,
-          name: categoryName,
-        });
-      } else {
-        success = await execute({
-          type: categoryType,
-          token: userToken?.token || "",
-          icon: `${iconColor}-${icon}`,
-          name: categoryName,
-          created_at: new Date().toISOString(),
-        });
-      }
-
-      if (success) {
-        showSnackBar(
-          `Categoria ${isEditing ? "atualizada" : "criada"} com sucesso!`,
-          "#4BB543",
-        );
-
-        navigation.goBack();
-      } else {
+      if (!success) {
         showSnackBar(
           `Erro ao ${isEditing ? "atualizar" : "criar"} categoria.`,
-          "#de525a",
+          "#de525a"
         );
+        return;
       }
+
+      showSnackBar(
+        `Categoria ${isEditing ? "atualizada" : "criada"} com sucesso!`,
+        "#4BB543"
+      );
+      navigation.goBack();
     } catch (error) {
       showSnackBar("Ocorreu um erro inesperado", "#de525a");
     }
   };
 
-  return (
-    <SafeAreaView style={styles(color).container}>
-      <View style={[styles(color).menuColor, styles(color).topMenu]}>
-        <View style={styles(color).topLogo}>
-          <TouchableOpacity onPress={handleBackBtn}>
-            <ArrowLeftIcon height={18} width={18} />
-          </TouchableOpacity>
+  const renderIconOption = (option: CategoryOption) => {
+    const IconComponent = iconMap[option.value];
+    const isSelected = option.value === icon;
 
-          <View style={styles(color).logo}>
-            <CustomText style={{ color: "#FFFFFF" }}>
-              {isEditing ? "Atualizar Categoria" : "Criar Categoria"}
-            </CustomText>
-          </View>
-        </View>
-
-        <View>
-          <CategoryTypeSelector
-            typeSelected={categoryType}
-            onSelect={setCategoryType}
-            disabled={isEditing}
-          />
-        </View>
-      </View>
-
-      <View style={styles(color).mainContent}>
-        <View>
-          <CustomText style={{ color: Colors.primaryGray, fontSize: 14 }}>
-            Nome da Categoria:
-          </CustomText>
-          <TextInput
-            style={styles(color).categoryNameInput}
-            placeholder={"Digite o nome da categoria"}
-            placeholderTextColor={"rgba(100, 100, 100, 0.7)"}
-            onChangeText={setCategoryName}
-            value={categoryName}
-          />
-        </View>
-
-        <View style={styles(color).chooseData}>
-          <View style={styles(color).justify}>
-            <CustomText style={{ color: Colors.primaryGray, fontSize: 14 }}>
-              Escolher Ícone:
-            </CustomText>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setShowIconsMenu(true)}
-              style={styles(color).addButton}
-            >
-              <PlusButton width={20} height={20} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles(color).justify}>
-            <CustomText style={{ color: Colors.primaryGray, fontSize: 14 }}>
-              Escolher Cor:
-            </CustomText>
-
-            <TouchableOpacity
-              onPress={() => setShowColorsMenu(true)}
-              activeOpacity={0.7}
-              style={styles(color).addButton}
-            >
-              <PlusButton width={20} height={20} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles(color).chooseIcon}>
-          <CustomText style={{ color: Colors.primaryGray, fontSize: 14 }}>
-            Ícone Escolhido:
-          </CustomText>
-
-          <View style={styles(iconColor).choosedIcon}>
-            {IconComponent ? (
-              <IconComponent width={36} height={36} />
-            ) : (
-              <PlusButton width={36} height={36} />
-            )}
-          </View>
-        </View>
-
-        <TouchableOpacity
-          disabled={isSubmitting}
-          onPress={handleSubmit}
-          activeOpacity={0.9}
+    return (
+      <TouchableOpacity
+        key={option.value}
+        style={[styles.iconOption, isSelected && styles.iconOptionSelected]}
+        activeOpacity={0.8}
+        onPress={() => setIcon(option.value)}
+        accessibilityRole="radio"
+        accessibilityState={{ checked: isSelected }}
+        accessibilityLabel={option.label}
+      >
+        <View
           style={[
-            styles(color).confirmButtonContainer,
-            isSubmitting && { opacity: 0.6 },
+            styles.iconOptionCircle,
+            { backgroundColor: color || Colors.refLine },
           ]}
         >
-          <View
+          {IconComponent && <IconComponent width={22} height={22} />}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderColorOption = (option: CategoryOption) => {
+    const isSelected = option.value === color;
+
+    return (
+      <TouchableOpacity
+        key={option.value}
+        style={styles.colorOption}
+        activeOpacity={0.8}
+        onPress={() => setColor(option.value)}
+        accessibilityRole="radio"
+        accessibilityState={{ checked: isSelected }}
+        accessibilityLabel={option.label}
+      >
+        {isSelected && (
+          <View style={[styles.colorRing, { borderColor: option.value }]} />
+        )}
+        <View style={[styles.colorSwatch, { backgroundColor: option.value }]}>
+          {isSelected && (
+            <CheckIcon width={16} height={16} color={Colors.surface} />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <FormScreen
+      title={isEditing ? "Editar categoria" : "Nova categoria"}
+      footerDivider
+      footer={
+        <FooterButton
+          label={isEditing ? "Salvar alterações" : "Criar categoria"}
+          onPress={handleSubmit}
+          disabled={!canSaveCategory({ name, icon, color }, original)}
+          loading={loading || updateCategoryLoading}
+        />
+      }
+    >
+      <View style={styles.preview}>
+        <View
+          style={[
+            styles.previewCircle,
+            PreviewIcon
+              ? { backgroundColor: color }
+              : styles.previewCircleEmpty,
+          ]}
+        >
+          {PreviewIcon ? (
+            <PreviewIcon width={24} height={24} />
+          ) : (
+            <PlusIcon width={24} height={24} color={Colors.refLine} />
+          )}
+        </View>
+
+        <View style={styles.previewTexts}>
+          <Text style={styles.previewLabel}>Prévia</Text>
+          <Text
             style={[
-              styles(color).confirmButtonColor,
-              styles(color).confirmButton,
+              styles.previewName,
+              !trimmedName && styles.previewNameEmpty,
             ]}
+            numberOfLines={1}
           >
-            {isSubmitting ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <CustomText style={{ color: "white", fontSize: 16 }}>
-                {isEditing ? "Atualizar" : "Criar"}
-              </CustomText>
-            )}
-          </View>
-        </TouchableOpacity>
+            {trimmedName || "Nome da categoria"}
+          </Text>
+        </View>
+
+        <Text
+          style={[
+            styles.typeTag,
+            isExpense ? styles.expenseTag : styles.incomeTag,
+          ]}
+        >
+          {isExpense ? "Despesa" : "Receita"}
+        </Text>
       </View>
 
-      <ColorSelector
-        visible={showColorsMenu}
-        onClose={() => setShowColorsMenu(false)}
-        onSelectColor={(color) => setIconColor(color)}
+      <View style={styles.group}>
+        <Text style={styles.groupLabel}>Tipo</Text>
+        <TypeSwitch
+          tone="light"
+          options={TYPE_OPTIONS}
+          selected={categoryType}
+          onSelect={setCategoryType}
+          disabled={isEditing}
+          accessibilityLabel="Tipo"
+        />
+        {isEditing && (
+          <Text style={styles.groupHint}>
+            O tipo não pode ser alterado depois que a categoria é criada.
+          </Text>
+        )}
+      </View>
+
+      <FormField
+        label="Nome"
+        value={name}
+        onChangeText={setName}
+        placeholder="Ex.: Pet, Academia, Freelas"
+        maxLength={CATEGORY_NAME_MAX_LENGTH}
+        error={nameError}
+        labelAccessory={
+          <Text
+            style={[
+              styles.counter,
+              name.length >= CATEGORY_NAME_MAX_LENGTH && styles.counterFull,
+            ]}
+          >
+            {name.length}/{CATEGORY_NAME_MAX_LENGTH}
+          </Text>
+        }
       />
 
-      <IconSelector
-        visible={showIconsMenu}
-        onClose={() => setShowIconsMenu(false)}
-        onSelectIcon={(icon) => setIcon(icon)}
-      />
-    </SafeAreaView>
+      <View style={styles.group}>
+        <Text style={styles.groupLabel}>Ícone</Text>
+        <View style={styles.iconGrid} accessibilityRole="radiogroup">
+          {toRows(CATEGORY_ICONS, ICON_COLUMNS).map((row, index) => (
+            <View key={index} style={styles.iconRow}>
+              {row.map(renderIconOption)}
+              {fillRow(row.length, ICON_COLUMNS)}
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.group}>
+        <Text style={styles.groupLabel}>Cor</Text>
+        <View accessibilityRole="radiogroup">
+          {toRows(colors, COLOR_COLUMNS).map((row, index) => (
+            <View key={index} style={styles.colorRow}>
+              {row.map(renderColorOption)}
+              {fillRow(row.length, COLOR_COLUMNS)}
+            </View>
+          ))}
+        </View>
+      </View>
+    </FormScreen>
   );
 };

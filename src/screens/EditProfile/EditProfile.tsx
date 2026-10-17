@@ -1,27 +1,24 @@
 import { styles } from "./EditProfileStyles";
-import { Button } from "../../components/Button/Button";
+import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
-import { CustomText } from "../../components/CustomText/CustomText";
+import { FormField } from "../../components/FormField/FormField";
+import { FormScreen } from "../../components/FormScreen/FormScreen";
 import { UpdateUser } from "../../services/UpdateUserService";
+import { FooterButton } from "../../components/FooterButton/FooterButton";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
-import { validateEmail } from "../../utils/validate-email";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Text, TouchableOpacity } from "react-native";
 import {
-  Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+  canSaveProfile,
+  emailError,
+  nameError,
+} from "../../utils/account-forms";
 
-import Logo from "../../assets/images/logo-mt.svg";
-import BackButton from "../../assets/images/arrow-left-svg.svg";
-import BlueRightArrow from "../../assets/images/blue-right-arrow.svg";
+import LockIcon from "../../assets/images/icons/lock.svg";
 
 type StackNavigation = {
-  Home: undefined;
   EditPassword: undefined;
 };
 
@@ -30,116 +27,81 @@ export const EditProfile: FC = () => {
 
   const { user, userToken, refreshUser } = useAuth();
 
-  const [customerName, setCustomerName] = useState<string>(user?.name || "");
-  const [customerEmail, setCustomerEmail] = useState<string>(user?.email || "");
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const canSave = canSaveProfile(
+    { name, email },
+    { name: user?.name ?? "", email: user?.email ?? "" }
+  );
 
-  const handleUpdateUser = async () => {
-    if (!/^[A-Za-z]+$/.test(customerName)) {
-      showSnackBar(
-        "O nome deve conter apenas letras, sem números ou símbolos.",
-        "#de525a",
-      );
-      return;
-    }
-
-    if (customerName.length < 3 || customerName.length > 20) {
-      showSnackBar("Nome deve ter entre 3 e 20 caracteres", "#de525a");
-      return;
-    }
-
-    if (!validateEmail(customerEmail)) {
-      showSnackBar("Email inválido", "#de525a");
-      return;
-    }
-
+  const handleSave = async () => {
     setIsLoading(true);
 
     const { success, message } = await UpdateUser(
-      user?.id || "",
-      userToken?.token || "",
-      customerEmail,
-      customerName,
+      user?.id ?? "",
+      userToken?.token ?? "",
+      email.trim(),
+      name.trim()
     );
 
+    setIsLoading(false);
+
     if (!success) {
-      setIsLoading(false);
       showSnackBar(message || "Erro desconhecido!", "#de525a");
-    } else {
-      refreshUser();
-      showSnackBar("Perfil editado com sucesso!!", "#4BB543");
-      navigation.navigate("Home");
-      setIsLoading(false);
+      return;
     }
+
+    refreshUser();
+    showSnackBar("Perfil editado com sucesso!!", "#4BB543");
+    navigation.goBack();
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topMenuContent}>
-        <View style={styles.topContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <BackButton width={20} height={20} />
-          </TouchableOpacity>
-          <View style={styles.logo}>
-            <Logo width={30} height={40} />
-          </View>
-        </View>
+    <FormScreen
+      title="Dados pessoais"
+      footer={
+        <FooterButton
+          label="Salvar alterações"
+          onPress={handleSave}
+          disabled={!canSave}
+          loading={isLoading}
+        />
+      }
+    >
+      <FormField
+        label="Nome"
+        value={name}
+        onChangeText={setName}
+        error={nameError(name)}
+        placeholder="Digite seu nome"
+        autoComplete="name"
+        autoCapitalize="words"
+      />
 
-        <CustomText style={styles.editProfileText}>Editar Perfil</CustomText>
-      </View>
+      <FormField
+        label="E-mail"
+        value={email}
+        onChangeText={setEmail}
+        error={emailError(email)}
+        placeholder="Digite seu e-mail"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+      />
 
-      <View style={styles.mainContent}>
-        <View style={styles.fieldGroup}>
-          <View style={styles.label}>
-            <CustomText style={styles.labelText}>Nome</CustomText>
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite seu nome"
-            placeholderTextColor="rgba(100, 100, 100, 0.5)"
-            onChangeText={setCustomerName}
-            value={customerName}
-          />
-        </View>
-
-        <View style={styles.fieldGroup}>
-          <View style={styles.label}>
-            <CustomText style={styles.labelText}>Email</CustomText>
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite seu email"
-            placeholderTextColor="rgba(100, 100, 100, 0.5)"
-            onChangeText={setCustomerEmail}
-            value={customerEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View style={styles.fieldGroup}>
-          <View style={styles.label}>
-            <CustomText style={styles.labelText}>Senha</CustomText>
-          </View>
-          <TouchableOpacity
-            style={[styles.input, styles.passwordRow]}
-            onPress={() => navigation.navigate("EditPassword")}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.passwordText}>• • • • • • • • •</Text>
-            <BlueRightArrow width={14} height={14} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.buttonDiv}>
-          <Button
-            value="Salvar"
-            onPress={handleUpdateUser}
-            isLoading={isLoading}
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+      <TouchableOpacity
+        style={styles.passwordCard}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate("EditPassword")}
+        accessibilityRole="button"
+        accessibilityLabel="Quer trocar a senha? Alterar"
+      >
+        <LockIcon width={20} height={20} color={Colors.ink} />
+        <Text style={styles.passwordText}>Quer trocar a senha?</Text>
+        <Text style={styles.passwordAction}>Alterar</Text>
+      </TouchableOpacity>
+    </FormScreen>
   );
 };

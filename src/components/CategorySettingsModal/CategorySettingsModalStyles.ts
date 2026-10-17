@@ -1,85 +1,125 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
+  actionsSheet: {
+    gap: 20,
   },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  container: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-  },
-  dragIndicator: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 14,
-    marginBottom: 24,
-  },
-  content: {
-    alignItems: "center",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
+
+  confirmSheet: {
     gap: 14,
   },
-  iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    justifyContent: "center",
+
+  identity: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 14,
   },
-  categoryName: {
+
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  identityTexts: {
+    flex: 1,
+  },
+
+  name: {
+    fontFamily: Fonts.semiBold,
     fontSize: 18,
-    color: "#1A1A2E",
-    fontFamily: "KonkhmerSleokchher-Regular",
+    lineHeight: 25,
+    color: Colors.ink,
   },
-  separator: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#F0F0F0",
-    marginBottom: 24,
+
+  typeText: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.muted,
   },
-  actionsContainer: {
-    width: "100%",
+
+  actionsRow: {
+    flexDirection: "row",
     gap: 12,
   },
+
   actionButton: {
-    width: "100%",
+    flex: 1,
+    height: 48,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 10,
+    gap: 8,
   },
-  editButton: {
-    backgroundColor: Colors.primaryBlue,
-  },
-  deleteButton: {
-    backgroundColor: Colors.expenseRed,
-  },
+
   actionText: {
-    color: "#fff",
-    fontSize: 16,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: Fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+
+  deleteButton: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.expenseText,
+  },
+
+  deleteText: {
+    color: Colors.expenseText,
+  },
+
+  editButton: {
+    backgroundColor: Colors.brandBlue,
+  },
+
+  editText: {
+    color: Colors.surface,
+  },
+
+  dangerChip: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: Colors.expenseTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  confirmTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 18,
+    lineHeight: 25,
+    color: Colors.ink,
+  },
+
+  confirmText: {
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: Colors.muted,
+  },
+
+  confirmActions: {
+    marginTop: 6,
+    gap: 4,
+  },
+
+  cancel: {
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  cancelText: {
+    fontFamily: Fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.muted,
   },
 });

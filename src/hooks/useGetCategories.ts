@@ -34,6 +34,7 @@ export const useGetCategories = ({ token, type }: UseGetCategoriesDTO) => {
       }
 
       setLoading(true);
+      setError(null);
       try {
         const res = await getCategories({ token, type });
         if (res.success && res.categories) {

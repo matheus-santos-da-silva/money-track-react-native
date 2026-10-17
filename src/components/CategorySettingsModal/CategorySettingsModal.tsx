@@ -1,185 +1,224 @@
-import { FC } from "react";
 import { styles } from "./CategorySettingsModalStyles";
+import { Colors } from "../../styles/colors";
 import { iconMap } from "../../utils/icons";
-import { CustomText } from "../CustomText/CustomText";
-import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
-import { showSnackBar } from "../../utils/show-snack-bar";
 import { useAuth } from "../../hooks/useAuth";
+import { sheetStyles } from "../../styles/sheet";
+import { CategoryDTO } from "../../services/DTOS/finance/CategoryDTO";
+import { FooterButton } from "../FooterButton/FooterButton";
+import { showSnackBar } from "../../utils/show-snack-bar";
 import { useNavigation } from "@react-navigation/native";
+import { parseCategoryIcon } from "../../utils/categories";
 import { useDeleteCategory } from "../../hooks/useDeleteCategory";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { InitialCategoryData } from "../../screens/HandleCategory/HandleCategory";
+import { FC, useEffect, useState } from "react";
 import {
+  Animated,
+  Dimensions,
+  Pressable,
+  Text,
   TouchableOpacity,
   View,
-  Animated,
-  Pressable,
-  Modal,
-  ActivityIndicator,
 } from "react-native";
 
-import WhitePencil from "../../assets/images/white-pencil.svg";
-import WhiteTrashIcon from "../../assets/images/white-trash.svg";
+import TrashIcon from "../../assets/images/icons/trash.svg";
+import PencilIcon from "../../assets/images/icons/pencil.svg";
 
 type TransactionType = "INCOME" | "EXPENSE";
 
-export type StackNavigation = {
+type StackNavigation = {
   HandleCategory: {
-    token: string;
     type: TransactionType;
     initialData?: InitialCategoryData;
     isEditing?: boolean;
   };
 };
 
-export interface CategorySettingsProps {
-  category: CategoryDTO | null;
-  token: string;
-  user_id: string;
-  type: TransactionType;
-}
-
 interface CategorySettingsModalProps {
   visible: boolean;
+  category: CategoryDTO | null;
+  type: TransactionType;
   onClose: () => void;
-  props: CategorySettingsProps;
+  onDeleted: () => void;
 }
 
 export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
   visible,
+  category,
+  type,
   onClose,
-  props,
+  onDeleted,
 }) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
-  const { user } = useAuth();
+  const { user, userToken } = useAuth();
 
-  const { translateY, panResponder, handleClose } = useModalAnimation(
+  const insets = useSafeAreaInsets();
+
+  const { translateY, panResponder } = useModalAnimation(
     visible,
     onClose,
+    Dimensions.get("window").height
   );
 
   const { deleteCategory, loading } = useDeleteCategory();
 
-  const handleOptionSelect = (modalAction: "edit" | "delete") => {
-    if (modalAction === "edit") {
-      // Plano gratuito com trial vencido é somente leitura (o servidor também bloqueia).
-      if (user?.isPremium === false) {
-        showSnackBar(
-          "Seu período gratuito acabou. Assine o Premium para editar categorias.",
-          "#de525a",
-        );
-        return;
-      }
+  const [step, setStep] = useState<"actions" | "confirm">("actions");
 
-      navigation.navigate("HandleCategory", {
-        token: props.token,
-        type: props.type,
-        isEditing: true,
-        initialData: {
-          id: props.category?.id,
-          name: props.category?.name,
-          icon: props.category?.icon,
-        },
-      });
-      handleClose();
-    } else {
-      handleDelete();
+  useEffect(() => {
+    if (visible) setStep("actions");
+  }, [visible]);
+
+  const handleEdit = () => {
+    if (user?.isPremium === false) {
+      showSnackBar(
+        "Seu período gratuito acabou. Assine o Premium para editar categorias.",
+        "#de525a"
+      );
+      return;
     }
+
+    navigation.navigate("HandleCategory", {
+      type,
+      isEditing: true,
+      initialData: {
+        id: category?.id,
+        name: category?.name,
+        icon: category?.icon,
+      },
+    });
+    onClose();
   };
 
   const handleDelete = async () => {
-    let success;
-
-    if (props.category?.id) {
-      try {
-        success = await deleteCategory({
-          id: props.category.id,
-          token: props.token,
-        });
-
-        if (success) {
-          showSnackBar(`Categoria deletada com sucesso!`, "#4BB543");
-          navigation.goBack();
-        } else {
-          showSnackBar(`Erro ao deletar Categoria`, "#de525a");
-        }
-      } catch (error) {
-        showSnackBar("Ocorreu um erro inesperado", "#de525a");
-      }
-    } else {
+    if (!category?.id) {
       showSnackBar("Erro ao deletar Categoria", "#de525a");
+      return;
+    }
+
+    try {
+      const success = await deleteCategory({
+        id: category.id,
+        token: userToken?.token ?? "",
+      });
+
+      if (!success) {
+        showSnackBar("Erro ao deletar Categoria", "#de525a");
+        return;
+      }
+
+      showSnackBar("Categoria deletada com sucesso!", "#4BB543");
+      onClose();
+      onDeleted();
+    } catch (error) {
+      showSnackBar("Ocorreu um erro inesperado", "#de525a");
     }
   };
 
-  if (!visible || !props.category) {
+  if (!visible || !category) {
     return null;
   }
 
-  const IconComponent = iconMap[props.category.icon.split("-")[1]];
+  const { color, icon } = parseCategoryIcon(category.icon);
+  const IconComponent = iconMap[icon];
 
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={() => handleClose()}
-    >
-      <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={() => handleClose()} />
+    <View style={sheetStyles.overlay}>
+      <Pressable
+        style={sheetStyles.backdrop}
+        onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Fechar"
+      />
 
-        <Animated.View
-          style={[styles.container, { transform: [{ translateY }] }]}
-          {...panResponder.panHandlers}
-        >
-          <View style={styles.dragIndicator} />
+      <Animated.View
+        style={[
+          sheetStyles.sheet,
+          step === "actions" ? styles.actionsSheet : styles.confirmSheet,
+          { paddingBottom: 28 + insets.bottom, transform: [{ translateY }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <View style={sheetStyles.handle} />
 
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: props.category.icon.split("-")[0] },
-                ]}
-              >
-                <IconComponent width={28} height={28} />
+        {step === "actions" ? (
+          <>
+            <View style={styles.identity}>
+              <View style={[styles.iconCircle, { backgroundColor: color }]}>
+                {IconComponent && <IconComponent width={26} height={26} />}
               </View>
-              <CustomText style={styles.categoryName}>
-                {props.category.name}
-              </CustomText>
+
+              <View style={styles.identityTexts}>
+                <Text style={styles.name} numberOfLines={1}>
+                  {category.name}
+                </Text>
+                <Text style={styles.typeText}>
+                  {type === "EXPENSE"
+                    ? "Categoria de despesa"
+                    : "Categoria de receita"}
+                </Text>
+              </View>
             </View>
 
-            <View style={styles.separator} />
-
-            <View style={styles.actionsContainer}>
+            <View style={styles.actionsRow}>
               <TouchableOpacity
-                style={[styles.actionButton, styles.editButton]}
-                activeOpacity={0.8}
-                onPress={() => handleOptionSelect("edit")}
-              >
-                <WhitePencil width={18} height={18} />
-                <CustomText style={styles.actionText}>Editar</CustomText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => setStep("confirm")}
                 style={[styles.actionButton, styles.deleteButton]}
-                activeOpacity={0.8}
-                disabled={loading}
-                onPress={() => handleOptionSelect("delete")}
+                accessibilityRole="button"
               >
-                {loading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <>
-                    <WhiteTrashIcon width={18} height={18} />
-                    <CustomText style={styles.actionText}>Excluir</CustomText>
-                  </>
-                )}
+                <TrashIcon width={18} height={18} color={Colors.expenseText} />
+                <Text style={[styles.actionText, styles.deleteText]}>
+                  Excluir
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={handleEdit}
+                style={[styles.actionButton, styles.editButton]}
+                accessibilityRole="button"
+              >
+                <PencilIcon width={18} height={18} color={Colors.surface} />
+                <Text style={[styles.actionText, styles.editText]}>Editar</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Animated.View>
-      </View>
-    </Modal>
+          </>
+        ) : (
+          <>
+            <View style={styles.dangerChip}>
+              <TrashIcon width={24} height={24} color={Colors.expenseText} />
+            </View>
+
+            <Text style={styles.confirmTitle} accessibilityRole="header">
+              Excluir “{category.name}”?
+            </Text>
+
+            <Text style={styles.confirmText}>
+              Os lançamentos que já usam essa categoria continuam no seu
+              extrato. Ela só deixa de aparecer na hora de lançar.
+            </Text>
+
+            <View style={styles.confirmActions}>
+              <FooterButton
+                label="Excluir categoria"
+                variant="danger"
+                onPress={handleDelete}
+                loading={loading}
+              />
+              <TouchableOpacity
+                style={styles.cancel}
+                onPress={() => setStep("actions")}
+                disabled={loading}
+                accessibilityRole="button"
+              >
+                <Text style={styles.cancelText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </Animated.View>
+    </View>
   );
 };

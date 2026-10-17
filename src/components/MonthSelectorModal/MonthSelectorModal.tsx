@@ -1,19 +1,30 @@
-import { styles } from "./MonthSelectorModalStyles";
-import { CustomText } from "../CustomText/CustomText";
+import { Colors } from "../../styles/colors";
+import { sheetStyles } from "../../styles/sheet";
+import { useCloseOnBack } from "../../hooks/useCloseOnBack";
+import { useModalAnimation } from "../../hooks/useModalAnimation";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SHEET_HEIGHT, styles } from "./MonthSelectorModalStyles";
 import { FC, useEffect, useState } from "react";
-import { Modal, Text, TouchableOpacity, Pressable, View } from "react-native";
+import {
+  Animated,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import ArrowLeftIcon from "../../assets/images/blue-left-arrow.svg";
-import ArrowRightIcon from "../../assets/images/blue-right-arrow.svg";
+import ChevronLeftIcon from "../../assets/images/icons/chevron-left.svg";
+import ChevronRightIcon from "../../assets/images/icons/chevron-right.svg";
 
 interface MonthSelectorModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectMonth: (month: number, year: number) => void;
+  currentMonth: number;
   currentYear: number;
 }
 
-export const months = [
+const months = [
   "Janeiro",
   "Fevereiro",
   "Março",
@@ -32,9 +43,17 @@ export const MonthSelectorModal: FC<MonthSelectorModalProps> = ({
   visible,
   onClose,
   onSelectMonth,
+  currentMonth,
   currentYear,
 }) => {
+  const insets = useSafeAreaInsets();
   const [selectedYear, setSelectedYear] = useState(currentYear);
+
+  const { translateY, panResponder } = useModalAnimation(
+    visible,
+    onClose,
+    SHEET_HEIGHT + insets.bottom,
+  );
 
   useEffect(() => {
     if (visible) {
@@ -42,54 +61,95 @@ export const MonthSelectorModal: FC<MonthSelectorModalProps> = ({
     }
   }, [visible, currentYear]);
 
-  const handlePrevYear = () => setSelectedYear((prev) => prev - 1);
-  const handleNextYear = () => setSelectedYear((prev) => prev + 1);
+  useCloseOnBack(visible, onClose);
+
+  if (!visible) return null;
+
+  const selectMonth = (month: number, year: number) => {
+    onSelectMonth(month, year);
+    onClose();
+  };
+
+  const goToCurrentMonth = () => {
+    const today = new Date();
+    selectMonth(today.getMonth(), today.getFullYear());
+  };
 
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <Pressable style={styles.modalContainer} onPress={onClose}>
-        <Pressable style={styles.modalContent}>
-          <CustomText style={styles.modalTitle}>Selecione uma data</CustomText>
+    <View style={sheetStyles.overlay}>
+      <Pressable style={sheetStyles.backdrop} onPress={onClose} />
+
+      <Animated.View
+        style={[
+          sheetStyles.sheet,
+          { paddingBottom: 28 + insets.bottom, transform: [{ translateY }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <View style={sheetStyles.handle} />
+
+        <View style={styles.header}>
+          <Text style={styles.title}>Selecionar mês</Text>
 
           <View style={styles.yearContainer}>
             <TouchableOpacity
-              onPress={handlePrevYear}
-              style={styles.arrowButton}
+              style={styles.yearButton}
+              onPress={() => setSelectedYear((year) => year - 1)}
+              accessibilityRole="button"
+              accessibilityLabel="Ano anterior"
             >
-              <ArrowLeftIcon width={20} height={20} />
+              <ChevronLeftIcon width={18} height={18} color={Colors.ink} />
             </TouchableOpacity>
 
             <Text style={styles.yearText}>{selectedYear}</Text>
 
             <TouchableOpacity
-              onPress={handleNextYear}
-              style={styles.arrowButton}
+              style={styles.yearButton}
+              onPress={() => setSelectedYear((year) => year + 1)}
+              accessibilityRole="button"
+              accessibilityLabel="Próximo ano"
             >
-              <ArrowRightIcon width={20} height={20} />
+              <ChevronRightIcon width={18} height={18} color={Colors.ink} />
             </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.monthsContainer}>
-            {months.map((month, index) => (
+        <View style={styles.monthsGrid}>
+          {months.map((month, index) => {
+            const isSelected =
+              index === currentMonth && selectedYear === currentYear;
+
+            return (
               <TouchableOpacity
                 key={month}
-                style={styles.monthItem}
-                onPress={() => {
-                  onSelectMonth(index, selectedYear);
-                  onClose();
-                }}
+                style={[styles.monthButton, isSelected && styles.monthSelected]}
+                activeOpacity={0.8}
+                onPress={() => selectMonth(index, selectedYear)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
               >
-                <Text style={styles.monthText}>{month}</Text>
+                <Text
+                  style={[
+                    styles.monthText,
+                    isSelected && styles.monthTextSelected,
+                  ]}
+                >
+                  {month}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+            );
+          })}
+        </View>
+
+        <TouchableOpacity
+          style={styles.currentMonthButton}
+          activeOpacity={0.8}
+          onPress={goToCurrentMonth}
+          accessibilityRole="button"
+        >
+          <Text style={styles.currentMonthText}>Ir para o mês atual</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 };

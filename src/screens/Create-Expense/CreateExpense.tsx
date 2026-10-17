@@ -1,4 +1,3 @@
-import { Colors } from "../../styles/colors";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import {
   HandleTransaction,
@@ -17,10 +16,8 @@ export const CreateExpense = () => {
   return (
     <HandleTransaction
       transactionType="EXPENSE"
-      color={Colors.expenseRed}
-      typeText="Receita"
       initialData={initialData}
-      isEditing={initialData ? true : false}
+      isEditing={!!initialData}
     />
   );
 };

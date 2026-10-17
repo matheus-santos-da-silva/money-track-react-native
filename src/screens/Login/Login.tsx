@@ -1,94 +1,162 @@
-import { Logo } from "../../components/Logo/Logo";
-import { Input } from "../../components/Input/Input";
 import { styles } from "./LoginStyles";
-import { Button } from "../../components/Button/Button";
+import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { FC, useState } from "react";
-import { showSnackBar } from "../../utils/show-snack-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthLogo } from "../../components/AuthLogo/AuthLogo";
+import { FormField } from "../../components/FormField/FormField";
+import { AuthScreen } from "../../components/AuthScreen/AuthScreen";
+import { FooterButton } from "../../components/FooterButton/FooterButton";
 import { useNavigation } from "@react-navigation/native";
-import { homeScreensStyle } from "../../styles/home-screens.style";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { Pressable, Text, View } from "react-native";
+import { AuthFooterLink } from "../../components/AuthFooterLink/AuthFooterLink";
+import { AuthErrorBanner } from "../../components/AuthErrorBanner/AuthErrorBanner";
+import { authErrorMessage } from "../../utils/auth-errors";
+import { AuthIllustration } from "../../components/AuthIllustration/AuthIllustration";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FC, useRef, useState } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
-import LoginImage from "../../assets/images/login-image.svg";
+import ChevronLeftIcon from "../../assets/images/icons/chevron-left.svg";
 
 type StackNavigation = {
   SignUp: undefined;
-  Home: undefined;
 };
 
+const TOP_MAX_HEIGHT = 300;
+const TOP_SCREEN_SHARE = 0.36;
+
 export const Login: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackNavigation>>();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
 
-  const { login, error, isLoading } = useAuth();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const { login, isLoading } = useAuth();
 
-  const handleSignUpBtn = () => {
-    navigation.navigate("SignUp");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const passwordRef = useRef<TextInput>(null);
+
+  const canSubmit = email.trim() !== "" && password !== "";
+
+  const editField = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setError(null);
   };
 
   const handleLogin = async () => {
-    const result = await login(email, password);
-    if (!result) showSnackBar(error || "Erro desconhecido!", "#de525a");
+    if (!canSubmit || isLoading) return;
+
+    const result = await login(email.trim(), password);
+    if (!result.success) setError(authErrorMessage(result));
   };
 
+  const header = (
+    <View
+      style={[
+        styles.top,
+        {
+          height:
+            Math.min(TOP_MAX_HEIGHT, height * TOP_SCREEN_SHARE) + insets.top,
+        },
+      ]}
+    >
+      <View
+        style={[styles.ring, styles.ringOuter]}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+      />
+      <View
+        style={[styles.ring, styles.ringInner]}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+      />
+
+      <View style={[styles.topRow, { paddingTop: 28 + insets.top }]}>
+        <TouchableOpacity
+          style={styles.back}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+        >
+          <ChevronLeftIcon width={22} height={22} color={Colors.surface} />
+        </TouchableOpacity>
+        <AuthLogo size="compact" />
+      </View>
+
+      <View style={[styles.illustration, { top: 98 + insets.top }]}>
+        <AuthIllustration variant="compact" />
+      </View>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.loginContainer}>
-      <View style={homeScreensStyle.topContent}>
-        <Logo />
-        <CustomText style={styles.loginMsg}>Acesse sua conta</CustomText>
+    <AuthScreen header={header} overlap={32} gap={22}>
+      <View style={styles.heading}>
+        <Text style={styles.title} accessibilityRole="header">
+          Bem-vindo de volta
+        </Text>
+        <Text style={styles.subtitle}>Entre para ver como está o seu mês.</Text>
       </View>
-      <View style={homeScreensStyle.mainContent}>
-        <LoginImage width={250} height={250} />
-        <View style={homeScreensStyle.middleContent}>
-          <View style={homeScreensStyle.form}>
-            <Input
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Digite seu email"
-              isPassword={false}
-            />
-            <Input
-              label="Senha"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Digite sua senha"
-              isPassword={true}
-            />
-          </View>
-        </View>
-        <View style={styles.bottomContent}>
-          <Button
-            isLoading={isLoading}
-            onPress={handleLogin}
-            value="Entrar"
-          ></Button>
-          <View style={homeScreensStyle.divisionContainer}>
-            <View style={homeScreensStyle.orLine} />
-            <Text style={homeScreensStyle.orText}>OU</Text>
-            <View style={homeScreensStyle.orLine} />
-          </View>
-          <View style={homeScreensStyle.footer}>
-            <CustomText style={homeScreensStyle.text}>
-              Ainda não tem uma conta
-            </CustomText>
-            <Text
-              style={[homeScreensStyle.text, homeScreensStyle.questionMark]}
-            >
-              ?
-            </Text>
-            <Pressable onPress={handleSignUpBtn}>
-              <CustomText style={homeScreensStyle.bottomLink}>
-                Cadastre-se
-              </CustomText>
-            </Pressable>
-          </View>
-        </View>
+
+      <View style={styles.fields}>
+        <FormField
+          label="E-mail"
+          surface="ground"
+          value={email}
+          onChangeText={editField(setEmail)}
+          invalid={!!error}
+          placeholder="voce@email.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+        />
+
+        <FormField
+          ref={passwordRef}
+          label="Senha"
+          surface="ground"
+          secure
+          value={password}
+          onChangeText={editField(setPassword)}
+          invalid={!!error}
+          placeholder="Sua senha"
+          autoCapitalize="none"
+          autoComplete="current-password"
+          textContentType="password"
+          returnKeyType="go"
+          onSubmitEditing={handleLogin}
+        />
+
+        {error && <AuthErrorBanner message={error} />}
       </View>
-    </SafeAreaView>
+
+      <FooterButton
+        label="Entrar"
+        size="large"
+        onPress={handleLogin}
+        disabled={!canSubmit}
+        loading={isLoading}
+      />
+
+      <View style={styles.spacer} />
+
+      <AuthFooterLink
+        question="Ainda não tem conta?"
+        label="Criar conta"
+        onPress={() => navigation.navigate("SignUp")}
+      />
+    </AuthScreen>
   );
 };

@@ -1,24 +1,28 @@
-import { Colors } from "../../styles/colors";
+import { Fonts } from "../../styles/fonts";
 import { StyleSheet } from "react-native";
-import { Dimensions } from "react-native";
-
-const { height } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
-  signUpContainer: {
-    flex: 1,
-    width: "100%",
-    paddingVertical: 16,
+  fields: {
+    gap: 16,
   },
 
-  signUpMsg: {
-    fontSize: 22,
-    color: Colors.primaryGray,
-  },
-
-  bottomContent: {
-    width: "100%",
+  rule: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: height * 0.03,
+    gap: 6,
+  },
+
+  ruleText: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+
+  spacer: {
+    flexGrow: 1,
+  },
+
+  footer: {
+    marginTop: -8,
   },
 });
