@@ -1,4 +1,3 @@
-import { SHEET_HEIGHT } from "../components/CategorySelector/CategorySelectorStyles";
 import { useRef, useEffect } from "react";
 import { Animated, PanResponder, PanResponderInstance } from "react-native";
 
@@ -11,9 +10,10 @@ type ModalAnimationHook = {
 
 export const useModalAnimation = (
   visible: boolean,
-  onClose: () => void
+  onClose: () => void,
+  sheetHeight: number
 ): ModalAnimationHook => {
-  const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+  const translateY = useRef(new Animated.Value(sheetHeight)).current;
 
   const handleOpen = () => {
     Animated.timing(translateY, {
@@ -25,7 +25,7 @@ export const useModalAnimation = (
 
   const handleClose = (onClosed?: () => void) => {
     Animated.timing(translateY, {
-      toValue: SHEET_HEIGHT,
+      toValue: sheetHeight,
       duration: 300,
       useNativeDriver: true,
     }).start(() => {

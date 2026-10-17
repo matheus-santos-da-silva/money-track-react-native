@@ -1,99 +1,101 @@
 import { FC } from "react";
-import { styles } from "./BottomBarStyles";
+import { Colors } from "../../styles/colors";
+import { SvgProps } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TouchableOpacity, View } from "react-native";
+import { BAR_HEIGHT, styles } from "./BottomBarStyles";
+import { Text, TouchableOpacity, View } from "react-native";
 
-import HomeIcon from "../../assets/images/home-svg.svg";
-import AlignLeftIcon from "../../assets/images/align-left-svg.svg";
-import ChartsIcon from "../../assets/images/bar-chart-svg.svg";
-import UserIcon from "../../assets/images/user-svg.svg";
-import BluePlusBTN from "../../assets/images/add-transaction-button.svg";
+import HomeIcon from "../../assets/images/icons/home.svg";
+import ListIcon from "../../assets/images/icons/list.svg";
+import PlusIcon from "../../assets/images/icons/plus.svg";
+import UserIcon from "../../assets/images/icons/user.svg";
+import BarChartIcon from "../../assets/images/icons/bar-chart.svg";
 
-interface ButtonFieldProps {
-  userProps: {
-    id: string;
-    name: string;
-    email?: string;
-    token: string;
-    month: number;
-    year: number;
-  };
+export type BottomBarTab = "Home" | "Transactions" | "Dashboard" | "Menu";
+
+type StackNavigation = Record<BottomBarTab, { month: number; year: number }>;
+
+interface BottomBarProps {
+  active: BottomBarTab;
+  month: number;
+  year: number;
+  onShowTypeSelector: () => void;
 }
 
-type StackNavigation = {
-  Menu: {
-    month: number;
-    year: number;
-  };
+interface TabConfig {
+  screen: BottomBarTab;
+  label: string;
+  Icon: FC<SvgProps>;
+}
 
-  Transactions: {
-    month: number;
-    year: number;
-  };
+const LEFT_TABS: TabConfig[] = [
+  { screen: "Home", label: "Início", Icon: HomeIcon },
+  { screen: "Transactions", label: "Extrato", Icon: ListIcon },
+];
 
-  Dashboard: {
-    month: number;
-    year: number;
-  };
+const RIGHT_TABS: TabConfig[] = [
+  { screen: "Dashboard", label: "Relatórios", Icon: BarChartIcon },
+  { screen: "Menu", label: "Perfil", Icon: UserIcon },
+];
 
-  Home: undefined;
-  CreateExpense: undefined;
-  CreateIncome: undefined;
-};
-
-export const BottomBar: FC<
-  ButtonFieldProps & { onShowTypeSelector: () => void }
-> = ({ userProps, onShowTypeSelector }) => {
+export const BottomBar: FC<BottomBarProps> = ({
+  active,
+  month,
+  year,
+  onShowTypeSelector,
+}) => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
-  const navigateTo = (screen: keyof StackNavigation) => {
-    if (
-      screen === "Menu" ||
-      screen === "Transactions" ||
-      screen === "Dashboard"
-    ) {
-      navigation.navigate(screen, {
-        month: userProps.month,
-        year: userProps.year,
-      });
-    } else {
-      navigation.navigate(screen);
-    }
+  const renderTab = ({ screen, label, Icon }: TabConfig) => {
+    const isActive = screen === active;
+    const color = isActive ? Colors.brandBlue : Colors.muted;
+
+    return (
+      <TouchableOpacity
+        key={screen}
+        style={styles.tab}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate(screen, { month, year })}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected: isActive }}
+      >
+        <Icon width={22} height={22} color={color} />
+        <Text
+          style={[styles.tabLabel, isActive && styles.tabLabelActive, { color }]}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <View
-      style={[
-        styles.bottomMenu,
-        { paddingBottom: 10 + insets.bottom, height: 60 + insets.bottom },
-      ]}
-    >
-      <View style={styles.iconGroup}>
-        <TouchableOpacity onPress={() => navigateTo("Home")}>
-          <HomeIcon height="24" width="24" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigateTo("Transactions")}>
-          <AlignLeftIcon height="24" width="24" />
-        </TouchableOpacity>
+    // box-none: a faixa transparente acima da barra não bloqueia o conteúdo da tela.
+    <View style={styles.wrapper} pointerEvents="box-none">
+      <View
+        style={[
+          styles.bar,
+          { height: BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
+        ]}
+      >
+        {LEFT_TABS.map(renderTab)}
+        <View style={styles.fabSlot} />
+        {RIGHT_TABS.map(renderTab)}
       </View>
 
-      <View style={styles.svgContainer}>
-        <TouchableOpacity activeOpacity={0.9} onPress={onShowTypeSelector}>
-          <BluePlusBTN height="70" width="70" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.iconGroup}>
-        <TouchableOpacity onPress={() => navigateTo("Dashboard")}>
-          <ChartsIcon height="24" width="24" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigateTo("Menu")}>
-          <UserIcon height="24" width="24" />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.9}
+        onPress={onShowTypeSelector}
+        accessibilityRole="button"
+        accessibilityLabel="Novo lançamento"
+      >
+        <PlusIcon width={26} height={26} color={Colors.surface} />
+      </TouchableOpacity>
     </View>
   );
 };

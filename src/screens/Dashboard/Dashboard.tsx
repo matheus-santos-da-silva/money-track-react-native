@@ -1,33 +1,46 @@
 import { styles } from "./DashboardStyles";
 import { Colors } from "../../styles/colors";
-import { colors } from "../../utils/colors";
-import { sumAmounts, subtractAmounts } from "../../utils/money";
 import { useAuth } from "../../hooks/useAuth";
-import { PieChart } from "react-native-gifted-charts";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { SubtitleRow } from "../../components/SubtitleRow/SubtitleRow";
+import { shiftMonth } from "../../utils/home-summary";
+import { BalanceCard } from "../../components/BalanceCard/BalanceCard";
+import { MessageCard } from "../../components/MessageCard/MessageCard";
 import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
-import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
-import { useTransactions } from "../../contexts/TransactionsContext";
 import { StackNavigation } from "../Home/Home";
+import { MonthNavigator } from "../../components/MonthNavigator/MonthNavigator";
+import { MonthHighlights } from "../../components/MonthHighlights/MonthHighlights";
+import { useTransactions } from "../../contexts/TransactionsContext";
+import { ReportIndicators } from "../../components/ReportIndicators/ReportIndicators";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CategoryBreakdown } from "../../components/CategoryBreakdown/CategoryBreakdown";
+import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
-import { TransactionsMonthSelector } from "../../components/TransactionsMonthSelector/TransactionsMonthSelector";
+import { useTransactionsHistory } from "../../hooks/useTransactionsHistory";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { FC, useEffect, useMemo, useState } from "react";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { ScrollView, Text, View } from "react-native";
 import {
-  ActivityIndicator,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+  SpendingBar,
+  SpendingHistoryChart,
+} from "../../components/SpendingHistoryChart/SpendingHistoryChart";
+import {
+  balanceComparison,
+  dailyAverage,
+  dailyAverageCaption,
+  historyByMonth,
+  monthHighlights,
+  monthName,
+  monthTotals,
+  savingsRate,
+  transactionsOfMonth,
+} from "../../utils/reports";
 
-import ReportsImage from "../../assets/images/reports-image.svg";
-import RedTrendingDown from "../../assets/images/red-trending-down.svg";
-import GreenTrendingUp from "../../assets/images/green-trending-up.svg";
+import PlusIcon from "../../assets/images/icons/plus.svg";
+import BarChartIcon from "../../assets/images/icons/bar-chart.svg";
+import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
+import AlertTriangleIcon from "../../assets/images/icons/alert-triangle.svg";
 
 type ParamList = {
   Params: {
@@ -36,23 +49,27 @@ type ParamList = {
   };
 };
 
-type CategoryGroup = {
-  name: string;
-  total: number;
-};
+// Meses do gráfico, contando o exibido.
+const HISTORY_MONTHS = 6;
 
 export const Dashboard: FC = () => {
+  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const insets = useSafeAreaInsets();
+
   const { month, year } = useRoute<RouteProp<ParamList, "Params">>().params;
   const { user, userToken } = useAuth();
+  const userId = user?.id ?? "";
+  const token = userToken?.token ?? "";
 
+  const [isMonthSelectorVisible, setIsMonthSelectorVisible] = useState(false);
   const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
   const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
 
   const [currentYear, setCurrentYear] = useState<number>(year);
-  const [currentMonthIndex, setCurrentMonth] = useState(month);
+  const [currentMonth, setCurrentMonth] = useState(month);
   const [forceUpdate, setForceUpdate] = useState(false);
 
-  const isViewingCurrentMonth = currentMonthIndex === month && currentYear === year;
+  const isViewingRouteMonth = currentMonth === month && currentYear === year;
 
   const {
     transactions: contextTransactions,
@@ -61,49 +78,43 @@ export const Dashboard: FC = () => {
     clearRefetch,
   } = useTransactions();
 
-  const handleMonthChange = (newMonth: number, newYear: number) => {
-    setCurrentMonth(newMonth);
-    setCurrentYear(newYear);
-  };
-
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
-
-  const handleSelectType = (type: "EXPENSE" | "INCOME") => {
-    setIsTypeSelectorVisible(false);
-    if (user?.isPremium === false) {
-      setIsPremiumModalVisible(true);
-      return;
-    } else {
-      navigation.navigate(
-        type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
-        {},
-      );
-    }
-  };
-
   const {
     transactions: fetchedTransactions,
+    transactionsError,
     loading,
     refetch,
   } = useGetUserTransactions({
-    user_id: user?.id || "",
-    token: userToken?.token || "",
-    month: currentMonthIndex,
+    user_id: userId,
+    token,
+    month: currentMonth,
     year: currentYear,
   });
 
+  const history = useTransactionsHistory({
+    user_id: userId,
+    token,
+    month: currentMonth,
+    year: currentYear,
+    months: HISTORY_MONTHS,
+  });
+
+  // O mês da rota vem do contexto (já carregado pela Home); os demais, da busca.
+  // Enquanto a busca de outro mês carrega, os dados antigos não aparecem.
   const transactions =
-    isViewingCurrentMonth && !forceUpdate
+    isViewingRouteMonth && !forceUpdate
       ? contextTransactions
+      : loading
+      ? null
       : fetchedTransactions;
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       if (shouldRefetch) {
         setForceUpdate(true);
+        history.refetch(true);
 
         refetch(true).then((updated) => {
-          if (isViewingCurrentMonth && updated) {
+          if (isViewingRouteMonth && updated) {
             setTransactions(updated);
           }
 
@@ -114,315 +125,247 @@ export const Dashboard: FC = () => {
     });
 
     return unsubscribe;
-  }, [navigation, shouldRefetch]);
+  }, [
+    navigation,
+    shouldRefetch,
+    isViewingRouteMonth,
+    refetch,
+    history.refetch,
+  ]);
 
-  const getPieDataByCategory = (
-    colors: string[],
-    totalAmount: number,
-    transactions?: TransactionDTO[],
-    maxCategories: number = 7,
-  ) => {
-    if (!transactions?.length || totalAmount === 0) return [];
-
-    const grouped = transactions.reduce<Record<string, CategoryGroup>>(
-      (acc, item) => {
-        const categoryId = item.category_id;
-        const name = item.category?.name;
-        if (!acc[categoryId]) {
-          acc[categoryId] = { name, total: 0 };
-        }
-        acc[categoryId].total += item.amount;
-        return acc;
-      },
-      {},
-    );
-
-    const sorted = Object.values(grouped).sort((a, b) => b.total - a.total);
-    const topCategories = sorted.slice(0, maxCategories);
-    const otherCategories = sorted.slice(maxCategories);
-
-    if (otherCategories.length > 0) {
-      const othersTotal = otherCategories.reduce(
-        (sum, cat) => sum + cat.total,
-        0,
-      );
-      topCategories.push({ name: "Outros...", total: othersTotal });
-    }
-
-    const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
-
-    return topCategories.map((item, index) => {
-      const color = shuffledColors[index % shuffledColors.length];
-      return {
-        color,
-        value: (item.total / totalAmount) * 100,
-        text: `${((item.total / totalAmount) * 100).toFixed(1)}%`,
-        name: item.name,
-        total: item.total,
-      };
-    });
+  const handleMonthChange = (newMonth: number, newYear: number) => {
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
   };
 
-  // Soma em centavos inteiros (somar floats acumula erro).
-  const expensesAmount: number = sumAmounts(
-    (transactions?.expenses ?? []).map((expense) => expense.amount),
+  const handleMonthStep = (delta: number) => {
+    const next = shiftMonth(currentMonth, currentYear, delta);
+    handleMonthChange(next.month, next.year);
+  };
+
+  const handleSelectType = (type: "EXPENSE" | "INCOME") => {
+    setIsTypeSelectorVisible(false);
+    if (user?.isPremium === false) {
+      setIsPremiumModalVisible(true);
+      return;
+    }
+    navigation.navigate(
+      type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
+      {}
+    );
+  };
+
+  const name = monthName(currentMonth, currentYear);
+  const totals = useMemo(
+    () => (transactions ? monthTotals(transactions) : null),
+    [transactions]
+  );
+  const hasData =
+    !!transactions &&
+    (transactions.expenses.length > 0 || transactions.incomes.length > 0);
+
+  const months = useMemo(
+    () =>
+      history.transactions
+        ? historyByMonth(
+            history.transactions,
+            currentMonth,
+            currentYear,
+            HISTORY_MONTHS
+          )
+        : null,
+    [history.transactions, currentMonth, currentYear]
   );
 
-  const incomesAmount: number = sumAmounts(
-    (transactions?.incomes ?? []).map((income) => income.amount),
+  // A barra do mês exibido usa o mesmo total do card de saldo: os dois nunca divergem,
+  // mesmo que um cache esteja mais velho que o outro.
+  const bars = useMemo<SpendingBar[]>(
+    () =>
+      Array.from({ length: HISTORY_MONTHS }, (_, index) => {
+        const isShownMonth = index === HISTORY_MONTHS - 1;
+        const shifted = shiftMonth(
+          currentMonth,
+          currentYear,
+          index - (HISTORY_MONTHS - 1)
+        );
+
+        return {
+          ...shifted,
+          expenses:
+            isShownMonth && totals
+              ? totals.expenses
+              : months?.[index].expenses ?? 0,
+        };
+      }),
+    [months, totals, currentMonth, currentYear]
   );
 
-  const totalAmount = subtractAmounts(incomesAmount, expensesAmount);
+  const previousMonth = months?.[HISTORY_MONTHS - 2];
 
-  const incomesPieData = useMemo(
-    () => getPieDataByCategory(colors, incomesAmount, transactions?.incomes),
-    [transactions?.incomes, incomesAmount],
-  );
+  const highlights = useMemo(() => {
+    if (!transactions) return [];
 
-  const expensesPieData = useMemo(
-    () => getPieDataByCategory(colors, expensesAmount, transactions?.expenses),
-    [transactions?.expenses, expensesAmount],
-  );
+    const previous =
+      history.transactions && previousMonth
+        ? {
+            ...previousMonth,
+            expenses: transactionsOfMonth(
+              history.transactions,
+              previousMonth.month,
+              previousMonth.year
+            ).expenses,
+          }
+        : null;
+
+    return monthHighlights(transactions.expenses, previous);
+  }, [transactions, history.transactions, previousMonth]);
+
+  const average = totals
+    ? dailyAverage(totals.expenses, currentMonth, currentYear)
+    : null;
+
+  const chartStatus = history.transactions
+    ? "ready"
+    : history.error
+    ? "error"
+    : "loading";
+
+  const renderMonthContent = () => {
+    if (!transactions && transactionsError) {
+      return (
+        <MessageCard
+          icon={
+            <AlertTriangleIcon
+              width={28}
+              height={28}
+              color={Colors.expenseText}
+            />
+          }
+          title="Não conseguimos nos conectar"
+          message="Verifique sua conexão e tente novamente."
+          action={{
+            label: "Tentar novamente",
+            icon: <RefreshIcon width={16} height={16} />,
+            onPress: () => refetch(),
+          }}
+        />
+      );
+    }
+
+    return (
+      <BalanceCard
+        monthName={name}
+        totals={totals}
+        comparison={
+          totals && months
+            ? balanceComparison(totals.balance, previousMonth)
+            : null
+        }
+      />
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topMenu}>
-        <View style={styles.title}>
-          <CustomText style={{ fontSize: 20, color: "white" }}>
-            Resumo
-          </CustomText>
+    <View style={styles.container}>
+      <View
+        style={[styles.header, { paddingTop: Math.max(20, insets.top + 8) }]}
+      >
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Relatórios</Text>
         </View>
 
-        <View>
-          <TransactionsMonthSelector
-            monthIndex={currentMonthIndex}
-            year={currentYear}
-            onMonthChange={handleMonthChange}
-            filterSelected={null}
-          />
-        </View>
+        <MonthNavigator
+          label={`${name} ${currentYear}`}
+          onPress={() => setIsMonthSelectorVisible(true)}
+          onStep={handleMonthStep}
+        />
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 45,
-        }}
       >
-        <View style={styles.mainContainer}>
-          <View style={styles.totalAmountDiv}>
-            <View style={styles.cardTotalAmount}>
-              <View style={styles.cardTotalAmountTitle}>
-                <CustomText style={styles.cardTotalAmountText}>
-                  Receita
-                </CustomText>
-                <GreenTrendingUp width={12} height={12} />
-              </View>
+        {renderMonthContent()}
 
-              <View style={styles.justify}>
-                <Text
-                  style={[
-                    styles.cardTotalAmountValue,
-                    { color: Colors.incomeGreen },
-                  ]}
-                >
-                  {`R$ +${incomesAmount.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
-                </Text>
-              </View>
-            </View>
+        {hasData && totals && (
+          <ReportIndicators
+            savingsRate={savingsRate(totals)}
+            overspent={totals.balance < 0}
+            dailyAverage={
+              average && {
+                amount: average.amount,
+                caption: dailyAverageCaption(
+                  average,
+                  currentMonth,
+                  currentYear
+                ),
+              }
+            }
+          />
+        )}
 
-            <View style={styles.cardTotalAmount}>
-              <View style={styles.cardTotalAmountTitle}>
-                <CustomText style={styles.cardTotalAmountText}>
-                  Saldo Total
-                </CustomText>
-              </View>
+        <SpendingHistoryChart
+          key={`${currentYear}-${currentMonth}`}
+          bars={bars}
+          status={chartStatus}
+          onRetry={() => history.refetch()}
+        />
 
-              <View style={styles.justify}>
-                <Text
-                  style={[
-                    styles.cardTotalAmountValue,
-                    { color: Colors.primaryGray },
-                  ]}
-                >
-                  {`R$ ${totalAmount.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
-                </Text>
-              </View>
-            </View>
+        {hasData && transactions && (
+          <>
+            <CategoryBreakdown
+              key={`${currentYear}-${currentMonth}`}
+              monthName={name}
+              expenses={transactions.expenses}
+              incomes={transactions.incomes}
+            />
+            <MonthHighlights highlights={highlights} />
+          </>
+        )}
 
-            <View style={styles.cardTotalAmount}>
-              <View style={styles.cardTotalAmountTitle}>
-                <CustomText style={styles.cardTotalAmountText}>
-                  Despesa
-                </CustomText>
-                <RedTrendingDown width={12} height={12} />
-              </View>
-
-              <View style={styles.justify}>
-                <Text
-                  style={[
-                    styles.cardTotalAmountValue,
-                    { color: Colors.expenseRed },
-                  ]}
-                >
-                  {`R$ -${expensesAmount.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.primaryBlue} />
-              <Text style={styles.messageText}>Carregando relatórios...</Text>
-            </View>
-          ) : incomesPieData.length === 0 && expensesPieData.length === 0 ? (
-            // 🚫 Nenhum dado disponível
-            <View style={styles.withoutAnyReportDiv}>
-              <ReportsImage width={250} height={250} />
-              <View>
-                <Text style={styles.messageText}>
-                  Nenhum relatório disponível no momento!
-                </Text>
-                <Text style={styles.messageText}>
-                  Adicione alguma transação para visualizar os gráficos!
-                </Text>
-              </View>
-            </View>
-          ) : (
-            <>
-              {/* --- RECEITAS --- */}
-              {incomesPieData.length > 0 ? (
-                <View style={styles.chartsCards}>
-                  <View style={styles.chartsCardsTitleDiv}>
-                    <CustomText style={styles.chartsCardsTitle}>
-                      Receita por Categoria
-                    </CustomText>
-                  </View>
-
-                  <View style={styles.data}>
-                    <View style={styles.subtitle}>
-                      {incomesPieData.map((income, index) => (
-                        <SubtitleRow
-                          key={income.name + index}
-                          color={income.color}
-                          title={income.name}
-                          percent={(income.total / incomesAmount) * 100}
-                        />
-                      ))}
-                    </View>
-
-                    <View>
-                      <PieChart
-                        donut
-                        data={incomesPieData}
-                        showText={false}
-                        radius={65}
-                        innerRadius={38}
-                        strokeColor="#fff"
-                        innerCircleColor="#ffffffff"
-                        focusOnPress
-                      />
-                    </View>
-                  </View>
-                </View>
-              ) : (
-                // 🚫 Nenhuma receita
-                <View style={styles.withoutOneReportDiv}>
-                  <ReportsImage width={160} height={160} />
-                  <Text style={styles.messageText}>
-                    Nenhuma receita registrada!
-                  </Text>
-                </View>
-              )}
-
-              {/* --- DESPESAS --- */}
-              {expensesPieData.length > 0 ? (
-                <View style={styles.chartsCards}>
-                  <View style={styles.chartsCardsTitleDiv}>
-                    <CustomText style={styles.chartsCardsTitle}>
-                      Despesa por Categoria
-                    </CustomText>
-                  </View>
-
-                  <View style={styles.data}>
-                    <View style={styles.subtitle}>
-                      {expensesPieData.map((expense, index) => (
-                        <SubtitleRow
-                          key={expense.name + index}
-                          color={expense.color}
-                          title={expense.name}
-                          percent={(expense.total / expensesAmount) * 100}
-                        />
-                      ))}
-                    </View>
-
-                    <View>
-                      <PieChart
-                        donut
-                        data={expensesPieData}
-                        radius={65}
-                        innerRadius={38}
-                        strokeColor="#fff"
-                        innerCircleColor="#ffffffff"
-                        focusOnPress
-                      />
-                    </View>
-                  </View>
-                </View>
-              ) : (
-                // 🚫 Nenhuma despesa
-                <View style={styles.withoutOneReportDiv}>
-                  <ReportsImage width={160} height={160} />
-                  <Text style={styles.messageText}>
-                    Nenhuma despesa registrada!
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
-        </View>
+        {transactions && !hasData && (
+          <MessageCard
+            icon={
+              <BarChartIcon width={26} height={26} color={Colors.brandBlue} />
+            }
+            title={`Sem lançamentos em ${name.toLowerCase()}`}
+            message="Assim que você registrar receitas e despesas, os gráficos e destaques do mês aparecem aqui."
+            action={{
+              label: "Adicionar lançamento",
+              icon: <PlusIcon width={18} height={18} color={Colors.surface} />,
+              onPress: () => setIsTypeSelectorVisible(true),
+            }}
+          />
+        )}
       </ScrollView>
 
       <BottomBar
-        userProps={{
-          id: user?.id || "",
-          name: user?.name || "",
-          token: userToken?.token || "",
-          month,
-          year,
-          email: user?.email || "",
-        }}
+        active="Dashboard"
+        month={month}
+        year={year}
         onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
+      />
+
+      <MonthSelectorModal
+        visible={isMonthSelectorVisible}
+        onClose={() => setIsMonthSelectorVisible(false)}
+        onSelectMonth={handleMonthChange}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
       />
 
       <CreateTransactionTypeSelector
         visible={isTypeSelectorVisible}
         onClose={() => setIsTypeSelectorVisible(false)}
-        onSelect={(type) => {
-          setIsTypeSelectorVisible(false);
-          handleSelectType(type);
-        }}
+        onSelect={handleSelectType}
       />
 
       <PremiumModal
         isVisible={isPremiumModalVisible}
         onClose={() => setIsPremiumModalVisible(false)}
-        onSubscribe={(productId: string) => {
-          setIsPremiumModalVisible(false);
-          console.log("Subscribe to:", productId);
-        }}
+        onSubscribe={() => setIsPremiumModalVisible(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 };

@@ -1,90 +1,94 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
-const { height: screenHeight } = Dimensions.get("window");
-
-export const SHEET_HEIGHT = screenHeight * 0.42;
+// Altura do sheet sem a área segura inferior: de onde a animação de entrada parte.
+export const SHEET_HEIGHT = 312;
 
 export const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "flex-end",
-  },
-
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-
-  container: {
-    backgroundColor: "#fff",
-    width: "100%",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 36,
-  },
-
-  dragIndicator: {
-    width: 40,
-    height: 4,
-    borderRadius: 5,
-    backgroundColor: "#E0E0E0",
-    alignSelf: "center",
-    marginBottom: 24,
-  },
-
   titleContainer: {
-    alignItems: "center",
-    marginBottom: 28,
+    gap: 2,
   },
 
   title: {
-    fontSize: 19,
-    textAlign: "center",
-    color: Colors.primaryGray,
-    fontFamily: "KonkhmerSleokchher-Regular",
-    marginBottom: 6,
+    fontFamily: Fonts.semiBold,
+    fontSize: 18,
+    lineHeight: 26,
+    color: Colors.ink,
   },
 
   subtitle: {
-    fontSize: 13,
-    color: "#AAAAAA",
-    fontFamily: "Poppins-Regular",
-    textAlign: "center",
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.muted,
   },
 
   optionsContainer: {
     flexDirection: "row",
+    gap: 12,
+  },
+
+  optionCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 16,
     gap: 14,
   },
 
-  optionButton: {
-    flex: 1,
-    paddingVertical: 22,
-    borderRadius: 22,
-    alignItems: "center",
-    gap: 8,
+  expenseCard: {
+    backgroundColor: Colors.expenseTint,
   },
 
-  optionText: {
-    color: "white",
-    fontFamily: "KonkhmerSleokchher-Regular",
+  incomeCard: {
+    backgroundColor: Colors.incomeTint,
+  },
+
+  optionChip: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  expenseChip: {
+    backgroundColor: Colors.expenseText,
+  },
+
+  incomeChip: {
+    backgroundColor: Colors.incomeText,
+  },
+
+  optionTexts: {
+    gap: 2,
+  },
+
+  optionTitle: {
+    fontFamily: Fonts.semiBold,
     fontSize: 16,
-    letterSpacing: 0.3,
+    lineHeight: 22,
+    color: Colors.ink,
   },
 
   optionSubtitle: {
-    color: "rgba(255,255,255,0.72)",
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#4A546B",
   },
 
-  expenseButton: {
-    backgroundColor: Colors.expenseRed,
+  cancelButton: {
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  incomeButton: {
-    backgroundColor: Colors.incomeGreen,
+  cancelText: {
+    fontFamily: Fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.muted,
   },
 });

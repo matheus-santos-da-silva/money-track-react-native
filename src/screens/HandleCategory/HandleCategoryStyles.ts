@@ -1,122 +1,169 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
 import { StyleSheet } from "react-native";
 
-export const styles = (color: string) =>
-  StyleSheet.create({
-    menuColor: {
-      backgroundColor: color,
-    },
+export const styles = StyleSheet.create({
+  preview: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
 
-    confirmButtonColor: {
-      backgroundColor: color,
-    },
+  previewCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    container: {
-      backgroundColor: Colors.backgroundGray,
-      flex: 1,
-    },
+  previewCircleEmpty: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: Colors.refLine,
+  },
 
-    /* Top Menu */
-    topMenu: {
-      width: "100%",
-      flex: 0.3,
-      minHeight: 120,
-      maxHeight: 150,
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-      paddingBottom: 24,
-    },
+  previewTexts: {
+    flex: 1,
+    gap: 2,
+  },
 
-    /* Logo and BackBtn */
-    topLogo: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      width: "100%",
-      paddingHorizontal: 10,
-      marginTop: 10,
-    },
+  previewLabel: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.muted,
+  },
 
-    logo: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      alignItems: "center",
-    },
+  previewName: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 16,
+    lineHeight: 22,
+    color: Colors.ink,
+  },
 
-    /* Main Content */
-    mainContent: {
-      gap: 36,
-      paddingHorizontal: 30,
-      paddingTop: 36,
-    },
+  previewNameEmpty: {
+    color: Colors.refLine,
+  },
 
-    categoryNameInput: {
-      width: "100%",
-      height: 46,
-      alignItems: "center",
-      justifyContent: "center",
-      paddingLeft: 16,
-      position: "relative",
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderColor: Colors.primaryGray,
-      color: Colors.primaryGray,
-      borderRadius: 16,
-      fontFamily: "Poppins-Regular",
-    },
+  typeTag: {
+    fontFamily: Fonts.medium,
+    fontSize: 12,
+    lineHeight: 18,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
 
-    chooseData: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
+  expenseTag: {
+    color: Colors.expenseText,
+    backgroundColor: Colors.expenseTint,
+  },
 
-    addButton: {
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: color,
-      height: 24,
-      width: 24,
-      borderRadius: 50,
-    },
+  incomeTag: {
+    color: Colors.incomeText,
+    backgroundColor: Colors.incomeTint,
+  },
 
-    justify: {
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 6,
-    },
+  group: {
+    gap: 8,
+  },
 
-    chooseIcon: {
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 6,
-    },
+  groupLabel: {
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.ink,
+  },
 
-    choosedIcon: {
-      backgroundColor: color,
-      height: 70,
-      width: 70,
-      borderRadius: 36,
-      justifyContent: "center",
-      alignItems: "center",
-    },
+  groupHint: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.muted,
+  },
 
-    confirmButtonContainer: {
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 18,
-    },
+  counter: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.muted,
+    fontVariant: ["tabular-nums"],
+  },
 
-    confirmButton: {
-      width: 260,
-      height: 60,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 20,
-      elevation: 6.3,
-    },
-  });
+  counterFull: {
+    color: Colors.expenseText,
+  },
+
+  gridSpacer: {
+    flex: 1,
+  },
+
+  iconGrid: {
+    gap: 8,
+  },
+
+  iconRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  iconOption: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.chipBorder,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  iconOptionSelected: {
+    borderWidth: 2,
+    borderColor: Colors.brandBlue,
+    backgroundColor: Colors.brandTint,
+  },
+
+  iconOptionCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  colorRow: {
+    flexDirection: "row",
+    gap: 4,
+  },
+
+  colorOption: {
+    flex: 1,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  colorRing: {
+    position: "absolute",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+  },
+
+  colorSwatch: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

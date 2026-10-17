@@ -1,247 +1,204 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
 import { StyleSheet } from "react-native";
 
-export const styles = (color: string) =>
-  StyleSheet.create({
-    menuColor: {
-      backgroundColor: color,
-    },
-    confirmButtonColor: {
-      backgroundColor: color,
-    },
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.ground,
+  },
 
-    container: {
-      backgroundColor: Colors.backgroundGray,
-      flex: 1,
-    },
+  header: {
+    backgroundColor: Colors.brandBlue,
+    paddingHorizontal: 12,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    gap: 12,
+  },
 
-    grayText: {
-      color: Colors.primaryGray,
-    },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
 
-    /* Top Menu */
-    topMenu: {
-      width: "100%",
-      flex: 0.3,
-      minHeight: 180,
-      maxHeight: 240,
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingVertical: 4,
-      paddingHorizontal: 10,
-      borderBottomLeftRadius: 30,
-      borderBottomRightRadius: 30,
-    },
+  close: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    /* Logo and BackBtn */
-    topLogo: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      width: "100%",
-      paddingHorizontal: 10,
-      marginTop: 10,
-    },
+  title: {
+    flex: 1,
+    textAlign: "center",
+    fontFamily: Fonts.semiBold,
+    fontSize: 18,
+    lineHeight: 26,
+    color: Colors.surface,
+  },
 
-    logo: {
-      position: "absolute",
-      left: 0,
-      right: 0,
-      alignItems: "center",
-    },
+  typeSwitch: {
+    marginHorizontal: 48,
+  },
 
-    /* Amount Div */
-    amountDiv: {
-      alignItems: "center",
-      marginTop: 20,
-    },
+  amountButton: {
+    paddingTop: 4,
+    alignItems: "center",
+  },
 
-    valueText: {
-      fontFamily: "Poppins-Regular",
-      lineHeight: 14,
-      fontSize: 18,
-      color: "white",
-    },
+  amountLabel: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.onBlueMuted,
+  },
 
-    amountText: {
-      color: "white",
-      fontSize: 30,
-      bottom: 6,
-    },
+  amountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
 
-    /* Type Menu */
-    typeMenu: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 16,
-      gap: 4,
-    },
+  amount: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 40,
+    lineHeight: 52,
+    letterSpacing: -1,
+    color: Colors.surface,
+    fontVariant: ["tabular-nums"],
+  },
 
-    /* Main Content */
-    mainContent: {
-      width: "82%",
-      marginLeft: 36,
-      marginTop: 48,
-      gap: 20,
-    },
+  amountEmpty: {
+    opacity: 0.7,
+  },
 
-    label: {
-      width: "100%",
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
+  body: {
+    flex: 1,
+  },
 
-    descriptionInput: {
-      width: "100%",
-      height: 42,
-      alignItems: "center",
-      paddingLeft: 16,
-      position: "relative",
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderColor: Colors.primaryGray,
-      color: Colors.primaryGray,
-      borderRadius: 16,
-      fontFamily: "Poppins-Regular",
-    },
+  content: {
+    paddingTop: 18,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 20,
+  },
 
-    halfDiv: {
-      width: "100%",
-      flexDirection: "row",
-      gap: "10%",
-    },
+  notice: {
+    flexDirection: "row",
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    backgroundColor: Colors.brandTintStrong,
+  },
 
-    halfCard: {
-      width: "45%",
-      flexDirection: "column",
-    },
+  noticeText: {
+    flex: 1,
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: Colors.brandInk,
+  },
 
-    halfInput: {
-      height: 42,
-      justifyContent: "space-around",
-      alignItems: "center",
-      flexDirection: "row",
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderColor: Colors.primaryGray,
-      color: Colors.primaryGray,
-      borderRadius: 16,
-    },
+  section: {
+    gap: 8,
+  },
 
-    inputText: {
-      textAlign: "center",
-      lineHeight: 20,
-      opacity: 0.7,
-      color: Colors.primaryGray,
-      fontFamily: "Poppins-Regular",
-    },
+  locked: {
+    opacity: 0.6,
+  },
 
-    transactionContainer: {
-      gap: 8,
-    },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 
-    transactionButtonsContainer: {
-      width: "100%",
-      flexDirection: "row",
-      gap: 16,
-    },
+  sectionLabel: {
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.ink,
+  },
 
-    transactionButtonWrapper: {
-      flex: 1,
-    },
+  textButton: {
+    height: 32,
+    justifyContent: "center",
+  },
 
-    transactionButton: {
-      width: "100%",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "transparent",
-      height: 36,
-      borderWidth: 1,
-      borderRadius: 16,
-      borderColor: Colors.primaryGray,
-    },
+  textButtonLabel: {
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.brandBlue,
+  },
 
-    transactionButtonText: {
-      color: Colors.primaryGray,
-      fontSize: 10,
-    },
+  shortcutsScroll: {
+    marginHorizontal: -20,
+  },
 
-    confirmButtonContainer: {
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 18,
-    },
+  shortcuts: {
+    paddingHorizontal: 20,
+    paddingVertical: 2,
+    gap: 6,
+  },
 
-    confirmButton: {
-      width: 200,
-      height: 50,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 20,
-    },
+  shortcut: {
+    width: 70,
+  },
 
-    confirmButtonText: {
-      color: "white",
-      fontSize: 14,
-    },
+  shortcutPlaceholder: {
+    width: 70,
+    height: 79,
+    alignItems: "center",
+    paddingTop: 5,
+  },
 
-    /* Modal */
-    modalContainer: {
-      backgroundColor: "#fff",
-      borderRadius: 12,
-      paddingVertical: 25,
-      paddingHorizontal: 30,
-      width: "100%",
-      maxWidth: 320,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 5 },
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-      elevation: 10,
-    },
+  placeholderCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.chip,
+  },
 
-    modalTitle: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: Colors.primaryGray,
-      marginBottom: 15,
-      textAlign: "center",
-    },
+  categoriesError: {
+    alignItems: "flex-start",
+  },
 
-    modalButton: {
-      borderRadius: 12,
-      paddingVertical: 14,
-      paddingHorizontal: 10,
-      alignItems: "center",
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.4,
-      shadowRadius: 8,
-      elevation: 8,
-    },
+  categoriesErrorText: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: Colors.expenseText,
+  },
 
-    modalText: {
-      fontSize: 17,
-      fontWeight: "700",
-      color: "#fff",
-      letterSpacing: 0.5,
-      textShadowColor: "rgba(0, 0, 0, 0.25)",
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 3,
-    },
+  optionsRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
 
-    iconCircle: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      justifyContent: "center",
-      alignItems: "center",
-    },
+  recurrenceCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    gap: 10,
+  },
 
-    amountInput: {
-      fontSize: 26,
-      color: "white",
-      lineHeight: 39,
-      fontFamily: "KonkhmerSleokchher-Regular",
-    },
-  });
+  recurrenceSummary: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Colors.muted,
+  },
+
+  footer: {
+    paddingTop: 12,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    backgroundColor: Colors.ground,
+  },
+});

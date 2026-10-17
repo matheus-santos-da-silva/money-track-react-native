@@ -1,126 +1,116 @@
-import { StyleSheet } from "react-native";
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "flex-end",
+  sheet: {
+    gap: 18,
   },
 
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-
-  container: {
-    backgroundColor: "#fff",
-    width: "100%",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingBottom: 36,
-    paddingTop: 0,
-  },
-
-  dragIndicator: {
-    width: 40,
-    height: 4,
-    borderRadius: 5,
-    backgroundColor: "#E0E0E0",
-    alignSelf: "center",
-    marginTop: 14,
-    marginBottom: 20,
-  },
-
-  mainContent: {
-    flexDirection: "column",
-    gap: 20,
-  },
-
-  headerSection: {
+  identity: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    gap: 12,
   },
 
   iconCircle: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    justifyContent: "center",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  headerText: {
-    flexDirection: "column",
+  identityTexts: {
     flex: 1,
-    gap: 2,
   },
 
   categoryName: {
-    color: Colors.primaryGray,
-    fontSize: 17,
+    fontFamily: Fonts.semiBold,
+    fontSize: 16,
     lineHeight: 22,
+    color: Colors.ink,
   },
 
   dateText: {
-    color: Colors.primaryGray,
-    fontFamily: "Poppins-Regular",
+    fontFamily: Fonts.regular,
     fontSize: 13,
+    lineHeight: 18,
+    color: Colors.muted,
+  },
+
+  typeTag: {
+    fontFamily: Fonts.medium,
+    fontSize: 12,
+    lineHeight: 18,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  expenseTag: {
+    color: Colors.expenseText,
+    backgroundColor: Colors.expenseTint,
+  },
+
+  incomeTag: {
+    color: Colors.incomeText,
+    backgroundColor: Colors.incomeTint,
   },
 
   amountText: {
-    fontFamily: "KonkhmerSleokchher-Regular",
-    fontSize: 22,
-    lineHeight: 26,
+    fontFamily: Fonts.semiBold,
+    fontSize: 30,
+    lineHeight: 38,
+    letterSpacing: -0.5,
+    fontVariant: ["tabular-nums"],
   },
 
-  separator: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#F0F0F0",
+  expenseAmount: {
+    color: Colors.expenseText,
   },
 
-  infoSection: {
+  incomeAmount: {
+    color: Colors.incomeText,
+  },
+
+  infoRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    gap: 10,
   },
 
-  infoItem: {
-    alignItems: "center",
+  infoBlock: {
+    flex: 1,
+    backgroundColor: Colors.ground,
+    borderRadius: 14,
+    padding: 12,
     gap: 2,
   },
 
   infoLabel: {
-    color: "#AAAAAA",
-    fontFamily: "Poppins-Regular",
+    fontFamily: Fonts.regular,
     fontSize: 12,
+    lineHeight: 18,
+    color: Colors.muted,
   },
 
   infoValue: {
-    color: "#1A1A2E",
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: Fonts.medium,
     fontSize: 14,
+    lineHeight: 20,
+    color: Colors.ink,
   },
 
-  descriptionSection: {
-    backgroundColor: "#F8F8F8",
-    borderRadius: 14,
-    padding: 14,
-    gap: 4,
-  },
-
-  descriptionLabel: {
-    color: "#AAAAAA",
-    fontFamily: "Poppins-Regular",
-    fontSize: 12,
+  description: {
+    gap: 2,
   },
 
   descriptionText: {
-    color: Colors.primaryGray,
-    fontFamily: "Poppins-Regular",
+    fontFamily: Fonts.regular,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
+    color: Colors.ink,
   },
 
   actionsRow: {
@@ -130,25 +120,35 @@ export const styles = StyleSheet.create({
 
   actionButton: {
     flex: 1,
+    height: 48,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 16,
     gap: 8,
   },
 
-  editButton: {
-    backgroundColor: Colors.primaryBlue,
+  actionText: {
+    fontFamily: Fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
   },
 
   deleteButton: {
-    backgroundColor: Colors.expenseRed,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.expenseText,
   },
 
-  actionButtonText: {
-    color: "#fff",
-    fontFamily: "Poppins-SemiBold",
-    fontSize: 15,
+  deleteText: {
+    color: Colors.expenseText,
+  },
+
+  editButton: {
+    backgroundColor: Colors.brandBlue,
+  },
+
+  editText: {
+    color: Colors.surface,
   },
 });

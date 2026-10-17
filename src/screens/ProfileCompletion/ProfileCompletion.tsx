@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import { SafeAreaView, Text, View } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
-import { CustomText } from "../../components/CustomText/CustomText";
-import { Input } from "../../components/Input/Input";
 import { styles } from "./ProfileCompletionStyles";
-import { Button } from "../../components/Button/Button";
+import { Colors } from "../../styles/colors";
+import { useAuth } from "../../hooks/useAuth";
+import { nameError } from "../../utils/account-forms";
+import { FormField } from "../../components/FormField/FormField";
+import { AuthScreen } from "../../components/AuthScreen/AuthScreen";
+import { AuthResult } from "../../contexts/AuthContext";
+import { FooterButton } from "../../components/FooterButton/FooterButton";
+import { SignUpHeader } from "../../components/SignUpHeader/SignUpHeader";
+import { AuthErrorBanner } from "../../components/AuthErrorBanner/AuthErrorBanner";
+import { FC, useState } from "react";
+import { Text, View } from "react-native";
+import { authErrorMessage, isEmailTaken } from "../../utils/auth-errors";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { TopBar } from "../../components/TopBar/TopBar";
-import Snackbar from "react-native-snackbar";
 
-type StackNavigation = {
-  SignUp: undefined;
-  Home: undefined;
-};
+import StarIcon from "../../assets/images/icons/star.svg";
 
 type ParamList = {
   Params: {
@@ -22,58 +22,96 @@ type ParamList = {
   };
 };
 
-export const ProfileCompletion: React.FC = () => {
-  const [name, setName] = useState("");
+export const ProfileCompletion: FC = () => {
+  const navigation = useNavigation();
   const { email, password } = useRoute<RouteProp<ParamList, "Params">>().params;
-  const { signUp, error, isLoading } = useAuth();
+  const { signUp, isLoading } = useAuth();
 
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const [name, setName] = useState("");
+  const [failure, setFailure] = useState<AuthResult | null>(null);
 
-  const handleBackBtn = () => {
-    navigation.goBack();
+  const trimmedName = name.trim();
+  const error = nameError(trimmedName);
+  const canSubmit = error === null;
+
+  const handleNameChange = (value: string) => {
+    setName(value);
+    setFailure(null);
   };
 
   const handleFinishSignUp = async () => {
-    const result = await signUp({ email, name, password });
-    if (!result) {
-      Snackbar.show({
-        text: error || "Erro desconhecido!",
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: "#de525a",
-        fontFamily: "Poppins-Regular",
-      });
-    }
+    if (!canSubmit || isLoading) return;
+
+    const result = await signUp({ email, name: trimmedName, password });
+    if (!result.success) setFailure(result);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TopBar handleBackBtn={handleBackBtn} />
-      <View style={styles.middleContent}>
-        <CustomText style={styles.profileCompletionMsg}>
-          Estamos quase lá!
-        </CustomText>
-        <Text style={styles.middleText}>
-          Mas antes queremos saber o seu nome!
-        </Text>
-      </View>
-      <View style={styles.bottomContent}>
-        <View style={styles.inputContainer}>
-          <Input
-            label="Nome"
-            value={name}
-            onChangeText={setName}
-            placeholder="Digite seu nome"
-            isPassword={false}
-          />
+    <AuthScreen
+      header={
+        <SignUpHeader
+          step={2}
+          title="Como podemos te chamar?"
+          subtitle="Último passo. Depois disso, é só lançar o primeiro gasto."
+        />
+      }
+      overlap={28}
+      gap={18}
+    >
+      <View style={styles.fields}>
+        <FormField
+          label="Seu nome"
+          surface="ground"
+          value={name}
+          onChangeText={handleNameChange}
+          error={trimmedName !== "" ? error : null}
+          placeholder="Como você gosta de ser chamado"
+          autoCapitalize="words"
+          autoComplete="name"
+          textContentType="givenName"
+          returnKeyType="done"
+          onSubmitEditing={handleFinishSignUp}
+          hint={
+            <Text style={styles.hint}>
+              É assim que vamos te cumprimentar no app.
+            </Text>
+          }
+        />
+
+        <View style={styles.trial}>
+          <View style={styles.trialChip}>
+            <StarIcon width={20} height={20} color={Colors.surface} />
+          </View>
+          <View style={styles.trialTexts}>
+            <Text style={styles.trialTitle}>7 dias de Premium grátis</Text>
+            <Text style={styles.trialText}>
+              Sua conta já começa com tudo liberado. Sem cartão, sem
+              compromisso.
+            </Text>
+          </View>
         </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            isLoading={isLoading}
-            onPress={handleFinishSignUp}
-            value="Continuar"
-          ></Button>
-        </View>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.spacer} />
+
+      {failure && (
+        <AuthErrorBanner
+          message={authErrorMessage(failure)}
+          action={
+            isEmailTaken(failure)
+              ? { label: "Usar outro e-mail", onPress: navigation.goBack }
+              : undefined
+          }
+        />
+      )}
+
+      <FooterButton
+        label="Criar minha conta"
+        size="large"
+        onPress={handleFinishSignUp}
+        disabled={!canSubmit}
+        loading={isLoading}
+      />
+    </AuthScreen>
   );
 };

@@ -1,6 +1,8 @@
 import { UserDTO } from "../services/DTOS/UserDTO";
 import { LoginUser } from "../services/LoginService";
 import { useGetUser } from "../hooks/useGetUser";
+import { AuthFailure } from "../utils/auth-errors";
+import { AuthResponseDTO } from "../services/DTOS/AuthServicesResponsesDTO";
 import { SignUpProps, SignUpUser } from "../services/SignUpService";
 import axios from "axios";
 import { FINANCE_SERVICE_URL, USERS_SERVICE_URL } from "@env";
@@ -18,22 +20,25 @@ type AuthContextProps = {
   userToken: UserToken | null;
   user: UserDTO | null;
   isPremium: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  signUp: (data: SignUpProps) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  signUp: (data: SignUpProps) => Promise<AuthResult>;
   logout: () => void;
   refreshUser: () => void;
   isLoading: boolean;
-  error: string | null;
+  isBootstrapping: boolean;
 };
 
+export type AuthResult = { success: boolean } & AuthFailure;
+
 export const AuthContext = createContext<AuthContextProps>(
-  {} as AuthContextProps,
+  {} as AuthContextProps
 );
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [userToken, setUserToken] = useState<UserToken | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isTokenChecked, setIsTokenChecked] = useState(false);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   const {
     user,
@@ -50,59 +55,49 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         } else {
           setUserToken(null);
         }
-      } catch (error) {
-        setError("Erro ao verificar autenticação");
+      } catch {
+        setUserToken(null);
+      } finally {
+        setIsTokenChecked(true);
       }
     };
 
     checkAuthStatus();
   }, []);
 
+  // Só a primeira verificação conta: depois de pronto, login e logout não voltam a bloquear.
+  useEffect(() => {
+    const hasSettled = !userToken || user !== null || userError !== null;
+    if (isBootstrapping && isTokenChecked && hasSettled) {
+      setIsBootstrapping(false);
+    }
+  }, [isBootstrapping, isTokenChecked, userToken, user, userError]);
+
   const isPremium = user?.isPremium ?? false;
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setError(null);
+  const authenticate = async (
+    request: Promise<AuthResponseDTO>
+  ): Promise<AuthResult> => {
     setIsLoading(true);
-    const { success, message, userToken } = await LoginUser(email, password);
+    const { success, message, status, userToken } = await request;
     setIsLoading(false);
+
     if (success && userToken) {
       await AsyncStorage.setItem(
         "@money-track-token!",
-        JSON.stringify(userToken),
+        JSON.stringify(userToken)
       );
       setUserToken(userToken);
-      return success;
-    } else {
-      setError(message || "Erro de rede ou desconhecido");
-      return success;
+      return { success: true };
     }
+
+    return { success: false, message, status };
   };
 
-  const signUp = async ({
-    email,
-    name,
-    password,
-  }: SignUpProps): Promise<boolean> => {
-    setError(null);
-    setIsLoading(true);
-    const { success, message, userToken } = await SignUpUser({
-      email,
-      name,
-      password,
-    });
-    setIsLoading(false);
-    if (success && userToken) {
-      await AsyncStorage.setItem(
-        "@money-track-token!",
-        JSON.stringify(userToken),
-      );
-      setUserToken(userToken);
-      return success;
-    } else {
-      setError(message || "Erro de rede ou desconhecido");
-      return success;
-    }
-  };
+  const login = (email: string, password: string) =>
+    authenticate(LoginUser(email, password));
+
+  const signUp = (data: SignUpProps) => authenticate(SignUpUser(data));
 
   const logout = async () => {
     await AsyncStorage.removeItem("@money-track-token!");
@@ -124,7 +119,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           showSnackBar("Sua sessão expirou. Faça login novamente.", "#de525a");
           logout();
         },
-      }),
+      })
     );
 
     return () => axios.interceptors.response.eject(interceptorId);
@@ -141,7 +136,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         signUp,
         logout,
         isLoading,
-        error,
+        isBootstrapping,
       }}
     >
       {children}

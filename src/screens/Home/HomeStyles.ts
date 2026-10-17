@@ -1,179 +1,211 @@
-import { StyleSheet } from "react-native";
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
+import { StyleSheet } from "react-native";
+
+// Quanto o conteúdo sobe sobre o cabeçalho azul.
+const HEADER_OVERLAP = 48;
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.backgroundGray,
     flex: 1,
-    justifyContent: "flex-start",
+    backgroundColor: Colors.ground,
   },
 
-  /* Top Blue Menu */
-  topMenu: {
-    width: "100%",
-    height: "32%",
-    minHeight: 220,
-    maxHeight: 280,
-    backgroundColor: "#407BFF",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  /* Cabeçalho */
+  header: {
+    backgroundColor: Colors.brandBlue,
+    paddingHorizontal: 20,
+    paddingBottom: 20 + HEADER_OVERLAP,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    gap: 18,
   },
 
-  topMenuContent: {
-    width: "100%",
-    height: 50,
+  profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 12,
   },
 
-  profileCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#363636",
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.18)",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  profileLetter: {
-    fontSize: 26,
-    color: "#B1B1B1",
-    fontFamily: "KonkhmerSleokchher-Regular",
+  avatarLetter: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 17,
+    lineHeight: 24,
+    color: Colors.surface,
   },
 
-  profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  greeting: {
+    flex: 1,
   },
 
-  lastMenuContent: {
-    width: "100%",
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-  },
-
-  middleMenuContent: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  amountTotalText: {
-    color: "white",
-    fontFamily: "Poppins-Regular",
-    fontSize: 18,
+  greetingLabel: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
     lineHeight: 18,
+    color: Colors.onBlueMuted,
   },
 
-  amount: {
-    color: "white",
-    fontSize: 30,
-    lineHeight: 40,
-  },
-
-  EyeIconView: {
-    position: "absolute",
-    right: 4,
-    zIndex: 2,
-  },
-
-  greetingText: {
+  greetingName: {
+    fontFamily: Fonts.semiBold,
     fontSize: 16,
-    color: "white",
-    marginLeft: 14,
-    fontFamily: "Poppins-Regular",
+    lineHeight: 22,
+    color: Colors.surface,
   },
 
-  /* Main Content */
-  mainContainer: {
-    flex: 1,
-    flexDirection: "column",
+  bellButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.14)",
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  monthContent: {
+  iconButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  balance: {
+    alignItems: "center",
+    gap: 2,
+  },
+
+  balanceLabel: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.onBlueMuted,
+  },
+
+  // paddingLeft = botão do olho + intervalo: mantém o valor centralizado na tela.
+  balanceRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingVertical: 8,
+    paddingLeft: 48,
   },
 
-  monthText: {
-    fontSize: 18,
-    color: "white",
+  balanceAmount: {
+    flexShrink: 1,
+    fontFamily: Fonts.semiBold,
+    fontSize: 34,
+    lineHeight: 44,
+    letterSpacing: -0.5,
+    color: Colors.surface,
+    fontVariant: ["tabular-nums"],
   },
 
-  mainContent: {
-    flexDirection: "column",
-    alignItems: "center",
-    paddingTop: 24,
-    gap: 32,
+  /* Conteúdo */
+  scroll: {
+    marginTop: -HEADER_OVERLAP,
   },
 
-  /* Error styles */
-  errorCard: {
-    marginTop: 24,
-    marginHorizontal: 8,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 28,
-    paddingVertical: 36,
-    paddingHorizontal: 28,
-    alignItems: "center",
-    shadowColor: "#407BFF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 16,
   },
 
-  errorIconContainer: {
-    backgroundColor: "#EEF3FF",
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  errorTitle: {
-    color: "#1A1A2E",
-    fontSize: 18,
-    fontWeight: "600",
-    fontFamily: "Poppins-Regular",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-
-  errorMessage: {
-    color: "#9499A5",
-    fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 28,
-  },
-
-  retryButton: {
+  summaryRow: {
     flexDirection: "row",
-    backgroundColor: "#407BFF",
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 50,
-    alignItems: "center",
+    gap: 12,
+  },
+
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+  },
+
+  sectionTitle: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 16,
+    lineHeight: 22,
+    color: Colors.ink,
+  },
+
+  /* Barra de gasto */
+  spendingCard: {
+    padding: 16,
+    gap: 10,
+  },
+
+  spendingHeader: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
     gap: 8,
   },
 
-  retryButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-    fontFamily: "Poppins-Regular",
-    fontSize: 15,
+  spendingText: {
+    flexShrink: 1,
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.ink,
+  },
+
+  spendingPeriod: {
+    fontFamily: Fonts.regular,
+    fontSize: 12,
+    lineHeight: 18,
+    color: Colors.muted,
+  },
+
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.border,
+    overflow: "hidden",
+  },
+
+  progressFill: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.brandBlue,
+  },
+
+  progressFillExceeded: {
+    backgroundColor: Colors.expenseText,
+  },
+
+  /* Últimos lançamentos */
+  recentSection: {
+    gap: 8,
+  },
+
+  recentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  seeAllButton: {
+    height: 44,
+    paddingHorizontal: 4,
+    justifyContent: "center",
+  },
+
+  seeAllText: {
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.brandBlue,
+  },
+
+  recentCard: {
+    paddingVertical: 4,
+    paddingHorizontal: 16,
   },
 });

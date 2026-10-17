@@ -1,56 +1,81 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
-import { Dimensions, StyleSheet } from "react-native";
-
-const { height: screenHeight } = Dimensions.get("window");
-
-export const SHEET_HEIGHT = screenHeight * 0.6;
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  displayBox: {
-    padding: 8,
-    backgroundColor: "transparent",
-    borderRadius: 8,
+  sheet: {
+    gap: 14,
+  },
+
+  display: {
     alignItems: "center",
   },
 
-  displayText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    fontFamily: "KonkhmerSleokchher-Regular",
+  displayLabel: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.muted,
   },
 
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.4)",
+  displayValue: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 36,
+    lineHeight: 46,
+    fontVariant: ["tabular-nums"],
   },
 
-  keypadContainer: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-    padding: 26,
+  keypad: {
+    gap: 8,
+  },
+
+  keyRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 10,
-    height: "55%",
+    gap: 8,
   },
 
   key: {
-    width: "30%",
-    aspectRatio: 1,
-    marginBottom: 12,
-    backgroundColor: "#ddd",
-    borderRadius: 12,
-    justifyContent: "center",
+    flex: 1,
+    height: 56,
+    borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
   },
-  
-  keyText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: Colors.primaryGray,
+
+  digitKey: {
+    backgroundColor: Colors.ground,
+  },
+
+  actionKey: {
+    backgroundColor: Colors.border,
+  },
+
+  digitText: {
+    fontFamily: Fonts.medium,
+    fontSize: 22,
+    lineHeight: 30,
+    color: Colors.ink,
+  },
+
+  clearText: {
+    fontFamily: Fonts.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.ink,
+  },
+
+  confirm: {
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: Colors.brandBlue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  confirmText: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.surface,
   },
 });

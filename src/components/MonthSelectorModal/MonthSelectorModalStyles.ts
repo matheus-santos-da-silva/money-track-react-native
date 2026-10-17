@@ -1,73 +1,95 @@
+import { Fonts } from "../../styles/fonts";
 import { Colors } from "../../styles/colors";
 import { StyleSheet } from "react-native";
 
+// Altura do sheet sem a área segura inferior: de onde a animação de entrada parte.
+export const SHEET_HEIGHT = 406;
+
 export const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  
-  modalContent: {
-    width: "90%",
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 20,
-    alignItems: "center",
-    elevation: 5,
+    justifyContent: "space-between",
   },
 
-  modalTitle: {
-    fontSize: 17,
-    marginBottom: 20,
-    color: Colors.primaryBlue,
+  title: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 18,
+    lineHeight: 26,
+    color: Colors.ink,
   },
 
   yearContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    marginBottom: 25,
-    gap: 20,
+    gap: 4,
   },
 
-  arrowButton: {
-    padding: 8,
-    backgroundColor: "#F0F9FF",
-    borderRadius: 50,
+  yearButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Colors.chip,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   yearText: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: Colors.primaryBlue,
-    fontFamily: "Poppins-Regular",
+    minWidth: 60,
+    textAlign: "center",
+    fontFamily: Fonts.semiBold,
+    fontSize: 17,
+    lineHeight: 24,
+    color: Colors.ink,
+    fontVariant: ["tabular-nums"],
   },
 
-  monthsContainer: {
+  monthsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingHorizontal: 5,
-    rowGap: 10,
+    gap: 10,
   },
 
-  monthItem: {
-    width: "48%",
-    paddingVertical: 12,
+  // 30% + crescimento: três colunas iguais, já descontado o intervalo.
+  monthButton: {
+    flexBasis: "30%",
+    flexGrow: 1,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: Colors.chip,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
-    backgroundColor: "#F3F7FF",
-    marginBottom: 5,
+  },
+
+  monthSelected: {
+    backgroundColor: Colors.brandBlue,
   },
 
   monthText: {
+    fontFamily: Fonts.medium,
     fontSize: 14,
-    fontFamily: "Poppins-Regular",
-    color: Colors.primaryBlue,
+    lineHeight: 20,
+    color: Colors.ink,
+  },
+
+  monthTextSelected: {
+    fontFamily: Fonts.semiBold,
+    color: Colors.surface,
+  },
+
+  currentMonthButton: {
+    height: 48,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.borderStrong,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  currentMonthText: {
+    fontFamily: Fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.ink,
   },
 });

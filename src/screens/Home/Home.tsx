@@ -1,21 +1,31 @@
 import { styles } from "./HomeStyles";
+import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
 import { BottomBar } from "../../components/BottomBar/BottomBar";
-import { CustomText } from "../../components/CustomText/CustomText";
 import { useBalance } from "../../hooks/useBalance";
+import { SummaryCard } from "../../components/SummaryCard/SummaryCard";
 import { getDateRange } from "../../utils/get-date-range";
 import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useNavigation } from "@react-navigation/native";
+import { formatCurrency } from "../../utils/format-amount";
 import { useTransactions } from "../../contexts/TransactionsContext";
-import { TransactionCard } from "../../components/TransactionCard/TransactionCard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { MessageCard } from "../../components/MessageCard/MessageCard";
+import { MonthNavigator } from "../../components/MonthNavigator/MonthNavigator";
+import { TransactionListRow } from "../../components/TransactionListRow/TransactionListRow";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
-import { FC, useEffect, useRef, useState } from "react";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import {
+  latestTransactions,
+  shiftMonth,
+  shortDateLabel,
+  spendingRatio,
+} from "../../utils/home-summary";
 import {
   Animated,
   ScrollView,
@@ -24,14 +34,21 @@ import {
   View,
 } from "react-native";
 
-import EyeIcon from "../../assets/images/white-eye-icon-svg.svg";
+import EyeIcon from "../../assets/images/icons/eye.svg";
+import BellIcon from "../../assets/images/icons/bell.svg";
+import ListIcon from "../../assets/images/icons/list.svg";
+import PlusIcon from "../../assets/images/icons/plus.svg";
+import EyeOffIcon from "../../assets/images/icons/eye-off.svg";
 import RefreshIcon from "../../assets/images/refresh-icon-svg.svg";
-import DownArrowIcon from "../../assets/images/white-arrow-down.svg";
-import NotificationIcon from "../../assets/images/bell-svg.svg";
-import AlertTriangleIcon from "../../assets/images/alert-triangle.svg";
+import AlertTriangleIcon from "../../assets/images/icons/alert-triangle.svg";
 
 export type StackNavigation = {
   Menu: undefined;
+
+  Transactions: {
+    month: number;
+    year: number;
+  };
 
   CreateExpense: {
     initialData?: InitialTransactionData;
@@ -42,25 +59,27 @@ export type StackNavigation = {
   };
 };
 
-export const Home: FC = () => {
-  const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
+const RECENT_TRANSACTIONS_LIMIT = 4;
 
+export const Home: FC = () => {
   const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const insets = useSafeAreaInsets();
 
   const currentDate = new Date();
   const [currentYear, setCurrentYear] = useState<number>(
-    currentDate.getFullYear(),
+    currentDate.getFullYear()
   );
   const [currentMonth, setCurrentMonth] = useState<number>(
-    currentDate.getMonth(),
+    currentDate.getMonth()
   );
 
   const { monthName } = getDateRange(currentYear, currentMonth);
 
-  const { user, isPremium, userToken } = useAuth();
+  const { user, userToken } = useAuth();
 
   const [isHidden, setIsHidden] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isMonthSelectorVisible, setIsMonthSelectorVisible] = useState(false);
+  const [isTypeSelectorVisible, setIsTypeSelectorVisible] = useState(false);
   const [isPremiumModalVisible, setIsPremiumModalVisible] = useState(false);
 
   const { setTransactions } = useTransactions();
@@ -70,12 +89,9 @@ export const Home: FC = () => {
     setCurrentYear(newYear);
   };
 
-  const toggleVisibility = () => {
-    setIsHidden((prev) => !prev);
-  };
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
+  const handleMonthStep = (delta: number) => {
+    const { month, year } = shiftMonth(currentMonth, currentYear, delta);
+    handleMonthChange(month, year);
   };
 
   useEffect(() => {
@@ -97,7 +113,19 @@ export const Home: FC = () => {
   }, [transactions]);
 
   const { total, expenses, incomes } = useBalance(transactions);
-  const insets = useSafeAreaInsets();
+
+  const recentTransactions = useMemo(
+    () =>
+      transactions
+        ? latestTransactions(transactions, RECENT_TRANSACTIONS_LIMIT)
+        : [],
+    [transactions]
+  );
+
+  const hasTransactions = recentTransactions.length > 0;
+  // Só é "mês vazio" depois que os dados chegaram: evita piscar no 1º carregamento.
+  const isEmptyMonth = transactions !== null && !hasTransactions;
+  const spending = hasTransactions ? spendingRatio(expenses, incomes) : null;
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -129,10 +157,6 @@ export const Home: FC = () => {
     }
   }, [transactionsError]);
 
-  const handleRetry = () => {
-    refetch();
-  };
-
   const handleSelectType = (type: "EXPENSE" | "INCOME") => {
     setIsTypeSelectorVisible(false);
     if (user?.isPremium === false) {
@@ -141,175 +165,227 @@ export const Home: FC = () => {
     }
     navigation.navigate(
       type === "EXPENSE" ? "CreateExpense" : "CreateIncome",
-      {},
+      {}
     );
   };
+
+  const openMonthTransactions = () => {
+    navigation.navigate("Transactions", {
+      month: currentMonth,
+      year: currentYear,
+    });
+  };
+
+  const VisibilityIcon = isHidden ? EyeOffIcon : EyeIcon;
 
   return (
     <View style={styles.container}>
       <View
-        style={[styles.topMenu, { paddingTop: Math.max(20, insets.top + 8) }]}
+        style={[styles.header, { paddingTop: Math.max(20, insets.top + 8) }]}
       >
-        <View style={styles.topMenuContent}>
-          <View style={styles.profileContainer}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.profileCircle}
-              onPress={() => navigation.navigate("Menu")}
-            >
-              <Text style={styles.profileLetter}>
-                {user?.name ? user.name[0] : "U"}
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={styles.greetingText}>
-              {user ? `Olá, ${user.name}!` : "Carregando..."}
-            </Text>
-          </View>
-          <NotificationIcon fill="white" height="24" width="24" />
-        </View>
-
-        <View style={styles.middleMenuContent}>
-          <Text style={styles.amountTotalText}>Saldo Total</Text>
-          <CustomText style={styles.amount}>
-            {isHidden
-              ? "-----"
-              : transactions
-              ? `R$ ${total.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : "R$ 00,00"}
-          </CustomText>
-        </View>
-
-        <View style={styles.lastMenuContent}>
-          <View
-            style={{
-              position: "absolute",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity onPress={toggleModal} style={styles.monthContent}>
-              <CustomText style={styles.monthText}>{monthName}</CustomText>
-              <DownArrowIcon height="20" width="20" />
-            </TouchableOpacity>
-          </View>
-
+        <View style={styles.profileRow}>
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={toggleVisibility}
-            style={styles.EyeIconView}
+            activeOpacity={0.8}
+            style={styles.avatar}
+            onPress={() => navigation.navigate("Menu")}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir menu"
           >
-            <EyeIcon height="20" width="20" />
+            <Text style={styles.avatarLetter}>
+              {user?.name ? user.name[0] : "U"}
+            </Text>
           </TouchableOpacity>
 
-          <MonthSelectorModal
-            visible={isModalVisible}
-            onClose={() => setIsModalVisible(false)}
-            onSelectMonth={handleMonthChange}
-            currentYear={currentYear}
-          />
+          <View style={styles.greeting}>
+            <Text style={styles.greetingLabel}>Olá,</Text>
+            <Text style={styles.greetingName} numberOfLines={1}>
+              {user ? user.name : "Carregando..."}
+            </Text>
+          </View>
+
+          <View
+            style={styles.bellButton}
+            accessibilityRole="button"
+            accessibilityLabel="Notificações"
+          >
+            <BellIcon width={20} height={20} color={Colors.surface} />
+          </View>
+        </View>
+
+        <MonthNavigator
+          label={`${monthName} ${currentYear}`}
+          onPress={() => setIsMonthSelectorVisible(true)}
+          onStep={handleMonthStep}
+        />
+
+        <View style={styles.balance}>
+          <Text style={styles.balanceLabel}>Saldo total</Text>
+          <View style={styles.balanceRow}>
+            <Text style={styles.balanceAmount} numberOfLines={1}>
+              {formatCurrency(total, isHidden)}
+            </Text>
+            <TouchableOpacity
+              style={styles.iconButton}
+              activeOpacity={0.7}
+              onPress={() => setIsHidden((prev) => !prev)}
+              accessibilityRole="button"
+              accessibilityLabel="Mostrar ou ocultar valores"
+            >
+              <VisibilityIcon width={20} height={20} color={Colors.surface} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      <ScrollView>
-        <View style={styles.mainContainer}>
-          <View style={styles.mainContent}>
-            {transactionsError ? (
-              <Animated.View
-                style={[
-                  styles.errorCard,
-                  {
-                    opacity: errorFadeAnim,
-                    transform: [{ translateY: errorSlideAnim }],
-                  },
-                ]}
-              >
-                <View style={styles.errorIconContainer}>
-                  <AlertTriangleIcon width={32} height={32} />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {transactionsError ? (
+          <Animated.View
+            style={{
+              opacity: errorFadeAnim,
+              transform: [{ translateY: errorSlideAnim }],
+            }}
+          >
+            <MessageCard
+              icon={
+                <AlertTriangleIcon
+                  width={28}
+                  height={28}
+                  color={Colors.expenseText}
+                />
+              }
+              title="Não conseguimos nos conectar"
+              message={
+                "Não se preocupe, seus dados estão salvos.\nVerifique sua conexão e tente novamente."
+              }
+              action={{
+                label: "Tentar novamente",
+                icon: <RefreshIcon width={16} height={16} />,
+                onPress: () => refetch(),
+              }}
+            />
+          </Animated.View>
+        ) : (
+          <>
+            <View style={styles.summaryRow}>
+              <SummaryCard
+                kind="INCOME"
+                amount={incomes}
+                isHidden={isHidden}
+                isLoading={loading}
+                onPress={openMonthTransactions}
+              />
+              <SummaryCard
+                kind="EXPENSE"
+                amount={expenses}
+                isHidden={isHidden}
+                isLoading={loading}
+                onPress={openMonthTransactions}
+              />
+            </View>
+
+            {spending && (
+              <View style={[styles.card, styles.spendingCard]}>
+                <View style={styles.spendingHeader}>
+                  <Text style={styles.spendingText}>
+                    {spending.exceeded
+                      ? "Você gastou mais do que recebeu"
+                      : `Você gastou ${spending.percent}% do que recebeu`}
+                  </Text>
+                  <Text style={styles.spendingPeriod}>no mês</Text>
                 </View>
-                <Text style={styles.errorTitle}>
-                  Não conseguimos nos conectar
-                </Text>
-                <Text style={styles.errorMessage}>
-                  Não se preocupe, seus dados estão salvos.{"\n"}Verifique sua
-                  conexão e tente novamente.
-                </Text>
-                <TouchableOpacity
-                  style={styles.retryButton}
-                  onPress={handleRetry}
-                  activeOpacity={0.8}
-                >
-                  <RefreshIcon width={16} height={16} />
-                  <Text style={styles.retryButtonText}>Tentar novamente</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            ) : (
-              <>
-                <TransactionCard
-                  type="expense"
-                  isHidden={isHidden}
-                  onPress={() => {
-                    if (!isPremium) {
-                      setIsPremiumModalVisible(true);
-                      return;
-                    }
-                    navigation.navigate("CreateExpense", {});
-                  }}
-                  amount={expenses}
-                  isLoading={loading}
-                />
-
-                <TransactionCard
-                  type="income"
-                  isHidden={isHidden}
-                  onPress={() => {
-                    if (!isPremium) {
-                      setIsPremiumModalVisible(true);
-                      return;
-                    }
-
-                    navigation.navigate("CreateIncome", {});
-                  }}
-                  amount={incomes}
-                  isLoading={loading}
-                />
-              </>
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${Math.min(spending.percent, 100)}%` },
+                      spending.exceeded && styles.progressFillExceeded,
+                    ]}
+                  />
+                </View>
+              </View>
             )}
-          </View>
-        </View>
+
+            {hasTransactions && (
+              <View style={styles.recentSection}>
+                <View style={styles.recentHeader}>
+                  <Text style={styles.sectionTitle}>Últimos lançamentos</Text>
+                  <TouchableOpacity
+                    style={styles.seeAllButton}
+                    onPress={openMonthTransactions}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.seeAllText}>Ver todos</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={[styles.card, styles.recentCard]}>
+                  {recentTransactions.map((transaction, index) => (
+                    <TransactionListRow
+                      key={`${transaction.kind}-${transaction.id}`}
+                      categoryIcon={transaction.category.icon}
+                      title={
+                        transaction.description || transaction.category.name
+                      }
+                      subtitle={`${
+                        transaction.category.name
+                      } · ${shortDateLabel(transaction.transaction_date)}`}
+                      amount={transaction.amount}
+                      kind={transaction.kind}
+                      iconShape="rounded"
+                      showDivider={index < recentTransactions.length - 1}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {isEmptyMonth && (
+              <MessageCard
+                icon={
+                  <ListIcon width={26} height={26} color={Colors.brandBlue} />
+                }
+                title={`Nada lançado em ${monthName.toLowerCase()}`}
+                message="Registre sua primeira receita ou despesa para acompanhar o mês por aqui."
+                action={{
+                  label: "Adicionar lançamento",
+                  icon: (
+                    <PlusIcon width={18} height={18} color={Colors.surface} />
+                  ),
+                  onPress: () => setIsTypeSelectorVisible(true),
+                }}
+              />
+            )}
+          </>
+        )}
       </ScrollView>
 
-      {user && (
-        <BottomBar
-          userProps={{
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            token: userToken?.token ?? "",
-            month: currentMonth,
-            year: currentYear,
-          }}
-          onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
-        />
-      )}
+      <BottomBar
+        active="Home"
+        month={currentMonth}
+        year={currentYear}
+        onShowTypeSelector={() => setIsTypeSelectorVisible(true)}
+      />
 
+      <MonthSelectorModal
+        visible={isMonthSelectorVisible}
+        onClose={() => setIsMonthSelectorVisible(false)}
+        onSelectMonth={handleMonthChange}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+      />
       <CreateTransactionTypeSelector
         visible={isTypeSelectorVisible}
         onClose={() => setIsTypeSelectorVisible(false)}
-        onSelect={(type) => {
-          setIsTypeSelectorVisible(false);
-          handleSelectType(type);
-        }}
+        onSelect={handleSelectType}
       />
       <PremiumModal
         isVisible={isPremiumModalVisible}
         onClose={() => setIsPremiumModalVisible(false)}
-        onSubscribe={(productId: string) => {
-          setIsPremiumModalVisible(false);
-          console.log("Subscribe to:", productId);
-        }}
+        onSubscribe={() => setIsPremiumModalVisible(false)}
       />
     </View>
   );
