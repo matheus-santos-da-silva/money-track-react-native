@@ -14,7 +14,7 @@ import { ReportIndicators } from "../../components/ReportIndicators/ReportIndica
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryBreakdown } from "../../components/CategoryBreakdown/CategoryBreakdown";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
 import { useTransactionsHistory } from "../../hooks/useTransactionsHistory";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
@@ -53,7 +53,7 @@ type ParamList = {
 const HISTORY_MONTHS = 6;
 
 export const Dashboard: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
   const { month, year } = useRoute<RouteProp<ParamList, "Params">>().params;

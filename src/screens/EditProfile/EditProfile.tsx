@@ -8,7 +8,7 @@ import { FooterButton } from "../../components/FooterButton/FooterButton";
 import { FC, useState } from "react";
 import { showSnackBar } from "../../utils/show-snack-bar";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text, TouchableOpacity } from "react-native";
 import {
   canSaveProfile,
@@ -23,7 +23,7 @@ type StackNavigation = {
 };
 
 export const EditProfile: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
 
   const { user, userToken, refreshUser } = useAuth();
 

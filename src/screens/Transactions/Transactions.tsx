@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatementItemDTO } from "../../services/DTOS/finance/StatementDTO";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
 import { TransactionListRow } from "../../components/TransactionListRow/TransactionListRow";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Chip, RemovableChip } from "../../components/Chip/Chip";
 import { StatementFilterSheet } from "../../components/StatementFilterSheet/StatementFilterSheet";
 import { TransactionSettingsModal } from "../../components/TransactionSettingsModal/TransactionSettingsModal";
@@ -74,7 +74,7 @@ type ParamList = {
 const SEARCH_DEBOUNCE_MS = 300;
 
 export const Transactions: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
   const { month, year } = useRoute<RouteProp<ParamList, "Params">>().params;

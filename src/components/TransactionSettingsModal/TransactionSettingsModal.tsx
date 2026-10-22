@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { TransactionDTO } from "../../services/DTOS/finance/TransactionDTO";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 import { InitialTransactionData } from "../HandleTransaction/HandleTransaction";
 import { ManageTransactionOptionsModal } from "../ManageTransactionOptionsModal/ManageTransactionOptionsModal";
@@ -62,7 +62,7 @@ export const TransactionSettingsModal: FC<TransactionSettingsModalProps> = ({
   onClose,
   props,
 }) => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const { user } = useAuth();
 
   const insets = useSafeAreaInsets();

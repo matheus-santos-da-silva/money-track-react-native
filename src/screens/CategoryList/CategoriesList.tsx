@@ -8,7 +8,7 @@ import { HeaderSearch } from "../../components/HeaderSearch/HeaderSearch";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { CategoryListRow } from "../../components/CategoryListRow/CategoryListRow";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { InitialCategoryData } from "../HandleCategory/HandleCategory";
 import { matchesCategorySearch } from "../../utils/categories";
 import { CategorySettingsModal } from "../../components/CategorySettingsModal/CategorySettingsModal";
@@ -50,7 +50,7 @@ const EMPTY_EXAMPLES: Record<TransactionType, string> = {
 };
 
 export const CategoriesList: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
   const { userToken, user } = useAuth();
