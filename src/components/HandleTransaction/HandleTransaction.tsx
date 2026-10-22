@@ -18,7 +18,7 @@ import { useTransactions } from "../../contexts/TransactionsContext";
 import { CategorySelector } from "../CategorySelector/CategorySelector";
 import { useGetCategories } from "../../hooks/useGetCategories";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { InstallmentsStepper } from "../InstallmentsStepper/InstallmentsStepper";
 import { useCreateTransaction } from "../../hooks/useCreateTransaction";
 import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
@@ -100,7 +100,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
   initialData,
   isEditing = false,
 }) => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
   const footerPadding = useKeyboardFooterPadding();
 

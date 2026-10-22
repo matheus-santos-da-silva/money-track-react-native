@@ -1,8 +1,0 @@
-diff --git a/node_modules/@d11/react-native-fast-image/android/src/main/AndroidManifest.xml b/node_modules/@d11/react-native-fast-image/android/src/main/AndroidManifest.xml
-index 1234567..abcdefg 100644
---- a/node_modules/@d11/react-native-fast-image/android/src/main/AndroidManifest.xml
-+++ b/node_modules/@d11/react-native-fast-image/android/src/main/AndroidManifest.xml
-@@ -1,2 +1,2 @@
--<manifest package="com.dylanvann.fastimage">
-+<manifest>
- </manifest>

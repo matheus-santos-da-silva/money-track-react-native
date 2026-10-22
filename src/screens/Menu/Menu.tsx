@@ -7,7 +7,7 @@ import { planSummary } from "../../utils/plan-summary";
 import { PremiumModal } from "../../components/PremiumModal/PremiumModal";
 import { clearOldCache } from "../../utils/cache-helpers";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FC, useState } from "react";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
@@ -33,7 +33,7 @@ type ParamList = {
 };
 
 export const Menu: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
   const params = useRoute<RouteProp<ParamList, "Params">>().params;
 

@@ -3,7 +3,7 @@ import { Colors } from "../../styles/colors";
 import { SvgProps } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BAR_HEIGHT, styles } from "./BottomBarStyles";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -46,7 +46,7 @@ export const BottomBar: FC<BottomBarProps> = ({
   year,
   onShowTypeSelector,
 }) => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
   const renderTab = ({ screen, label, Icon }: TabConfig) => {

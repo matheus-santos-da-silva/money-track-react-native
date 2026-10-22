@@ -12,7 +12,7 @@ import { formatCurrency } from "../../utils/format-amount";
 import { useTransactions } from "../../contexts/TransactionsContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MonthSelectorModal } from "../../components/MonthSelectorModal/MonthSelectorModal";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MessageCard } from "../../components/MessageCard/MessageCard";
 import { MonthNavigator } from "../../components/MonthNavigator/MonthNavigator";
 import { TransactionListRow } from "../../components/TransactionListRow/TransactionListRow";
@@ -62,7 +62,7 @@ export type StackNavigation = {
 const RECENT_TRANSACTIONS_LIMIT = 4;
 
 export const Home: FC = () => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const insets = useSafeAreaInsets();
 
   const currentDate = new Date();

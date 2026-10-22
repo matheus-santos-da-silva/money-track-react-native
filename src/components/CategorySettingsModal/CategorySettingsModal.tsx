@@ -11,7 +11,7 @@ import { parseCategoryIcon } from "../../utils/categories";
 import { useDeleteCategory } from "../../hooks/useDeleteCategory";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { InitialCategoryData } from "../../screens/HandleCategory/HandleCategory";
 import { FC, useEffect, useState } from "react";
 import {
@@ -51,7 +51,7 @@ export const CategorySettingsModal: FC<CategorySettingsModalProps> = ({
   onClose,
   onDeleted,
 }) => {
-  const navigation = useNavigation<StackNavigationProp<StackNavigation>>();
+  const navigation = useNavigation<NativeStackNavigationProp<StackNavigation>>();
   const { user, userToken } = useAuth();
 
   const insets = useSafeAreaInsets();
