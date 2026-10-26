@@ -1,7 +1,7 @@
 import { styles } from "./ProfileCompletionStyles";
 import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
-import { nameError } from "../../utils/account-forms";
+import { NAME_MAX_LENGTH, nameError } from "../../utils/account-forms";
 import { FormField } from "../../components/FormField/FormField";
 import { AuthScreen } from "../../components/AuthScreen/AuthScreen";
 import { AuthResult } from "../../contexts/AuthContext";
@@ -66,6 +66,7 @@ export const ProfileCompletion: FC = () => {
           onChangeText={handleNameChange}
           error={trimmedName !== "" ? error : null}
           placeholder="Como você gosta de ser chamado"
+          maxLength={NAME_MAX_LENGTH}
           autoCapitalize="words"
           autoComplete="name"
           textContentType="givenName"

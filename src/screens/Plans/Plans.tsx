@@ -3,14 +3,10 @@ import { Colors } from "../../styles/colors";
 import { useAuth } from "../../hooks/useAuth";
 import { CustomText } from "../../components/CustomText/CustomText";
 import { useNavigation } from "@react-navigation/native";
-import { ValidatePurchase } from "../../services/ValidatePurchaseService";
+import { usePremiumProducts } from "../../hooks/usePremiumProducts";
+import { planSummary, trialDaysLeft } from "../../utils/plan-summary";
+import { ANNUAL_PRODUCT_ID, PremiumProduct } from "../../utils/premium-products";
 import { useEffect, useState, FC } from "react";
-import {
-  ErrorCode,
-  useIAP,
-  SubscriptionAndroid,
-  Subscription,
-} from "react-native-iap";
 import {
   View,
   Text,
@@ -18,22 +14,9 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 
 import BackButton from "../../assets/images/back-btn.svg";
-
-const productIds = ["plano_mensal", "plano_anual"];
-
-interface Product {
-  productId: string;
-  title: string;
-  localizedPrice: string;
-  pricePerMonth?: string;
-  description: string;
-  savings?: string;
-  discount?: string;
-}
 
 const PREMIUM_FEATURES = [
   "Categorias ilimitadas",
@@ -41,44 +24,6 @@ const PREMIUM_FEATURES = [
   "Relatórios e gráficos avançados",
   "Exportação de dados",
 ];
-
-const getPrice = (sub: Subscription): string => {
-  if ("subscriptionOfferDetails" in sub) {
-    return (
-      sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]
-        ?.formattedPrice ?? ""
-    );
-  }
-  return (sub as { localizedPrice?: string }).localizedPrice ?? "";
-};
-
-const getPricePerMonth = (sub: Subscription): string | undefined => {
-  if (sub.productId !== "plano_anual") return undefined;
-
-  if ("subscriptionOfferDetails" in sub) {
-    const phase =
-      sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0];
-    const micros = phase?.priceAmountMicros;
-    if (micros) {
-      const monthly = Number(micros) / 12 / 1_000_000;
-      return `R$ ${monthly.toFixed(2).replace(".", ",")}/mês`;
-    }
-    const formatted = phase?.formattedPrice ?? "";
-    const numeric = parseFloat(formatted.replace(/[^\d,]/g, "").replace(",", "."));
-    if (!isNaN(numeric)) {
-      const monthly = numeric / 12;
-      return `R$ ${monthly.toFixed(2).replace(".", ",")}/mês`;
-    }
-  }
-  return undefined;
-};
-
-const getDaysRemaining = (trialEndsAt: Date): number => {
-  const now = new Date();
-  const end = new Date(trialEndsAt);
-  const diff = end.getTime() - now.getTime();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-};
 
 const formatDate = (date: Date): string => {
   return new Date(date).toLocaleDateString("pt-BR", {
@@ -90,105 +35,28 @@ const formatDate = (date: Date): string => {
 
 export const Plans: FC = () => {
   const navigation = useNavigation();
-  const { userToken, user, isPremium, refreshUser } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { user } = useAuth();
   const [showPlans, setShowPlans] = useState<boolean>(false);
+  const { connected, products, isLoading, setIsLoading, loadProducts, subscribe } =
+    usePremiumProducts();
 
-  const isPremiumPlan = user?.plan === "PREMIUM";
-  const isTrialActive =
-    user?.plan === "TRIAL" && new Date() < new Date(user.trialEndsAt);
-
-  const {
-    connected,
-    subscriptions,
-    getSubscriptions,
-    requestSubscription,
-    finishTransaction,
-  } = useIAP({
-    onPurchaseSuccess: async (purchase) => {
-      if (!userToken || !purchase.purchaseToken) return;
-
-      const result = await ValidatePurchase(
-        purchase.purchaseToken,
-        purchase.productId,
-        userToken.token,
-      );
-
-      if (result.success) {
-        await finishTransaction({ purchase, isConsumable: false });
-        refreshUser();
-      } else {
-        console.error("❌ Compra inválida:", result.message);
-      }
-    },
-
-    onPurchaseError: (error) => {
-      if (error.code !== ErrorCode.E_USER_CANCELLED) {
-        console.error("❌ Erro na compra:", error);
-      }
-    },
-  });
+  // O plano vem calculado pelo servidor (isPremium/isTrialActive): o app não refaz a regra.
+  const planKind = user ? planSummary(user).kind : null;
+  const isPremiumPlan = planKind === "premium";
+  const isTrialActive = planKind === "trial";
 
   useEffect(() => {
     if (!isPremiumPlan && !isTrialActive) loadProducts();
     else setIsLoading(false);
   }, [connected, isPremiumPlan, isTrialActive]);
 
-  const loadProducts = async () => {
-    try {
-      setIsLoading(true);
-      if (connected) await getSubscriptions({ skus: productIds });
-    } catch (e) {
-      console.log("Erro ao carregar planos:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (subscriptions.length > 0) {
-      const formattedProducts = subscriptions.map((sub) => {
-        const fullPrice = getPrice(sub);
-        const monthlyPrice = getPricePerMonth(sub);
-        return {
-          productId: sub.productId,
-          title: (sub.title || "Plano").replace(/\s*\(.*\)\s*$/, "").trim(),
-          localizedPrice: monthlyPrice ?? fullPrice,
-          pricePerMonth: monthlyPrice ? fullPrice : undefined,
-          description: sub.description || "",
-        };
-      });
-
-      setProducts(formattedProducts);
-    }
-  }, [subscriptions]);
-
-  const handleSubscribe = async (productId: string) => {
-    try {
-      if (Platform.OS === "android") {
-        const sub = subscriptions.find(
-          (s) => s.productId === productId,
-        ) as SubscriptionAndroid;
-        const offerToken = sub?.subscriptionOfferDetails?.[0]?.offerToken ?? "";
-        await requestSubscription({
-          subscriptionOffers: [{ sku: productId, offerToken }],
-        });
-      } else {
-        await requestSubscription({ sku: productId });
-      }
-    } catch (err) {
-      console.log("Erro ao assinar:", err);
-    }
-  };
-
-  const renderItem = ({ item }: { item: Product }) => {
-    const isRecommended = item.productId === "plano_anual";
+  const renderItem = ({ item }: { item: PremiumProduct }) => {
+    const isRecommended = item.productId === ANNUAL_PRODUCT_ID;
 
     return (
       <TouchableOpacity
         style={[styles.card, isRecommended && styles.cardRecommended]}
-        onPress={() => handleSubscribe(item.productId)}
+        onPress={() => subscribe(item.productId)}
         activeOpacity={0.9}
       >
         {isRecommended && (
@@ -274,7 +142,7 @@ export const Plans: FC = () => {
     }
 
     if (isTrialActive && user?.trialEndsAt) {
-      const daysRemaining = getDaysRemaining(user.trialEndsAt);
+      const daysRemaining = trialDaysLeft(user.trialEndsAt);
 
       return (
         <View style={styles.activePlanContainer}>
@@ -291,9 +159,15 @@ export const Plans: FC = () => {
             </CustomText>
 
             <View style={styles.daysRemainingContainer}>
-              <Text style={styles.daysRemainingNumber}>{daysRemaining}</Text>
+              <Text style={styles.daysRemainingNumber}>
+                {daysRemaining === 0 ? "Hoje" : daysRemaining}
+              </Text>
               <Text style={styles.daysRemainingLabel}>
-                {daysRemaining === 1 ? "dia restante" : "dias restantes"}
+                {daysRemaining === 0
+                  ? "é o último dia"
+                  : daysRemaining === 1
+                    ? "dia restante"
+                    : "dias restantes"}
               </Text>
             </View>
 

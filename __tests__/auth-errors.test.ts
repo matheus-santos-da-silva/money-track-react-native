@@ -67,7 +67,7 @@ describe("sign up rules", () => {
   it("should validate email and password", () => {
     expect(isSignUpEmailValid("voce@email.com")).toBe(true);
     expect(isSignUpEmailValid("voce@email")).toBe(false);
-    expect(isSignUpPasswordValid("1234567")).toBe(true);
-    expect(isSignUpPasswordValid("123456")).toBe(false);
+    expect(isSignUpPasswordValid("12345678")).toBe(true);
+    expect(isSignUpPasswordValid("1234567")).toBe(false);
   });
 });

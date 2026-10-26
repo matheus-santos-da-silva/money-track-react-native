@@ -12,7 +12,12 @@ import { Text, TextInput, View } from "react-native";
 import {
   isSignUpEmailValid,
   isSignUpPasswordValid,
+  PASSWORD_RULE_TEXT,
 } from "../../utils/validate-signUp";
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from "../../utils/account-forms";
 
 import CheckIcon from "../../assets/images/icons/check.svg";
 import CircleIcon from "../../assets/images/icons/circle.svg";
@@ -88,7 +93,8 @@ export const SignUp: FC = () => {
           secure
           value={password}
           onChangeText={setPassword}
-          placeholder="Pelo menos 7 caracteres"
+          placeholder={`Pelo menos ${PASSWORD_MIN_LENGTH} caracteres`}
+          maxLength={PASSWORD_MAX_LENGTH}
           autoCapitalize="none"
           autoComplete="new-password"
           textContentType="newPassword"
@@ -98,13 +104,13 @@ export const SignUp: FC = () => {
             <View
               style={styles.rule}
               accessible
-              accessibilityLabel={`Pelo menos 7 caracteres${
+              accessibilityLabel={`${PASSWORD_RULE_TEXT}${
                 isPasswordValid ? ", cumprido" : ""
               }`}
             >
               <RuleIcon width={14} height={14} color={ruleColor} />
               <Text style={[styles.ruleText, { color: ruleColor }]}>
-                Pelo menos 7 caracteres
+                {PASSWORD_RULE_TEXT}
               </Text>
             </View>
           }

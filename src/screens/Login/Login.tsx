@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthFooterLink } from "../../components/AuthFooterLink/AuthFooterLink";
 import { AuthErrorBanner } from "../../components/AuthErrorBanner/AuthErrorBanner";
 import { authErrorMessage } from "../../utils/auth-errors";
+import { PASSWORD_MAX_LENGTH } from "../../utils/account-forms";
 import { AuthIllustration } from "../../components/AuthIllustration/AuthIllustration";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FC, useRef, useState } from "react";
@@ -132,6 +133,7 @@ export const Login: FC = () => {
           onChangeText={editField(setPassword)}
           invalid={!!error}
           placeholder="Sua senha"
+          maxLength={PASSWORD_MAX_LENGTH}
           autoCapitalize="none"
           autoComplete="current-password"
           textContentType="password"
