@@ -28,6 +28,7 @@ import { parseDateOnly, toDateOnlyString } from "../../utils/date-only";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
   dateOption,
+  DESCRIPTION_MAX_LENGTH,
   MIN_INSTALLMENTS,
   rankCategoryShortcuts,
   recurrenceSummary,
@@ -401,6 +402,7 @@ export const HandleTransaction: FC<HandleTransactionProps> = ({
           optional
           value={description}
           onChangeText={setDescription}
+          maxLength={DESCRIPTION_MAX_LENGTH}
           placeholder={
             isExpense ? "Ex.: Mercado do mês" : "Ex.: Projeto freelance"
           }

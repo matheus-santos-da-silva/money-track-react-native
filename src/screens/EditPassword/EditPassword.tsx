@@ -82,6 +82,7 @@ export const EditPassword: FC = () => {
         label="Nova senha"
         value={newPassword}
         onChangeText={setNewPassword}
+        maxLength={PASSWORD_MAX_LENGTH}
         secure
         autoCapitalize="none"
         autoComplete="new-password"
@@ -99,6 +100,7 @@ export const EditPassword: FC = () => {
         label="Confirmar nova senha"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
+        maxLength={PASSWORD_MAX_LENGTH}
         error={confirmationError(newPassword, confirmPassword)}
         secure
         autoCapitalize="none"

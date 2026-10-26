@@ -14,6 +14,7 @@ import {
   canSaveProfile,
   emailError,
   nameError,
+  NAME_MAX_LENGTH,
 } from "../../utils/account-forms";
 
 import LockIcon from "../../assets/images/icons/lock.svg";
@@ -76,6 +77,7 @@ export const EditProfile: FC = () => {
         onChangeText={setName}
         error={nameError(name)}
         placeholder="Digite seu nome"
+        maxLength={NAME_MAX_LENGTH}
         autoComplete="name"
         autoCapitalize="words"
       />

@@ -11,6 +11,8 @@ export const SHORTCUT_COUNT = 5;
 export const MIN_INSTALLMENTS = 2;
 export const MAX_INSTALLMENTS = 36;
 export const MAX_AMOUNT_DIGITS = 9;
+// Mesmo limite do finance-service (DESCRIPTION_MAX_LENGTH).
+export const DESCRIPTION_MAX_LENGTH = 100;
 
 export type DateOption = "today" | "yesterday" | "other";
 

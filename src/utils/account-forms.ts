@@ -1,9 +1,11 @@
 import { validateEmail } from "./validate-email";
 
-export const NAME_MIN_LENGTH = 3;
-export const NAME_MAX_LENGTH = 20;
-export const PASSWORD_MIN_LENGTH = 7;
-export const PASSWORD_MAX_LENGTH = 30;
+// Mesmos limites do users-service (create-user-DTO, update-user-DTO e
+// update-password-DTO): mudar aqui exige mudar lá.
+export const NAME_MIN_LENGTH = 2;
+export const NAME_MAX_LENGTH = 40;
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 64;
 
 // Mesmos caracteres que o users-service aceita no nome.
 const NAME_CHARACTERS = /^[a-zA-ZÀ-ÿ\s'-]+$/;

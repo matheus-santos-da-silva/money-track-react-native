@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { SplashScreen } from "./screens/SplashScreen/SplashScreen";
 import { withIAPContext } from "react-native-iap";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PurchaseListener } from "./components/PurchaseListener/PurchaseListener";
 import { TransactionsProvider } from "./contexts/TransactionsContext";
 
 // A splash fica por cima do Stack até a saída terminar, para a troca ser contínua.
@@ -35,6 +36,7 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <AuthProvider>
+        <PurchaseListener />
         <AppContent />
       </AuthProvider>
     </SafeAreaProvider>

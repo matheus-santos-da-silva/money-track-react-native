@@ -11,6 +11,10 @@ import {
   isNewPasswordValid,
   nameError,
 } from "../src/utils/account-forms";
+import {
+  isSignUpPasswordValid,
+  validateData,
+} from "../src/utils/validate-signUp";
 
 // 14 de outubro de 2026, à tarde no horário local.
 const TODAY = new Date(2026, 9, 14, 15, 30);
@@ -77,13 +81,16 @@ describe("plan summary", () => {
 describe("profile form", () => {
   const original = { name: "Matheus Santos", email: "matheus@email.com" };
 
-  it("should validate the name like the server, within 3 to 20 characters", () => {
+  it("should validate the name like the server, within 2 to 40 characters", () => {
     expect(nameError("Matheus Santos")).toBeNull();
     expect(nameError("João D'Ávila-Neto")).toBeNull();
     expect(nameError("  Ana  ")).toBeNull();
-    expect(nameError("Al")).toBe("O nome deve ter entre 3 e 20 caracteres.");
-    expect(nameError("Matheus Santos Oliveira")).toBe(
-      "O nome deve ter entre 3 e 20 caracteres."
+    expect(nameError("Al")).toBeNull();
+    expect(nameError("Matheus Santos Oliveira")).toBeNull();
+    expect(nameError("a".repeat(40))).toBeNull();
+    expect(nameError("A")).toBe("O nome deve ter entre 2 e 40 caracteres.");
+    expect(nameError("a".repeat(41))).toBe(
+      "O nome deve ter entre 2 e 40 caracteres."
     );
     expect(nameError("Matheus 2")).toBe(
       "Use apenas letras, espaços, apóstrofo ou hífen."
@@ -112,10 +119,23 @@ describe("profile form", () => {
 });
 
 describe("password form", () => {
-  it("should require 7 to 30 characters in the new password", () => {
-    expect(isNewPasswordValid("123456")).toBe(false);
-    expect(isNewPasswordValid("1234567")).toBe(true);
-    expect(isNewPasswordValid("x".repeat(31))).toBe(false);
+  it("should require 8 to 64 characters in the new password", () => {
+    expect(isNewPasswordValid("1234567")).toBe(false);
+    expect(isNewPasswordValid("12345678")).toBe(true);
+    expect(isNewPasswordValid("x".repeat(64))).toBe(true);
+    expect(isNewPasswordValid("x".repeat(65))).toBe(false);
+  });
+
+  it("should apply the same password rule on sign up and login", () => {
+    expect(isSignUpPasswordValid("1234567")).toBe(false);
+    expect(isSignUpPasswordValid("12345678")).toBe(true);
+    expect(validateData("ana@email.com", "1234567")).toEqual({
+      success: false,
+      message: "A senha deve ter entre 8 e 64 caracteres.",
+    });
+    expect(validateData("ana@email.com", "12345678")).toEqual({
+      success: true,
+    });
   });
 
   it("should tell when the confirmation differs", () => {
