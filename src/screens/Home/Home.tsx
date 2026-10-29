@@ -17,6 +17,7 @@ import { MessageCard } from "../../components/MessageCard/MessageCard";
 import { MonthNavigator } from "../../components/MonthNavigator/MonthNavigator";
 import { TransactionListRow } from "../../components/TransactionListRow/TransactionListRow";
 import { useGetUserTransactions } from "../../hooks/useGetUserTransactions";
+import { useRefetchOnReturn } from "../../hooks/useRefetchOnReturn";
 import { InitialTransactionData } from "../../components/HandleTransaction/HandleTransaction";
 import { CreateTransactionTypeSelector } from "../../components/CreateTransactionTypeSelector/CreateTransactionTypeSelector";
 import { FC, useEffect, useMemo, useRef, useState } from "react";
@@ -127,13 +128,7 @@ export const Home: FC = () => {
   const isEmptyMonth = transactions !== null && !hasTransactions;
   const spending = hasTransactions ? spendingRatio(expenses, incomes) : null;
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      refetch(true);
-    });
-
-    return unsubscribe;
-  }, [navigation, refetch]);
+  useRefetchOnReturn(() => refetch(true));
 
   const errorFadeAnim = useRef(new Animated.Value(0)).current;
   const errorSlideAnim = useRef(new Animated.Value(24)).current;
