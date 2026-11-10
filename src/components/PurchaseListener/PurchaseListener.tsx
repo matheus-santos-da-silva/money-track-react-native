@@ -12,7 +12,7 @@ export const PurchaseListener = () => {
   // Tokens já em validação ou validados nesta sessão.
   const handledTokens = useRef(new Set<string>());
 
-  const { finishTransaction, clearCurrentPurchase } = useIAP({
+  const { finishTransaction } = useIAP({
     onPurchaseSuccess: async (purchase: Purchase) => {
       const { purchaseToken } = purchase;
       if (!userToken || !purchaseToken) return;
@@ -34,12 +34,10 @@ export const PurchaseListener = () => {
         handledTokens.current.delete(purchaseToken);
         console.error("❌ Compra inválida:", result.message);
       }
-
-      clearCurrentPurchase();
     },
 
     onPurchaseError: (error) => {
-      if (error.code !== ErrorCode.E_USER_CANCELLED) {
+      if (error.code !== ErrorCode.UserCancelled) {
         console.error("❌ Erro na compra:", error);
       }
     },

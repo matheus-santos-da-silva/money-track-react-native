@@ -1,4 +1,4 @@
-import type { Subscription } from "react-native-iap";
+import type { ProductSubscription } from "react-native-iap";
 import {
   formatProduct,
   getPrice,
@@ -6,23 +6,25 @@ import {
 } from "../src/utils/premium-products";
 
 const androidSub = (
-  productId: string,
+  id: string,
   formattedPrice: string,
   priceAmountMicros?: string
 ) =>
   ({
-    productId,
+    id,
+    platform: "android",
     title: "Plano (Money Track)",
     description: "Acesso completo",
-    subscriptionOfferDetails: [
+    displayPrice: formattedPrice,
+    subscriptionOffers: [
       {
-        offerToken: "token",
-        pricingPhases: {
+        offerTokenAndroid: "token",
+        pricingPhasesAndroid: {
           pricingPhaseList: [{ formattedPrice, priceAmountMicros }],
         },
       },
     ],
-  } as unknown as Subscription);
+  } as unknown as ProductSubscription);
 
 describe("premium products", () => {
   it("should read the price of the first pricing phase", () => {

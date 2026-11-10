@@ -32,7 +32,7 @@ export const Welcome: FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.brandBlue} />
+      <StatusBar barStyle="light-content" />
 
       <View
         style={[styles.ring, styles.ringOuter]}

@@ -445,7 +445,7 @@ export const Transactions: FC = () => {
               color={Colors.brandBlue}
               style={styles.footerLoader}
             />
-          ) : null
+          ) : undefined
         }
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}

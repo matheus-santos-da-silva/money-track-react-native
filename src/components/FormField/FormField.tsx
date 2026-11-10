@@ -4,6 +4,7 @@ import { forwardRef, ReactNode, useState } from "react";
 import {
   Text,
   TextInput,
+  TextInputInstance,
   TextInputProps,
   TouchableOpacity,
   View,
@@ -24,7 +25,7 @@ interface FormFieldProps
   surface?: "surface" | "ground";
 }
 
-export const FormField = forwardRef<TextInput, FormFieldProps>(
+export const FormField = forwardRef<TextInputInstance, FormFieldProps>(
   (
     {
       label,

@@ -24,7 +24,7 @@ export const AuthScreen: FC<AuthScreenProps> = ({
 
   return (
     <Animated.View style={[styles.container, keyboardInset]}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.brandBlue} />
+      <StatusBar barStyle="light-content" />
 
       <ScrollView
         contentContainerStyle={styles.scroll}

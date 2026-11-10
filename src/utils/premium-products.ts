@@ -1,4 +1,4 @@
-import type { Subscription } from "react-native-iap";
+import type { ProductSubscription } from "react-native-iap";
 
 export const MONTHLY_PRODUCT_ID = "plano_mensal";
 export const ANNUAL_PRODUCT_ID = "plano_anual";
@@ -16,24 +16,22 @@ export interface PremiumProduct {
   discount?: string;
 }
 
-const firstPricingPhase = (sub: Subscription) =>
-  "subscriptionOfferDetails" in sub
-    ? sub.subscriptionOfferDetails?.[0]?.pricingPhases?.pricingPhaseList?.[0]
+const firstPricingPhase = (sub: ProductSubscription) =>
+  sub.platform === "android"
+    ? sub.subscriptionOffers?.[0]?.pricingPhasesAndroid?.pricingPhaseList?.[0]
     : undefined;
 
 const toMonthlyLabel = (yearly: number) =>
   `R$ ${(yearly / 12).toFixed(2).replace(".", ",")}/mês`;
 
-export const getPrice = (sub: Subscription): string => {
-  if ("subscriptionOfferDetails" in sub) {
-    return firstPricingPhase(sub)?.formattedPrice ?? "";
-  }
-  return (sub as { localizedPrice?: string }).localizedPrice ?? "";
-};
+export const getPrice = (sub: ProductSubscription): string =>
+  firstPricingPhase(sub)?.formattedPrice ?? sub.displayPrice ?? "";
 
 // Só o plano anual tem preço mensal equivalente.
-export const getPricePerMonth = (sub: Subscription): string | undefined => {
-  if (sub.productId !== ANNUAL_PRODUCT_ID) return undefined;
+export const getPricePerMonth = (
+  sub: ProductSubscription
+): string | undefined => {
+  if (sub.id !== ANNUAL_PRODUCT_ID) return undefined;
 
   const phase = firstPricingPhase(sub);
   if (!phase) return undefined;
@@ -48,12 +46,12 @@ export const getPricePerMonth = (sub: Subscription): string | undefined => {
   return isNaN(numeric) ? undefined : toMonthlyLabel(numeric);
 };
 
-export const formatProduct = (sub: Subscription): PremiumProduct => {
+export const formatProduct = (sub: ProductSubscription): PremiumProduct => {
   const fullPrice = getPrice(sub);
   const monthlyPrice = getPricePerMonth(sub);
 
   return {
-    productId: sub.productId,
+    productId: sub.id,
     // A loja acrescenta o nome do app entre parênteses: "Plano Anual (Money Track)".
     title: (sub.title || "Plano").replace(/\s*\(.*\)\s*$/, "").trim(),
     localizedPrice: monthlyPrice ?? fullPrice,

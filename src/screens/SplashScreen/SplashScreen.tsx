@@ -218,7 +218,7 @@ export const SplashScreen: FC<SplashScreenProps> = ({
       accessible
       accessibilityLabel="Money Track carregando"
     >
-      <StatusBar barStyle="light-content" backgroundColor={Colors.brandBlue} />
+      <StatusBar barStyle="light-content" />
 
       <Animated.View
         style={[styles.ringOuter, ring(OUTER_RING), outerRingStyle]}

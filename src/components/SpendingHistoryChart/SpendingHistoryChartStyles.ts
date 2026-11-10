@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
   },
 
   loader: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 
   labels: {

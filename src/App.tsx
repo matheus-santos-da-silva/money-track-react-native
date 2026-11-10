@@ -3,7 +3,6 @@ import { Stack } from "./routes/Stack";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SplashScreen } from "./screens/SplashScreen/SplashScreen";
-import { withIAPContext } from "react-native-iap";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PurchaseListener } from "./components/PurchaseListener/PurchaseListener";
 import { TransactionsProvider } from "./contexts/TransactionsContext";
@@ -43,4 +42,4 @@ function App(): React.JSX.Element {
   );
 }
 
-export default withIAPContext(App);
+export default App;

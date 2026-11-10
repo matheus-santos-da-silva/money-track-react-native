@@ -24,7 +24,7 @@ App Android do [Money Track](https://github.com/matheus-santos-da-silva/money-tr
 
 ```
 src/
-├── App.tsx        withIAPContext → AuthProvider → TransactionsProvider → navegação
+├── App.tsx        AuthProvider → PurchaseListener → TransactionsProvider → navegação
 ├── routes/        Stack: rotas públicas (login/cadastro) ou protegidas, conforme o token
 ├── contexts/      AuthContext (token, usuário, isPremium) e TransactionsContext
 ├── hooks/         chamadas e estado de cada tela
@@ -42,13 +42,19 @@ src/
 
 ## Rodando
 
-Pré-requisitos: Node 20+, JDK 17 e Android SDK com um emulador (ou aparelho). O backend sobe pelo [repositório principal](https://github.com/matheus-santos-da-silva/money-track).
+Pré-requisitos: Node 22.13+ (ou 24), JDK 17 e Android SDK com um emulador (ou aparelho). O backend sobe pelo [repositório principal](https://github.com/matheus-santos-da-silva/money-track).
 
 ```bash
 cp .env.example .env
 npm install         # instala pelo package-lock.json
 npm start           # Metro
 npm run android     # em outro terminal (variante playDebug)
+```
+
+No Windows, o `react-native-iap` (Nitro) gera arquivos C++ com caminho acima de 260 caracteres, e o `ninja` da CMake 3.22 não aceita. Instale uma CMake mais nova pelo SDK Manager e aponte o build para ela no `android/local.properties`:
+
+```
+cmake.dir=C:/Users/<você>/AppData/Local/Android/Sdk/cmake/3.31.6
 ```
 
 `.env` para o emulador Android:
