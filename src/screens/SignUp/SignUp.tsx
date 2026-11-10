@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AuthFooterLink } from "../../components/AuthFooterLink/AuthFooterLink";
 import { FC, useRef, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Text, TextInput, View } from "react-native";
+import { Text, TextInputInstance, View } from "react-native";
 import {
   isSignUpEmailValid,
   isSignUpPasswordValid,
@@ -34,7 +34,7 @@ export const SignUp: FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
 
   const trimmedEmail = email.trim();
   const isEmailValid = isSignUpEmailValid(trimmedEmail);

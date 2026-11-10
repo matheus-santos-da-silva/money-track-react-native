@@ -16,7 +16,7 @@ import { FC, useRef, useState } from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Text,
-  TextInput,
+  TextInputInstance,
   TouchableOpacity,
   useWindowDimensions,
   View,
@@ -43,7 +43,7 @@ export const Login: FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
 
   const canSubmit = email.trim() !== "" && password !== "";
 

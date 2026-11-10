@@ -8,11 +8,11 @@ jest.mock('react-native-snackbar', () => ({
 }));
 
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+  require('@react-native-async-storage/async-storage/jest'),
 );
 
 jest.mock('react-native-iap', () => ({
-  withIAPContext: Component => Component,
+  ErrorCode: { UserCancelled: 'user-cancelled' },
   useIAP: () => ({
     connected: false,
     subscriptions: [],

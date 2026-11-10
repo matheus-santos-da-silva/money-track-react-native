@@ -122,7 +122,7 @@ export const clearOldCache = async (user_id: string) => {
       key.startsWith(`@money-track-transactions_${user_id}_`)
     );
 
-    if (userKeys.length > 0) await AsyncStorage.multiRemove(userKeys);
+    if (userKeys.length > 0) await AsyncStorage.removeMany(userKeys);
   } catch (error) {
     console.error("Error clearing cache:", error);
   }

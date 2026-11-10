@@ -1,4 +1,4 @@
-import Snackbar from "react-native-snackbar";
+import { Snackbar } from "react-native-snackbar";
 
 export const showSnackBar = (text: string, backgroundColor: string) => {
   Snackbar.show({

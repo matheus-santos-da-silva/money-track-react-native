@@ -4,12 +4,12 @@ import { Colors } from "./colors";
 // Base dos bottom sheets redesenhados (seletor de mês e novo lançamento).
 export const sheetStyles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: "flex-end",
   },
 
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.scrim,
   },
 
